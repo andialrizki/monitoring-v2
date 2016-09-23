@@ -38,7 +38,8 @@
 |
 */
 
-$route['default_controller'] = "fe_homepage";
+$route['default_controller'] = "fe_singlepage";
+$route['home'] = 'fe_homepage';
 $route['404_override'] = 'fe_error';
 
 /*

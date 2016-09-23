@@ -47,7 +47,7 @@ class Fe_login extends MX_Controller {
 			$result = $this->login_model->authentification($username, $password);
 			if ( $result )		 
 			{
-				redirect( site_url() );
+				redirect( site_url('home') );
 			}
 			else
 			{

@@ -17,9 +17,9 @@
         <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/2.jpg" alt="2"></div>
         <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/3.jpg" alt="3"></div>
         <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/4.jpg" alt="4"></div>
-        <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/6.jpg" alt="5"></div-->
-        <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/7.jpg" alt="6"></div>
-        <!--div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/8.jpg" alt="7"></div>
+        <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/6.jpg" alt="5"></div>
+        <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/6.jpg" alt="6"></div>
+        <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/8.jpg" alt="7"></div>
         <div class="item"><img src="<?php echo base_url(); ?>assets/images/slide/Slider1/9.jpg" alt="8"></div-->
     </div>
     <!--div class="customNavigation">

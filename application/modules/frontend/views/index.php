@@ -132,7 +132,7 @@
           <ul class="site-menu">
             <li class="site-menu-category">General</li>
             <li class="site-menu-item <?php echo ($active == 'home')?'active':''; ?>">
-              <a class="animsition-link" href="<?php echo site_url() ?>">
+              <a class="animsition-link" href="<?php echo site_url('home') ?>">
                 <i class="site-menu-icon md-view-dashboard" aria-hidden="true"></i>
                 <span class="site-menu-title">Dashboard</span>
               </a>

@@ -2,14 +2,14 @@
 <?php if ($type_admin == 0): //pangkalan | superadmin?>
   <li class="site-menu-item <?php echo ($active == 'admin')?'active':''; ?>">
     <a class="animsition-link" href="<?php echo site_url('manage-admin') ?>">
-      <i class="site-menu-icon md-view-dashboard" aria-hidden="true"></i>
+      <i class="site-menu-icon md-account" aria-hidden="true"></i>
       <span class="site-menu-title">Kelola Pengguna</span>
     </a>
   </li>
 <?php elseif ($type_admin == 1): ?>
   <li class="site-menu-item <?php echo ($active == 'admin')?'active':''; ?>">
     <a class="animsition-link" href="<?php echo site_url('manage-admin') ?>">
-      <i class="site-menu-icon md-view-dashboard" aria-hidden="true"></i>
+      <i class="site-menu-icon md-account" aria-hidden="true"></i>
       <span class="site-menu-title">Kelola Pengguna</span>
     </a>
   </li>
@@ -17,7 +17,7 @@
 <?php if ($type_admin == 0 || $type_admin == 1): ?>
   <li class="site-menu-item has-sub <?php echo ($active == 'penataan-agen' || $active == 'penataan-jarak') ? 'active' : ''; ?>">
     <a href="javascript:void(0)">
-      <i class="site-menu-icon md-view-compact" aria-hidden="true"></i>
+      <i class="site-menu-icon md-book" aria-hidden="true"></i>
       <span class="site-menu-title">Penataan</span>
       <span class="site-menu-arrow"></span>
     </a>
@@ -36,7 +36,7 @@
   </li>
   <li class="site-menu-item has-sub <?php echo ($active == 'pelanggan' || $active == 'pangkalan' || $active == 'agen' || $active == 'spbe') ? 'active' : ''; ?>">
     <a href="javascript:void(0)">
-      <i class="site-menu-icon md-view-compact" aria-hidden="true"></i>
+      <i class="site-menu-icon md-view-list" aria-hidden="true"></i>
       <span class="site-menu-title">Rekap Data</span>
       <span class="site-menu-arrow"></span>
     </a>
@@ -66,7 +66,7 @@
   </li>
   <li class="site-menu-item has-sub <?php echo ($active == 'transaksi' || $active == 'realisasi_agen' || $active == 'realisasi_spbe') ? 'active' : ''; ?>">
     <a href="javascript:void(0)">
-      <i class="site-menu-icon md-view-compact" aria-hidden="true"></i>
+      <i class="site-menu-icon md-view-list" aria-hidden="true"></i>
       <span class="site-menu-title">Rekap Transaksi</span>
       <span class="site-menu-arrow"></span>
     </a>
@@ -90,7 +90,7 @@
   </li>
   <li class="site-menu-item has-sub <?php echo ($active == 'lokasi-pelanggan' || $active == 'lokasi-pangkalan' || $active == 'lokasi-agen' || $active == 'lokasi-spbe') ? 'active' : ''; ?>">
     <a href="javascript:void(0)">
-      <i class="site-menu-icon md-view-compact" aria-hidden="true"></i>
+      <i class="site-menu-icon md-google-maps" aria-hidden="true"></i>
       <span class="site-menu-title">Lokasi</span>
       <span class="site-menu-arrow"></span>
     </a>

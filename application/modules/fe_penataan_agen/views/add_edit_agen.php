@@ -1,7 +1,7 @@
 <section id="services">
     <div class="container">
       <ol class="breadcrumb">
-          <li><a href="<?php echo site_url(); ?>"><i class="fa fa-home"></i> Home</a></li>
+          <li><a href="<?php echo site_url('home'); ?>"><i class="fa fa-home"></i> Home</a></li>
           <li><a href="<?php echo site_url('agen'); ?>"><i class="fa fa-minus-circle"></i> Data Agen</a></li>
           <li class="active"><i class="fa fa-plus-circle"></i> Tambah/Edit Agen</li>
       </ol>

@@ -1,103 +1,104 @@
-<section id="services">
-    <div class="container">
+<!-- page -->
+<div class="page animsition">
+    <div class="page-header">
+        <h1 class="page-title">Penataan Agen</h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo site_url(); ?>"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo site_url('home'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active"><i class="fa fa-plus-circle"></i> Penataan Agen</li>
         </ol>
-        <?php if (isset($error)): ?>
-            <div class="alert alert-success alert-dismissible" role="alert">
-                <center><strong><?php echo $error; ?></strong></center>
-            </div>
-        <?php endif ?>
-        <div class="panel panel-info">
+        <div class="page-header-actions">
+            <!-- for right button like add, post, etc -->
+            <a href="<?php echo site_url('penataan-agen/edit/1'); ?>" style="margin-bottom: 15px;">
+                <button class="btn btn-primary"><i class='fa fa-plus-circle'></i> Hitung Jarak</button>
+            </a>
+        </div>
+    </div>
+    <?php if (isset($error)): ?>
+        <div class="alert alert-success alert-dismissible" role="alert">
+            <center><strong><?php echo $error; ?></strong></center>
+        </div>
+    <?php endif ?>
+    <div class="page-content">
+        <div class="panel">
             <div class="panel-heading">
-                <strong>KRITERIA PENATAAN</strong>
-                <p><input type="checkbox" name="my-checkbox" checked data-size="mini"></p>
+                <h3 class="panel-title">Kriteria Penataan</h3>
             </div>
-            <div id="panel-element" class="panel-collapse collapse in">
-                <div class="panel-body table-responsive">
-                    <table class="table dataTables_scrollBody" cellspacing="0" width="50%">
-                        <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Kriteria</th>
-                            <th>SPBE-Agent</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Rata - Rata Jarak (Km)</td>
-                            <td><?php echo(isset($val) ? $val : ''); ?></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Jarak Maksimum (Km)</td>
-                            <td><?php echo(isset($max['jarak']) ? $max['jarak'] : ''); ?></td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Jarak Minimum (Km)</td>
-                            <td><?php echo(isset($min['jarak']) ? $min['jarak'] : ''); ?></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="panel-body container-fluid">
+                <table class="table table-hover dataTable table-striped width-full" data-plugin="dataTable">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Kriteria</th>
+                        <th>SPBE-Agent</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Rata - Rata Jarak (Km)</td>
+                        <td><?php echo(isset($val) ? $val : ''); ?></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Jarak Maksimum (Km)</td>
+                        <td><?php echo(isset($max['jarak']) ? $max['jarak'] : ''); ?></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Jarak Minimum (Km)</td>
+                        <td><?php echo(isset($min['jarak']) ? $min['jarak'] : ''); ?></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <div class="panel panel-info">
+        <div class="panel">
             <div class="panel-heading">
-                <strong>JARAK AGEN - SPPBE</strong>
-                <a href="<?php echo site_url('penataan-agen/edit/1'); ?>"
-                   class="btn btn-primary btn-xs pull-right" style="margin-bottom: 15px;">
-                    <i class='fa fa-plus-circle'></i> Hitung Jarak
-                </a>
-
+                <h3 class="panel-title">Jarak SPBBE - Agen</h3>
             </div>
-            <div id="panel-element" class="panel-coll
-                <div class="panel-body table-responsive">
-                    <table class="table dataTables" cellspacing="0" width="100%">
-                        <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama Agen</th>
-                            <th>Nama SPPBE</th>
-                            <th>Jarak (Km)</th>
-                            <th>Aksi</th>
-                        </tr>
-                        </thead>
+            <div class="panel-body container-fluid">
+                <table class="table table-hover dataTable table-striped width-full" data-plugin="dataTable">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Agen</th>
+                        <th>Nama SPPBE</th>
+                        <th>Jarak (Km)</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
 
-                        <tbody>
-                        <?php
-                        $num = 1;
-                        if (isset($data) && $data) :
-                            foreach ($data as $key) :
-                                $id = isset($key['id']) ? $key['id'] : '';
-                                ?>
-                                <tr>
-                                    <td><?php echo $num; ?></td>
-                                    <td><?php echo strtoupper(isset($key['name_agen']) ? $key['name_agen'] : ''); ?></td>
-                                    <td><?php echo strtoupper(isset($key['name_spbe']) ? $key['name_spbe'] : ''); ?></td>
-                                    <td><?php echo(isset($key['jarak']) ? $key['jarak'] : ''); ?></td>
-                                    <td class="btn-action">
-                                        <a href="javascript:;" class="modal-del" data-id="<?php echo $id; ?>" data-toggle="modal" data-tooltip="tooltip" data-placement="top" title="Delete">
-                                            <i class='fa fa-trash'></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php
-                                $num++;
-                            endforeach;
-                        endif;
-                        ?>
-                        </tbody>
-                    </table>
-                </div>
+                    <tbody>
+                    <?php
+                    $num = 1;
+                    if (isset($data) && $data) :
+                        foreach ($data as $key) :
+                            $id = isset($key['id']) ? $key['id'] : '';
+                            ?>
+                            <tr>
+                                <td><?php echo $num; ?></td>
+                                <td><?php echo strtoupper(isset($key['name_agen']) ? $key['name_agen'] : ''); ?></td>
+                                <td><?php echo strtoupper(isset($key['name_spbe']) ? $key['name_spbe'] : ''); ?></td>
+                                <td><?php echo(isset($key['jarak']) ? $key['jarak'] : ''); ?></td>
+                                <td class="btn-action">
+                                    <a href="javascript:;" class="modal-del" data-id="<?php echo $id; ?>"
+                                       data-toggle="modal"
+                                       data-tooltip="tooltip" data-placement="top" title="Delete">
+                                        <i class='fa fa-trash'></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php
+                            $num++;
+                        endforeach;
+                    endif;
+                    ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</section>
+</div>
 <div class="modal fade" id="modal-delete" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

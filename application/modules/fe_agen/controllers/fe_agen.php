@@ -18,6 +18,12 @@ class Fe_agen extends MX_Controller
         echo Modules::run('frontend', $content, 'agen');
     }
 
+    public function get_all_agen()
+    {
+        $data = $this->model_agen->get_all_agen();
+        return $data;
+    }
+
     public function add_agen()
     {
         $content = $this->load->view('add_edit_agen', '', TRUE);
@@ -43,6 +49,12 @@ class Fe_agen extends MX_Controller
         //$data = array_map('trim', $data);
         $content = $this->load->view('add_edit_agen', array('data' => $data), TRUE);
         echo Modules::run('frontend', $content, 'agen');
+    }
+
+    public function get_this_data($id)
+    {
+        $data = $this->model_agen->get_this_data($id);
+        return $data;
     }
 
     public function detail_agen()
@@ -125,25 +137,6 @@ class Fe_agen extends MX_Controller
         $data = $this->get_all_agen();
         $content = $this->load->view('index', array('data' => $data, 'error' => $msg), TRUE);
         echo Modules::run('frontend', $content, 'agen');
-    }
-
-    public function get_all_agen()
-    {
-        $data = $this->model_agen->get_all_agen();
-        return $data;
-    }
-
-    public function spbe_agen()
-    {
-        $data = $this->get_all_agen();
-        $content = $this->load->view('spbe_agen', array('data' => $data), TRUE);
-        echo Modules::run('frontend', $content, 'spbe_agen');
-    }
-
-    public function get_this_data($id)
-    {
-        $data = $this->model_agen->get_this_data($id);
-        return $data;
     }
 
 

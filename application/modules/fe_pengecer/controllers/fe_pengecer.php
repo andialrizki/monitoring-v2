@@ -17,6 +17,12 @@ class Fe_pengecer extends MX_Controller {
 		echo Modules::run('frontend', $content, 'pelanggan');
 	}
 
+	public function get_all_pengecer()
+	{
+		$data = $this->model_pengecer->get_all_pengecer();
+		return $data;
+	}
+
 	public function add_pengecer()
 	{
 		$pangkalan = Modules::run('myhelper/get_data_table', 'tbl_pangkalan', 'name, id_pangkalan');
@@ -33,9 +39,15 @@ class Fe_pengecer extends MX_Controller {
 		}
 		$pangkalan = Modules::run('myhelper/get_data_table', 'tbl_pangkalan', 'name, id_pangkalan');
 		$data=array_map('trim',$data);
-		$pangkalan=array_map('trim',$pangkalan);
+		//$pangkalan=array_map('trim',$pangkalan);
 		$content = $this->load->view('add_edit_pengecer', array('data' => $data, 'pangkalan' => $pangkalan), TRUE);
 		echo Modules::run('frontend', $content, 'pelanggan');
+	}
+
+	public function get_this_data($id)
+	{
+		$data = $this->model_pengecer->get_this_data($id);
+		return $data;
 	}
 
 	public function detail_pengecer()
@@ -104,18 +116,6 @@ class Fe_pengecer extends MX_Controller {
 		$data = $this->get_all_pengecer();
 		$content = $this->load->view('index', array('data' => $data, 'error' => $msg), TRUE);
 		echo Modules::run('frontend', $content, 'pelanggan');
-	}
-
-	public function get_all_pengecer()
-	{
-		$data = $this->model_pengecer->get_all_pengecer();
-		return $data;
-	}
-
-	public function get_this_data($id)
-	{
-		$data = $this->model_pengecer->get_this_data($id);
-		return $data;
 	}
 
 }

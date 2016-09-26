@@ -9,7 +9,7 @@
     <div class="page-header">
       <h1 class="page-title">Kelola Pengguna</h1>
       <ol class="breadcrumb">
-        <li><a href="<?php echo site_url() ?>">Home</a></li>
+          <li><a href="<?php echo site_url('home') ?>">Home</a></li>
         <li class="active">Kelola Pengguna</li>
       </ol>
       <div class="page-header-actions">

@@ -31,6 +31,20 @@ class Model_penataan_agen extends CI_Model {
 		return false;
 	}
 
+	public function get_this_data_spbe($id)
+	{
+		$this->db->select('tbl_supply_spbe_agen.id_supply_sa AS id, tbl_agen.id AS id_agen, tbl_agen.name AS name_agen, tbl_agen.latitude AS lat_agen, tbl_agen.longitude AS lon_agen, tbl_agen.provinsi AS provinsi, tbl_agen.city AS city, tbl_agen.address AS address, jarak');
+		$this->db->from('tbl_supply_spbe_agen');
+		$this->db->join('tbl_agen', 'tbl_agen.id = tbl_supply_spbe_agen.id_agen');
+		$this->db->join('tbl_spbe', 'tbl_spbe.id = tbl_supply_spbe_agen.id_spbe');
+		$this->db->where('tbl_spbe.id', $id);
+		$query = $this->db->get();
+		if ($query->num_rows() > 0) {
+			return $query->result_array();
+		}
+		return false;
+	}
+
 	public function add_penataan_agen($data)
 	{
 		$this->db->insert('tbl_supply_spbe_agen', $data);

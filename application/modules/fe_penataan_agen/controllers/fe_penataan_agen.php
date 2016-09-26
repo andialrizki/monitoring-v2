@@ -21,20 +21,13 @@ class Fe_penataan_agen extends MX_Controller
         echo Modules::run('frontend', $content, 'penataan-agen');
     }
 
-    function haversine($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
+    function avg()
     {
-        // convert from degrees to radians
-        $latFrom = deg2rad($latitudeFrom);
-        $lonFrom = deg2rad($longitudeFrom);
-        $latTo = deg2rad($latitudeTo);
-        $lonTo = deg2rad($longitudeTo);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-                cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-        return round(($angle * $earthRadius),2);
+        $data = $this->model_penataan_agen->get_all_penataan_agen();
+        foreach ($data as $key) {
+            $jarak = +$key['jarak'];
+        }
+        return $val = $jarak / sizeof($data);
     }
 
     function GetDrivingDistance($lat1, $long1, $lat2, $long2)
@@ -73,13 +66,20 @@ class Fe_penataan_agen extends MX_Controller
         //echo Modules::run('frontend', $content, 'penataan-agen');
     }
 
-    function avg()
+    function haversine($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
     {
-        $data = $this->model_penataan_agen->get_all_penataan_agen();
-        foreach ($data as $key){
-            $jarak =+ $key['jarak'];
-        }
-        return $val = $jarak / sizeof($data);
+        // convert from degrees to radians
+        $latFrom = deg2rad($latitudeFrom);
+        $lonFrom = deg2rad($longitudeFrom);
+        $latTo = deg2rad($latitudeTo);
+        $lonTo = deg2rad($longitudeTo);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+                cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+        return round(($angle * $earthRadius), 2);
     }
 
     /*public function add_agen()
@@ -218,6 +218,13 @@ class Fe_penataan_agen extends MX_Controller
         echo Modules::run('frontend', $content, 'detail-penataan');
     }
 
+    public function spbe_agen()
+    {
+        $id =
+        $data = $this->get_this_data_spbe();
+        $content = $this->load->view('index', array('data' => $data), TRUE);
+        echo Modules::run('frontend', $content, 'agen');
+    }
 
 }
 

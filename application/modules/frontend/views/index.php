@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="bootstrap admin template">
     <meta name="author" content="">
-    <title>Dashboard | Remark Admin Template</title>
+    <title>MonitoringLPG | semicolon;</title>
     <link rel="shortcut icon" href="../assets/images/favicon.ico">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/css/bootstrap.min.css">
@@ -20,12 +20,13 @@
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/slidepanel/slidePanel.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/flag-icon-css/flag-icon.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/waves/waves.css">
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/chartist-js/chartist.css">
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/jvectormap/jquery-jvectormap.css">
-    <link rel="stylesheet"
-          href="<?php echo base_url() ?>assets/global/vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.css">
+
+      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/datatables-bootstrap/dataTables.bootstrap.css">
+      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/datatables-fixedheader/dataTables.fixedHeader.css">
+      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/datatables-responsive/dataTables.responsive.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/base/assets/examples/css/dashboard/v1.css">
     <!-- Fonts -->
+      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/font-awesome/font-awesome.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/material-design/material-design.min.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/brand-icons/brand-icons.min.css">
     <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:300,400,500,300italic'>
@@ -44,6 +45,13 @@
     <script>
         Breakpoints();
     </script>
+
+    <script src="<?php echo base_url() ?>assets/global/vendor/jquery/jquery.js"></script>
+    <style type="text/css">
+     .btn-action a {
+        text-decoration: none;
+     }
+    </style>
 </head>
 <body class="dashboard">
 <!--[if lt IE 8]>
@@ -165,15 +173,15 @@
     <?php echo isset($grid) ? $grid : ''; ?>
 </div>
 <!-- Page -->
-<div class="page animsition">
+<!-- <div class="page animsition">
     <div class="page-content padding-30 container-fluid">
-        <div class="row" data-plugin="matchHeight" data-by-row="true">
+        <div class="row" data-plugin="matchHeight" data-by-row="true"> -->
             <!-- main content -->
             <?php echo $content ?>
-            <!-- end main content -->
+            <!-- end main content --><!-- 
         </div>
     </div>
-</div>
+</div> -->
 <!-- End Page -->
 <!-- Footer -->
 <footer class="site-footer">
@@ -184,7 +192,6 @@
     </div>
 </footer>
 <!-- Core  -->
-<script src="<?php echo base_url() ?>assets/global/vendor/jquery/jquery.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/bootstrap/bootstrap.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/animsition/animsition.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/asscroll/jquery-asScroll.js"></script>
@@ -197,13 +204,16 @@
 <script src="<?php echo base_url() ?>assets/global/vendor/intro-js/intro.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/screenfull/screenfull.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/slidepanel/jquery-slidePanel.js"></script>
-<script src="<?php echo base_url() ?>assets/global/vendor/chartist-js/chartist.min.js"></script>
-<script
-    src="<?php echo base_url() ?>assets/global/vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.min.js"></script>
-<script src="<?php echo base_url() ?>assets/global/vendor/jvectormap/jquery-jvectormap.min.js"></script>
-<script src="<?php echo base_url() ?>assets/global/vendor/jvectormap/maps/jquery-jvectormap-world-mill-en.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/matchheight/jquery.matchHeight-min.js"></script>
 <script src="<?php echo base_url() ?>assets/global/vendor/peity/jquery.peity.min.js"></script>
+
+
+  <script src="<?php echo base_url() ?>assets/global/vendor/datatables/jquery.dataTables.js"></script>
+  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-fixedheader/dataTables.fixedHeader.js"></script>
+  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-bootstrap/dataTables.bootstrap.js"></script>
+  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-responsive/dataTables.responsive.js"></script>
+  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-tabletools/dataTables.tableTools.js"></script>
+
 <!-- Scripts -->
 <script src="<?php echo base_url() ?>assets/global/js/core.js"></script>
 <script src="<?php echo base_url() ?>assets/base/assets/js/site.js"></script>
@@ -219,8 +229,10 @@
 <script src="<?php echo base_url() ?>assets/global/js/components/switchery.js"></script>
 <script src="<?php echo base_url() ?>assets/global/js/components/tabs.js"></script>
 <script src="<?php echo base_url() ?>assets/global/js/components/matchheight.js"></script>
-<script src="<?php echo base_url() ?>assets/global/js/components/jvectormap.js"></script>
 <script src="<?php echo base_url() ?>assets/global/js/components/peity.js"></script>
+
+  <script src="<?php echo base_url() ?>assets/global/js/components/datatables.js"></script>
+  <script src="<?php echo base_url() ?>assets/base/assets/examples/js/tables/datatable.js"></script>
 <script src="<?php echo base_url() ?>assets/base/assets/examples/js/dashboard/v1.js"></script>
 </body>
 </html>

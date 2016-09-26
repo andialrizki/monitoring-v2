@@ -63,7 +63,7 @@
           </div>
         </div>
     </div>
-</section>      
+</section>
   <div class="modal fade" id="modal-delete" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">

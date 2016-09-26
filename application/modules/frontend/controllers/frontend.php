@@ -12,12 +12,15 @@ class Frontend extends MX_Controller {
 		}
 		if ($type_admin==2) {
 			$navbar = $this->load->view('navbar_pangkalan', array('active' => $active),TRUE);
+			$grid = $grid = $this->load->view('grid_pangkalan', array('active' => $active), TRUE);
 		}
 		if ($type_admin==3) {
 			$navbar = $this->load->view('navbar_agen', array('active' => $active),TRUE);
+			$grid = '';
 		}
 		if ($type_admin==4) {
 			$navbar = $this->load->view('navbar_spbe', array('active' => $active),TRUE);
+			$grid = '';
 		}
 		$data = array('content' => $content, 'active' => $active, 'navbar' => $navbar, 'grid' => $grid);
 		$this->load->view('index', $data);

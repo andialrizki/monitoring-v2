@@ -164,7 +164,7 @@
             </div>
             <div class="col-lg-4 text-center">
                 <i class="fa fa-envelope-o fa-3x sr-contact"></i>
-                <p><a href="mailto:galih.w.w@gmail.com">admin@monitoringlpg.com</a></p>
+                <p><a href="mailto:admin@monitoringlpg.com">admin@monitoringlpg.com</a></p>
             </div>
         </div>
     </div>

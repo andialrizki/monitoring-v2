@@ -40,6 +40,11 @@ class Model_realisasi_agen extends CI_Model {
 		return true;
 	}
 
+	public function support_chart()
+	{
+		$this->db->where();
+	}
+
 }
 
 /* End of file model_penjadwalan.php */

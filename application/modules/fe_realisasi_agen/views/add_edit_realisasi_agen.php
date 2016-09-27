@@ -1,21 +1,31 @@
-<section id="services">
-    <div class="container">
+<div class="page animsition">
+    <div class="page-header">
+        <h1 class="page-title">Form Tambah/Edit Transaksi Agen</h1>
       <ol class="breadcrumb">
-          <li><a href="<?php echo site_url(); ?>"><i class="fa fa-home"></i> Home</a></li>
-          <li><a href="<?php echo site_url('realisasi-agen'); ?>"><i class="fa fa-minus-circle"></i> Realisasi Agen</a></li>
-          <li class="active"><i class="fa fa-plus-circle"></i> Tambah/Edit Agen</li>
+          <li><a href="<?php echo site_url(); ?>"><i class="fa fa-home"></i>Home</a></li>
+          <li><a href="<?php echo site_url('realisasi-agen'); ?>"><i class="fa fa-minus-circle"></i>Realisasi Agen</a>
+          </li>
+          <li class="active"><i class="fa fa-plus-circle"></i>Tambah/Edit Transaksi Agen</li>
       </ol>
+        <div class="page-header-actions">
+            <!-- for right button like add, post, etc -->
+            <a href="<?php echo site_url('realisasi-agen'); ?>" style="margin-bottom: 15px;">
+                <button class="btn btn-warning"><i class='icon fa-arrow-left'></i> Kembali</button>
+            </a>
+        </div>
+    </div>
       <?php if (isset($error)): ?>
           <div class="alert alert-success alert-dismissible" role="alert">
               <center><strong><?php echo $error; ?></strong></center>
           </div>
       <?php endif ?>
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            FORM TAMBAH/EDIT AGEN
-          </div>
-          <div id="panel-element-belum" class="panel-collapse collapse in">
-            <div class="panel-body">
+    <div class="page-content">
+        <!-- Panel Form Elements -->
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">Form Tambah/Edit Transaksi Agen</h3>
+            </div>
+            <div class="panel-body container-fluid">
               <form class="form-horizontal" action="<?php echo site_url('realisasi-agen/submit'); ?>" method="post">
                   <input type="hidden" name="action" value="<?php echo isset($data['id']) ? 'edit':'add'; ?>">
                   <input type="hidden" name="id" value="<?php echo isset($data['id']) ? $data['id']:''; ?>">
@@ -64,4 +74,4 @@
             </div>
           </div>
     </div>
-  </section>
+</div>

@@ -59,7 +59,7 @@
 
       <li class="site-menu-item <?php echo ($active == 'spbe') ? 'active' : ''; ?>">
         <a class="animsition-link" href="<?php echo site_url('spbe'); ?>">
-          <span class="site-menu-title">Data SPBE</span>
+          <span class="site-menu-title">Data SPPBE</span>
         </a>
       </li>
     </ul>
@@ -83,7 +83,7 @@
       </li>
       <li class="site-menu-item <?php echo ($active == 'realisasi_spbe') ? 'active' : ''; ?>">
         <a class="animsition-link" href="<?php echo site_url('realisasi-spbe'); ?>">
-          <span class="site-menu-title">SPBU</span>
+          <span class="site-menu-title">SPPBE</span>
         </a>
       </li>
     </ul>
@@ -113,7 +113,7 @@
 
       <li class="site-menu-item <?php echo ($active == 'lokasi-spbe') ? 'active' : ''; ?>">
         <a class="animsition-link" href="<?php echo site_url('lokasi-spbe'); ?>">
-          <span class="site-menu-title">SPBE</span>
+          <span class="site-menu-title">SPPBE</span>
         </a>
       </li>
     </ul>

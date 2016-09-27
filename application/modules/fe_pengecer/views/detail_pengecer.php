@@ -4,10 +4,10 @@
 <!-- page -->
 <div class="page animsition">
     <div class="page-header">
-        <h1 class="page-title">Form Tambah / Edit Pelanggan</h1>
+        <h1 class="page-title">Detail Pelanggan</h1>
         <ol class="breadcrumb">
             <li><a href="<?php echo site_url(); ?>"><i class="fa fa-home"></i> Home</a></li>
-            <li><a href="<?php echo site_url('pelanggan'); ?>"><i class="fa fa-minus-circle"></i> Pelanggan</a></li>
+            <li><a href="<?php echo site_url('pelanggan'); ?>"><i class="fa fa-minus-circle"></i>Data Pelanggan</a></li>
             <li class="active"><i class="fa fa-plus-circle"></i> Detail Pelanggan</li>
         </ol>
         <div class="page-header-actions">
@@ -26,7 +26,7 @@
         <!-- Panel Form Elements -->
         <div class="panel">
             <div class="panel-heading">
-                <h3 class="panel-title">Form Tambah/Edit Pelanggan</h3>
+                <h3 class="panel-title">Detail Pelanggan</h3>
             </div>
             <div class="panel-body container-fluid">
                 <form class="form-horizontal" action="<?php echo site_url('pelanggan/submit'); ?>" method="post">

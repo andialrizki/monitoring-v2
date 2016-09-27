@@ -1,24 +1,33 @@
 <?php  
   $type_admin = $this->session->userdata(APP_PREFIX.'type_admin');
 ?>
-<section id="services">
-    <div class="container">
+<div class="page animsition">
+    <div class="page-header">
+        <h1 class="page-title">Edit Profil</h1>
       <ol class="breadcrumb">
-          <li><a href="<?php echo site_url(); ?>"><i class="fa fa-home"></i> Home</a></li>
-          <li><a href="<?php echo site_url('profile'); ?>"><i class="fa fa-minus-circle"></i> Profile</a></li>
-          <li class="active"><i class="fa fa-plus-circle"></i> Edit Profile</li>
+          <li><a href="<?php echo site_url('home'); ?>"><i class="fa fa-home"></i> Home</a></li>
+          <li><a href="<?php echo site_url('profile'); ?>"><i class="fa fa-minus-circle"></i>Profil</a></li>
+          <li class="active"><i class="fa fa-plus-circle"></i>Edit Profil</li>
       </ol>
+        <div class="page-header-actions">
+            <!-- for right button like add, post, etc -->
+            <a href="<?php echo site_url('profile'); ?>" style="margin-bottom: 15px;">
+                <button class="btn btn-warning"><i class='icon fa-arrow-left'></i>Kembali</button>
+            </a>
+        </div>
+    </div>
       <?php if (isset($error)): ?>
           <div class="alert alert-success alert-dismissible" role="alert">
               <center><strong><?php echo $error; ?></strong></center>
           </div>
       <?php endif ?>
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            FORM TAMBAH/EDIT AGEN
-          </div>
-          <div id="panel-element-belum" class="panel-collapse collapse in">
-            <div class="panel-body">
+    <div class="page-content">
+        <!-- Panel Form Elements -->
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">Edit Profile SPPBE</h3>
+            </div>
+            <div class="panel-body container-fluid">
               <form class="form-horizontal" action="<?php echo site_url('profile/submit'); ?>" method="post">
                   <div class="form-group">
                       <label class="control-label col-sm-3">Username</label>
@@ -57,7 +66,7 @@
             </div>
           </div>
     </div>
-  </section>
+</div>
   <script type="text/javascript">
     $('.username').keyup(function() {
       var username = $(this).val();

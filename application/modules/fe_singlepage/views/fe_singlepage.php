@@ -26,6 +26,7 @@
 
     <!-- Plugin CSS -->
     <link href="<?php echo base_url() ?>assets/creative/vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+    <link href="<?php echo base_url() ?>assets/plugins/select2/css/select2.min.css" rel="stylesheet">
 
     <!-- Theme CSS -->
     <link href="<?php echo base_url() ?>assets/creative/css/creative.min.css" rel="stylesheet">
@@ -36,6 +37,11 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <style type="text/css">
+        .modal {
+            overflow: auto !important; 
+        }
+    </style>
 
 </head>
 
@@ -102,7 +108,7 @@
                     <li class="text-faded">Menyediakan Sistem monitoring distribusi tertutup LPG 3 Kg untuk konsumen rumah tangga dan usaha mikro bagi PT. Pertamina dan Pemerintah Daerah Setempat</li>
                     <li class="text-faded">Menyediakan layanan pencarian LPG 3 Kg bagi konsumen beserta berbagai fitur lainnya</li>
                 </ol>
-                <a href="<?php echo site_url('home') ?>" class="page-scroll btn btn-default btn-xl sr-button">Ayo Mulai Gunakan!</a>
+                <button class="page-scroll btn btn-default btn-xl sr-button" type="button" data-toggle="modal" data-target="#modal-mulai">Ayo Mulai Gunakan!</button> 
             </div>
         </div>
     </div>
@@ -169,7 +175,98 @@
         </div>
     </div>
 </section>
-
+<div class="modal fade" id="modal-mulai" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">
+                    Mulai Sekarang
+                </h4>
+            </div>
+            <div class="modal-body">
+                Sudah punya akun? <a href="<?php echo site_url('home') ?>"><button class="btn btn-primary" type="button">Login Disini</button></a><br>
+                atau ingin mendaftar sebagai konsumen? <button class="btn btn-warning" type="button" id="btnDaftar">Daftar Disini</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-daftar" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">
+                    Regstrasi Konsumen
+                </h4>
+            </div>
+            <form action="<?php echo site_url('registrasi-konsumen') ?>" method="post" class="form-horizontal">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">ID Pelanggan</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" name="dt[id_pengecer]" required=""
+                                   value="">
+                            <br>
+                            <small>Lihat dikartu kendali</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Pangkalan</label>
+                        <div class="col-sm-7">
+                            <div id="loading" style="display: none">
+                                <i class="fa fa-spin fa-refresh"></i> Memuat Data Pangkalan...
+                            </div>
+                            <select class="form-control" name="dt[id_pangkalan]" id="id_pangkalan" required="" style="width: 100%">
+                                <option value="">-- Pilih --</option>
+                            </select>
+                            <input type="hidden" name="pangkalan">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Nama Lengkap</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" name="dt[name]" required=""
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">No. Telepon</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" name="dt[phone]" required=""
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Password</label>
+                        <div class="col-sm-7">
+                            <input type="password" class="form-control" name="dt[password]" required=""
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Alamat Lengkap</label>
+                        <div class="col-sm-7">
+                            <textarea class="form-control" rows="4" cols="20" name="dt[address]"
+                                      required=""></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Verifikasi</label>
+                        <div class="col-sm-7">
+                            <b style="color: red"><?php $var = mt_rand(111111,999999); echo $var ?></b><br>
+                            <input type="text" class="form-control" name="verifikasi" required=""
+                                   value="" style="max-width: 100px;">
+                            <input type="hidden" name="verifikasi_valid" value="<?php echo $var ?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                   <button class="btn btn-primary" type="submit">Daftar</button>
+                   <button class="btn btn-danger" type="button" data-dismiss="modal">Batal</button> 
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <!-- jQuery -->
 <script src="<?php echo base_url() ?>assets/creative/vendor/jquery/jquery.min.js"></script>
 
@@ -184,6 +281,29 @@
 <!-- Theme JavaScript -->
 <script src="<?php echo base_url() ?>assets/creative/js/creative.min.js"></script>
 
+<script src="<?php echo base_url() ?>assets/plugins/select2/js/select2.min.js"></script>
+
+<script type="text/javascript">
+    $("#btnDaftar").click(function() {
+        $("#modal-mulai").modal('toggle');
+        $("#modal-daftar").modal('toggle');
+        $("#id_pangkalan").html('<option value="">-- Pilih --</option>');
+        $.ajax({
+            url: "<?php echo site_url('getdata-pangkalan') ?>",
+            dataType: "json",
+            beforeSend: function(){
+                $("#loading").show();
+            },
+            success: function(data){
+                $.each(data, function(i, v){
+                    $("#id_pangkalan").append('<option value="'+v.id_pangkalan+'">'+v.name+' ('+v.id_pangkalan+')</option>');
+                });
+                $("#loading").hide();
+                $("#id_pangkalan").select2();
+            }
+        });
+    });
+</script>
 </body>
 
 </html>

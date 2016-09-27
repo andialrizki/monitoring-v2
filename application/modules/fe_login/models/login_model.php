@@ -6,6 +6,10 @@ class Login_model extends CI_Model {
     {      
         if (!empty($username) && !empty($password)) 
         {   
+            $pelanggan = $this->_check_pelanggan($username, $password);
+            if ($pelanggan) {
+                return true;
+            }
             $pangkalan = $this->_check_pangkalan($username, $password);
             if ($pangkalan) {
                 return true;
@@ -24,6 +28,31 @@ class Login_model extends CI_Model {
             }
         }
 
+        return false;
+    }
+    protected function _check_pelanggan($username, $password){
+        $this->db->where('id_pengecer', $username);
+        //$this->db->or_where('phone', $username);
+        $query = $this->db->get('tbl_pengecer');
+        if($query->num_rows() != 0) 
+        {
+            $dt = $query->row(); 
+            if ($dt->password == md5(sha1($password).'monitoringlpg')){ 
+                
+                // set session user login
+                $val = array(
+                    APP_PREFIX.'username' => $username,
+                    APP_PREFIX.'name' => $dt->name,
+                    APP_PREFIX.'id_admin' => $dt->id_pengecer,
+                    APP_PREFIX.'is_login' => true,
+                    APP_PREFIX.'type_admin' => 5,
+                );
+                $this->session->set_userdata($val);
+                return true; // fix
+            } else {
+                return false;   
+            }
+        }
         return false;
     }
 
@@ -90,6 +119,7 @@ class Login_model extends CI_Model {
         }
         return false;
     }
+
 
     protected function _check_spbe($username, $password){
         $this->db->where('username', $username);

@@ -9,6 +9,7 @@ class Fe_login extends MX_Controller {
 
 	public function index()
 	{
+		//echo md5(sha1('123456789').'monitoringlpg');
 		$this->load->view('login_pagev2');
 	}
 

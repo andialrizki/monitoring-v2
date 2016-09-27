@@ -55,6 +55,15 @@ $route['be_(:any)'] = "fe_error";
 | ALLOW ROUTES
 | ------------------------------------------------------------------------- */
 
+// front end user
+$route['registrasi-konsumen'] = 'fe_singlepage/daftar';
+$route['getdata-pangkalan'] = 'fe_singlepage/get_pangkalan';
+
+//konsumen
+
+$route['konsumen/lokasi-pangkalan'] = "fe_konsumen/lokasi_pangkalan";
+
+
 $route['404'] = "fe_error";
 $route['sign-in'] = "fe_login";
 $route['sign-in/auth'] = "fe_login/do_login";

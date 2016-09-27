@@ -22,6 +22,10 @@ class Frontend extends MX_Controller {
 			$navbar = $this->load->view('navbar_spbe', array('active' => $active),TRUE);
 			$grid = '';
 		}
+		if ($type_admin==5) {
+			$navbar = $this->load->view('navbar_pelanggan', array('active' => $active),TRUE);
+			$grid = '';
+		}
 		$data = array('content' => $content, 'active' => $active, 'navbar' => $navbar, 'grid' => $grid);
 		$this->load->view('index', $data);
 	}

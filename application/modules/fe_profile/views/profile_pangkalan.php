@@ -16,9 +16,9 @@
             <a href="<?php echo site_url('profile/edit/1'); ?>" type="button" style="margin-bottom: 15px;">
                 <button class="btn btn-primary"><i class="fa fa-edit"></i> Edit</button>
             </a>
-            <a href="#modal-ganti-harga" type="button" style="margin-bottom: 15px;">
-                <button class="btn btn-warning"><i class="fa fa-money"></i>Ubah Harga</button>
-            </a>
+            <span style="margin-bottom: 15px;">
+                <button class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-ganti-harga"><i class="fa fa-money"></i>Ubah Harga</button>
+            </span>
         </div>
     </div>
     <?php if (isset($error)): ?>

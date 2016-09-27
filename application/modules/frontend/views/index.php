@@ -21,12 +21,15 @@
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/flag-icon-css/flag-icon.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/waves/waves.css">
 
-      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/datatables-bootstrap/dataTables.bootstrap.css">
-      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/datatables-fixedheader/dataTables.fixedHeader.css">
-      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/vendor/datatables-responsive/dataTables.responsive.css">
+    <link rel="stylesheet"
+          href="<?php echo base_url() ?>assets/global/vendor/datatables-bootstrap/dataTables.bootstrap.css">
+    <link rel="stylesheet"
+          href="<?php echo base_url() ?>assets/global/vendor/datatables-fixedheader/dataTables.fixedHeader.css">
+    <link rel="stylesheet"
+          href="<?php echo base_url() ?>assets/global/vendor/datatables-responsive/dataTables.responsive.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/base/assets/examples/css/dashboard/v1.css">
     <!-- Fonts -->
-      <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/font-awesome/font-awesome.css">
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/font-awesome/font-awesome.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/material-design/material-design.min.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/brand-icons/brand-icons.min.css">
     <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:300,400,500,300italic'>
@@ -45,12 +48,12 @@
     <script>
         Breakpoints();
     </script>
-
+    <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.js"></script>
     <script src="<?php echo base_url() ?>assets/global/vendor/jquery/jquery.js"></script>
     <style type="text/css">
-     .btn-action a {
-        text-decoration: none;
-     }
+        .btn-action a {
+            text-decoration: none;
+        }
     </style>
 </head>
 <body class="dashboard">
@@ -104,7 +107,9 @@
                 <li class="dropdown">
                     <a class="navbar-avatar dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false"
                        data-animation="scale-up" role="button">
-                        <span><i class="md-account" aria-hidden="true"></i> &nbsp; Account</span>
+                        <span><i class="icon md-account-circle"
+                                 aria-hidden="true"></i> &nbsp; <?php $name = $this->session->userdata(APP_PREFIX . 'name');
+                            echo $name; ?></span>
                     </a>
                     <ul class="dropdown-menu" role="menu">
                         <li role="presentation">
@@ -157,14 +162,15 @@
         </div>
     </div>
     <div class="site-menubar-footer">
-        <a href="javascript: void(0);" class="fold-show" data-placement="top" data-toggle="tooltip"
-           data-original-title="Settings">
+        <a href="<?php echo site_url('profile'); ?>" class="fold-show" data-placement="top" data-toggle="tooltip"
+           data-original-title="Atur Profil">
             <span class="icon md-settings" aria-hidden="true"></span>
         </a>
         <a href="javascript: void(0);" data-placement="top" data-toggle="tooltip" data-original-title="Lock">
             <span class="icon md-eye-off" aria-hidden="true"></span>
         </a>
-        <a href="javascript: void(0);" data-placement="top" data-toggle="tooltip" data-original-title="Logout">
+        <a href="<?php echo site_url('sign-out') ?>" data-placement="top" data-toggle="tooltip"
+           data-original-title="Logout">
             <span class="icon md-power" aria-hidden="true"></span>
         </a>
     </div>
@@ -176,9 +182,9 @@
 <!-- <div class="page animsition">
     <div class="page-content padding-30 container-fluid">
         <div class="row" data-plugin="matchHeight" data-by-row="true"> -->
-            <!-- main content -->
-            <?php echo $content ?>
-            <!-- end main content --><!-- 
+<!-- main content -->
+<?php echo $content ?>
+<!-- end main content --><!--
         </div>
     </div>
 </div> -->
@@ -208,11 +214,11 @@
 <script src="<?php echo base_url() ?>assets/global/vendor/peity/jquery.peity.min.js"></script>
 
 
-  <script src="<?php echo base_url() ?>assets/global/vendor/datatables/jquery.dataTables.js"></script>
-  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-fixedheader/dataTables.fixedHeader.js"></script>
-  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-bootstrap/dataTables.bootstrap.js"></script>
-  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-responsive/dataTables.responsive.js"></script>
-  <script src="<?php echo base_url() ?>assets/global/vendor/datatables-tabletools/dataTables.tableTools.js"></script>
+<script src="<?php echo base_url() ?>assets/global/vendor/datatables/jquery.dataTables.js"></script>
+<script src="<?php echo base_url() ?>assets/global/vendor/datatables-fixedheader/dataTables.fixedHeader.js"></script>
+<script src="<?php echo base_url() ?>assets/global/vendor/datatables-bootstrap/dataTables.bootstrap.js"></script>
+<script src="<?php echo base_url() ?>assets/global/vendor/datatables-responsive/dataTables.responsive.js"></script>
+<script src="<?php echo base_url() ?>assets/global/vendor/datatables-tabletools/dataTables.tableTools.js"></script>
 
 <!-- Scripts -->
 <script src="<?php echo base_url() ?>assets/global/js/core.js"></script>
@@ -231,8 +237,8 @@
 <script src="<?php echo base_url() ?>assets/global/js/components/matchheight.js"></script>
 <script src="<?php echo base_url() ?>assets/global/js/components/peity.js"></script>
 
-  <script src="<?php echo base_url() ?>assets/global/js/components/datatables.js"></script>
-  <script src="<?php echo base_url() ?>assets/base/assets/examples/js/tables/datatable.js"></script>
+<script src="<?php echo base_url() ?>assets/global/js/components/datatables.js"></script>
+<script src="<?php echo base_url() ?>assets/base/assets/examples/js/tables/datatable.js"></script>
 <script src="<?php echo base_url() ?>assets/base/assets/examples/js/dashboard/v1.js"></script>
 </body>
 </html>

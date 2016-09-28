@@ -44,7 +44,14 @@ class Model_realisasi_agen extends CI_Model {
 	{
 		$this->db->select('name');
 		$this->db->select_sum('qty_tabung', 'berat');
+		$this->db->from('tbl_realisasi_agen');
 		$this->db->where('tanggal', 'JAN 2014');
+		$this->db->order_by('name');
+		$query = $this->db->get();
+		if ($query->num_rows() > 0) {
+			return $query->result_array();
+		}
+		return false;
 	}
 
 }

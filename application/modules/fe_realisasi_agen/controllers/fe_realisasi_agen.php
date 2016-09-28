@@ -17,6 +17,12 @@ class Fe_realisasi_agen extends MX_Controller {
 		echo Modules::run('frontend', $content, 'realisasi_agen');
 	}
 
+	public function get_all_realisasi_agen()
+	{
+		$data = $this->model_realisasi_agen->get_all_realisasi_agen();
+		return $data;
+	}
+
 	public function add_realisasi_agen()
 	{
 		$content = $this->load->view('add_edit_realisasi_agen', '', TRUE);
@@ -30,6 +36,12 @@ class Fe_realisasi_agen extends MX_Controller {
 		$data=array_map('trim',$data);
 		$content = $this->load->view('add_edit_realisasi_agen', array('data' => $data), TRUE);
 		echo Modules::run('frontend', $content, 'realisasi_agen');
+	}
+
+	public function get_this_data($id)
+	{
+		$data = $this->model_realisasi_agen->get_this_data($id);
+		return $data;
 	}
 
 	public function submit_realisasi_agen()
@@ -69,16 +81,37 @@ class Fe_realisasi_agen extends MX_Controller {
 		echo Modules::run('frontend', $content, 'realisasi_agen');
 	}
 
-	public function get_all_realisasi_agen()
+	public function showchart()
 	{
-		$data = $this->model_realisasi_agen->get_all_realisasi_agen();
-		return $data;
-	}
+		$data = $this->submit_realisasi_agen->support_chart();
+		$year1 = $this->input->post('yearOne');
+		$year2 = $this->input->post('yearTwo');
+		$earning1 = $this->m_datachart->getEarning($year1);
+		$earning2 = $this->m_datachart->getEarning($year2);
+		$total1 = array();
+		$total2 = array();
+		foreach ($earning1 as $tot) {
+			$total1[] = $tot->total;
+		}
+		foreach ($earning2 as $tot) {
+			$total2[] = $tot->total;
+		}
 
-	public function get_this_data($id)
-	{
-		$data = $this->model_realisasi_agen->get_this_data($id);
-		return $data;
+		$label = array();
+		foreach ($data as $key) {
+			$label[] = $key['name'];
+		}
+		$Data['label'] = json_encode($label);//json_encode($label);
+		$Data['tahun'] = $this->m_datachart->getYear();
+		$Data['result1'] = json_encode($total1);
+		$Data['result2'] = json_encode($total2);
+		$Data['one'] = $year1;
+		$Data['two'] = $year2;
+		$this->load->view('chart', $Data);
+		//print_r($this->m_datachart->getMonth());
+		// print_r($this->m_datachart->getEarning($year1));
+		// echo " spasi ";
+		//print_r($this->m_datachart->getEarning($year2));
 	}
 
 }

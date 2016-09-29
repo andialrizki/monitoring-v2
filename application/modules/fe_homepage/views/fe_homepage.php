@@ -8,18 +8,7 @@
     <?php endif ?>
     <div class="page-content">
         <!-- Panel Form Elements -->
-        <div class="col-xlg-4 col-md-6">
-            <div class="panel panel-bordered">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Chart</h3>
-                </div>
-                <div class="panel-body container-fluid">
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xlg-4 col-md-6">
+        <div class="col-md-12">
             <div class="panel panel-bordered">
                 <div class="panel-heading">
                     <h3 class="panel-title">Tentang</h3>
@@ -33,67 +22,6 @@
                         penyalur yang berhubungan langsung dengan distribusi LPG 3 Kg yang tepat sasaran kepada
                         pengguna.
                     </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-12">
-            <div class="panel panel-bordered">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Layanan Kami</h3>
-                </div>
-                <div class="panel-body container-fluid">
-                    <div class="row">
-                        <div class="col-sm-4 wow fadeInDown">
-                            <div class="service-icon">
-                                <a href="<?php echo site_url('transaksi'); ?>"><i class="fa fa-money"></i></a>
-                            </div>
-                            <div class="service-info">
-                                <h3>Transaksi</h3>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 wow fadeInDown">
-                            <div class="service-icon">
-                                <a href="<?php echo site_url('pelanggan'); ?>"><i class="fa fa-book"></i></a>
-                            </div>
-                            <div class="service-info">
-                                <h3>Data Pelanggan</h3>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 wow fadeInDown">
-                            <div class="service-icon">
-                                <a href="<?php echo site_url('spbe'); ?>"><i class="fa fa-book"></i></i></a>
-                            </div>
-                            <div class="service-info">
-                                <h3>Data SPBE</h3>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 wow fadeInUp">
-                            <div class="service-icon">
-                                <a href="<?php echo site_url('pangkalan'); ?>"><i class="fa fa-book"></i></a>
-                            </div>
-                            <div class="service-info">
-                                <h3>Data dan Lokasi Pangkalan</h3>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 wow fadeInUp">
-                            <div class="service-icon">
-                                <a href="<?php echo site_url('lokasi-agen'); ?>"><i class="fa fa-map-marker"></i></a>
-                            </div>
-                            <div class="service-info">
-                                <h3>Lokasi Agen</h3>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 wow fadeInUp">
-                            <div class="service-icon">
-                                <a href="<?php echo site_url('lokasi-pelanggan'); ?>"><i
-                                        class="fa fa-map-marker"></i></a>
-                            </div>
-                            <div class="service-info">
-                                <h3>Lokasi Pelanggan</h3>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

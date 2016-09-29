@@ -49,6 +49,8 @@
         Breakpoints();
     </script>
     <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.js"></script>
+    <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.min.js"></script>
+    <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.bundle.min.js"></script>
     <script src="<?php echo base_url() ?>assets/global/vendor/jquery/jquery.js"></script>
     <style type="text/css">
         .btn-action a {

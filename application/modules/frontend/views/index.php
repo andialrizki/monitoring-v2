@@ -52,13 +52,37 @@
     <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.min.js"></script>
     <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.bundle.min.js"></script>
     <script src="<?php echo base_url() ?>assets/global/vendor/jquery/jquery.js"></script>
+    <script type="text/javascript">
+        $(window).load(function() {
+          // Animate loader off screen
+          $(".se-pre-con").fadeOut("slow");;
+        });
+        function clearFill(element) {
+            for(i=0; i<element.length; i++){
+                $(element[i]).val('');
+            }
+        }
+    </script>
     <style type="text/css">
         .btn-action a {
             text-decoration: none;
         }
+        .no-js #loader { display: none;  }
+          .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+          .se-pre-con {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url('<?php echo base_url() ?>assets/images/loader.gif') center no-repeat #fff;
+          }
+
     </style>
 </head>
 <body class="dashboard">
+<div class="se-pre-con"></div>
 <!--[if lt IE 8]>
 <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
     your browser</a> to improve your experience.</p>

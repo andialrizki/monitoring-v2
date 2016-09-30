@@ -39,9 +39,14 @@ class BRITbank
 			'pin'			=> $data['pin']));
 		return $response->InfoSaldoTBankResult;
 	}
-	public function FunctionName($value='')
+	public function transferTbank($data)
 	{
-		# code...
+		$response = $this->client->TransferTBank(array(
+			'nohandphonePengirim'	=> $data['nohandphonePengirim'],
+			'nohandphonePenerima'	=> $data['nohandphonePenerima'],
+			'pin'					=> $data['pin'],
+			'nominal'				=> $data['nominal']));
+		return $response->TransferTBankResult;
 	}
 
 }

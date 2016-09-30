@@ -43,6 +43,10 @@ class Fe_homepage extends MX_Controller
             $content = $this->load->view('fe_homepage', TRUE);
             echo Modules::run('frontend', $content, 'home');
         }
+        if ($type_admin == 6) {
+            $content = $this->load->view('fe_homepage', TRUE);
+            echo Modules::run('frontend', $content, 'home');
+        }
     }
 }
 

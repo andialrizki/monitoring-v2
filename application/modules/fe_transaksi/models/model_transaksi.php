@@ -4,8 +4,13 @@ class Model_transaksi extends CI_Model {
 
 	public function get_all_transaksi()
 	{
-		if ($this->session->userdata(APP_PREFIX.'type_admin') != 0) {
+		$this->db->select('tbl_transaksi.*, tbl_pangkalan.name as pangkalan');
+		$this->db->join('tbl_pangkalan', 'tbl_transaksi.id_pangkalan = tbl_pangkalan.id_pangkalan');
+		if ($this->session->userdata(APP_PREFIX.'type_admin') != 0 && $this->session->userdata(APP_PREFIX.'type_admin') != 6) {
 			$this->db->where('id_pangkalan', $this->session->userdata(APP_PREFIX.'id_admin'));
+		}
+		if ($this->session->userdata(APP_PREFIX.'type_admin') == 6) {
+			$this->db->where('jenis_pembayaran', 2);
 		}
 		$this->db->order_by('tgl','desc');
 		$query = $this->db->get('tbl_transaksi');

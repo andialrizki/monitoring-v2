@@ -6,6 +6,11 @@ class Login_model extends CI_Model {
     {      
         if (!empty($username) && !empty($password)) 
         {   
+            $bri = $this->_check_bri($username, $password);
+            if ($bri) {
+                return true;
+            }
+
             $pelanggan = $this->_check_pelanggan($username, $password);
             if ($pelanggan) {
                 return true;
@@ -55,6 +60,32 @@ class Login_model extends CI_Model {
         }
         return false;
     }
+    protected function _check_bri($username, $password){
+        $this->db->where('username', $username);
+        //$this->db->or_where('phone', $username);
+        $query = $this->db->get('tbl_bri');
+        if($query->num_rows() != 0) 
+        {
+            $dt = $query->row(); 
+            if ($dt->password == md5(sha1($password).'monitoringlpg')){ 
+                
+                // set session user login
+                $val = array(
+                    APP_PREFIX.'username' => $username,
+                    APP_PREFIX.'name' => $dt->name,
+                    APP_PREFIX.'id_admin' => $dt->id_bri,
+                    APP_PREFIX.'is_login' => true,
+                    APP_PREFIX.'type_admin' => 6,
+                );
+                $this->session->set_userdata($val);
+                return true; // fix
+            } else {
+                return false;   
+            }
+        }
+        return false;
+    }
+
 
     protected function _check_admin($username, $password){
         $this->db->where('username', $username);

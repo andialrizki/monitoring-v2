@@ -53,10 +53,9 @@ class Fe_login extends MX_Controller {
 			else
 			{
 				// jika login gagal; redirect ke login.html
-				$message = 'Username atau password anda salah.<script type="text/javascript">setInterval(function(){
-				   			window.location.href = "'.site_url('sign-in').'";
-				   		},2000);</script>';
-				$this->load->view('login_page', array('error' => $message));
+				$message = '<script type="text/javascript">alert("Username atau password anda salah."); window.location.href = "'.site_url('sign-in').'";</script>';
+				echo $message;
+				//$this->load->view('login_page', array('error' => $message));
 			}
 		}
 	}

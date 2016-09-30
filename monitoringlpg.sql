@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 27, 2016 at 06:09 PM
+-- Generation Time: Oct 01, 2016 at 12:21 AM
 -- Server version: 10.1.16-MariaDB
 -- PHP Version: 5.6.24
 
@@ -56,7 +56,7 @@ CREATE TABLE `tbl_admin` (
 --
 
 INSERT INTO `tbl_admin` (`id_other_user`, `id_admin`, `name`, `tgl_login`, `username`, `password`, `type`, `status`) VALUES
-(0, 8, 'Galih W Wicaksono', '2016-09-27', 'galih', 'UAA/ppXyYVfZN1nSbw==', 1, 1),
+(0, 8, 'Galih W Wicaksono', '2016-09-30', 'galih', 'UAA/ppXyYVfZN1nSbw==', 1, 1),
 (0, 2, 'admin sakti', '2015-11-04', 'admin_sakti', 'hf7S9IibLFat4IKuTLGv8AwBI6SQVg==', 0, 0),
 (0, 9, 'admin', '2016-09-26', 'admin_biasa', 'Yv8cd2ieLFaEcZszp1dO58n7Dj7t', 1, 0),
 (0, 7, 'admin ane', '2015-11-01', 'admin_ane', 'g/xyiL1ZOlYSEzheB0nc3igu7KgWm050', 0, 0),
@@ -124,6 +124,26 @@ INSERT INTO `tbl_agen` (`id`, `password`, `username`, `name`, `provinsi`, `city`
 (35, 'mv6+5E8nOlaeKm3RTEA0ZwPU3yUM', '1446651246', 'PT. TIRTAMAS ELPIJI', 'Jawa Timur', 'Kab. Malang', 'Jl. Tumapel Bar. Singosari Malang, Jawa Timur 65153', '112.658632', '-7.891687'),
 (36, 'mv6+5E8nOlaeKm3RTEA0ZwPU3yUM', '1443671248', 'PT. SUTOPO PUTRA', 'Jawa Timur', 'Kab. Malang', 'Jl. Raya Thamrin 42 Lawang', '112.697282', '-7.831238'),
 (37, 'mv6+5E8nOlaeKm3RTEA0ZwPU3yUM', '1446654236', 'PUSKOP. KARTIKA BHIRAWA ANORAGA', 'Jawa Timur', 'Kodya Malang', 'Jl. Panglima Sudirman, Blimbing, Kota Malang, Jawa Timur 65111', '-7.972381', '112.638475');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_bri`
+--
+
+CREATE TABLE `tbl_bri` (
+  `id_bri` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `tbl_bri`
+--
+
+INSERT INTO `tbl_bri` (`id_bri`, `username`, `password`, `name`) VALUES
+(1, 'bri', '08745943e7c8d11e34788d76577c40db', 'PT. Bank Rakyat Indonesia');
 
 -- --------------------------------------------------------
 
@@ -5523,23 +5543,25 @@ CREATE TABLE `tbl_transaksi` (
   `tgl` varchar(40) NOT NULL,
   `id_pangkalan` varchar(255) DEFAULT NULL,
   `qty` int(11) NOT NULL,
-  `jml_uang` int(11) NOT NULL
+  `jml_uang` int(11) NOT NULL,
+  `jenis_pembayaran` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1.tunai; 2.transfer'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `tbl_transaksi`
 --
 
-INSERT INTO `tbl_transaksi` (`id`, `id_pengecer`, `tgl`, `id_pangkalan`, `qty`, `jml_uang`) VALUES
-(10, '9020400060033731', '2016-08-04', '11248', 5, 75000),
-(8, '9020400060033730', '2015-11-09', '11248', 2, 30000),
-(9, '9020400060033730', '2015-11-09', '11248', 1, 15000),
-(11, '0002', '2016-08-19', '11981', 41, 615000),
-(12, '0013', '2016-08-20', '11981', 50, 750000),
-(13, '0016', '2016-08-20', '11981', 1, 15000),
-(20, '0001', '16-08-03', '11981', 2, 30000),
-(18, '0014', '16-08-01', '11981', 1, 15000),
-(19, '0014', '16-08-04', '11981', 3, 45000);
+INSERT INTO `tbl_transaksi` (`id`, `id_pengecer`, `tgl`, `id_pangkalan`, `qty`, `jml_uang`, `jenis_pembayaran`) VALUES
+(10, '9020400060033731', '2016-08-04', '11248', 5, 75000, 1),
+(8, '9020400060033730', '2015-11-09', '11248', 2, 30000, 1),
+(9, '9020400060033730', '2015-11-09', '11248', 1, 15000, 1),
+(11, '0002', '2016-08-19', '11981', 41, 615000, 1),
+(12, '0013', '2016-08-20', '11981', 50, 750000, 1),
+(13, '0016', '2016-08-20', '11981', 1, 15000, 1),
+(20, '0001', '16-08-03', '11981', 2, 30000, 1),
+(18, '0014', '16-08-01', '11981', 1, 15000, 1),
+(19, '0014', '16-08-04', '11981', 3, 45000, 1),
+(21, '085754', '2016-09-30', '11981', 1, 15000, 2);
 
 -- --------------------------------------------------------
 
@@ -5577,6 +5599,12 @@ ALTER TABLE `tbl_admin`
 ALTER TABLE `tbl_agen`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
+
+--
+-- Indexes for table `tbl_bri`
+--
+ALTER TABLE `tbl_bri`
+  ADD PRIMARY KEY (`id_bri`);
 
 --
 -- Indexes for table `tbl_pangkalan`
@@ -5644,6 +5672,11 @@ ALTER TABLE `tbl_admin`
 ALTER TABLE `tbl_agen`
   MODIFY `id` int(16) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 --
+-- AUTO_INCREMENT for table `tbl_bri`
+--
+ALTER TABLE `tbl_bri`
+  MODIFY `id_bri` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
 -- AUTO_INCREMENT for table `tbl_pangkalan`
 --
 ALTER TABLE `tbl_pangkalan`
@@ -5677,7 +5710,7 @@ ALTER TABLE `tbl_supply_spbe_agen`
 -- AUTO_INCREMENT for table `tbl_transaksi`
 --
 ALTER TABLE `tbl_transaksi`
-  MODIFY `id` int(16) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(16) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 --
 -- AUTO_INCREMENT for table `user`
 --

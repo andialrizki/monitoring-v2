@@ -6,7 +6,7 @@ class Fe_transaksi extends MX_Controller {
 	{
 		parent::__construct();
 		echo Modules::run('fe_login/is_login');
-		echo Modules::run('myhelper/permission', array(2,3));
+		echo Modules::run('myhelper/permission', array(2,3,6));
 		$this->load->model('model_transaksi');
 	}
 

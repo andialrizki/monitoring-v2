@@ -23,6 +23,18 @@
         <div class="col-xlg-4 col-md-6">
             <div class="panel panel-bordered">
                 <div class="panel-heading">
+                    <h3 class="panel-title">Realisasi SPPBE</h3>
+                </div>
+                <div class="panel-body container-fluid">
+                    <canvas id="myChart2"></canvas>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="panel panel-bordered">
+                <div class="panel-heading">
                     <h3 class="panel-title">Tentang</h3>
                 </div>
                 <div class="panel-body container-fluid">
@@ -38,7 +50,7 @@
             </div>
         </div>
 
-        <div class="col-md-12">
+        <!--div class="col-md-12">
             <div class="panel panel-bordered">
                 <div class="panel-heading">
                     <h3 class="panel-title">Layanan Kami</h3>
@@ -47,7 +59,7 @@
                     <div class="row">
                         <div class="col-sm-4 wow fadeInDown">
                             <div class="service-icon">
-                                <a href="<?php echo site_url('transaksi'); ?>"><i class="fa fa-money"></i></a>
+                                <a href="<?php //echo site_url('transaksi'); ?>"><i class="fa fa-money"></i></a>
                             </div>
                             <div class="service-info">
                                 <h3>Transaksi</h3>
@@ -55,7 +67,7 @@
                         </div>
                         <div class="col-sm-4 wow fadeInDown">
                             <div class="service-icon">
-                                <a href="<?php echo site_url('pelanggan'); ?>"><i class="fa fa-book"></i></a>
+                                <a href="<?php //echo site_url('pelanggan'); ?>"><i class="fa fa-book"></i></a>
                             </div>
                             <div class="service-info">
                                 <h3>Data Pelanggan</h3>
@@ -63,7 +75,7 @@
                         </div>
                         <div class="col-sm-4 wow fadeInDown">
                             <div class="service-icon">
-                                <a href="<?php echo site_url('spbe'); ?>"><i class="fa fa-book"></i></i></a>
+                                <a href="<?php //echo site_url('spbe'); ?>"><i class="fa fa-book"></i></i></a>
                             </div>
                             <div class="service-info">
                                 <h3>Data SPBE</h3>
@@ -71,7 +83,7 @@
                         </div>
                         <div class="col-sm-4 wow fadeInUp">
                             <div class="service-icon">
-                                <a href="<?php echo site_url('pangkalan'); ?>"><i class="fa fa-book"></i></a>
+                                <a href="<?php //echo site_url('pangkalan'); ?>"><i class="fa fa-book"></i></a>
                             </div>
                             <div class="service-info">
                                 <h3>Data dan Lokasi Pangkalan</h3>
@@ -79,7 +91,7 @@
                         </div>
                         <div class="col-sm-4 wow fadeInUp">
                             <div class="service-icon">
-                                <a href="<?php echo site_url('lokasi-agen'); ?>"><i class="fa fa-map-marker"></i></a>
+                                <a href="<?php //echo site_url('lokasi-agen'); ?>"><i class="fa fa-map-marker"></i></a>
                             </div>
                             <div class="service-info">
                                 <h3>Lokasi Agen</h3>
@@ -87,7 +99,7 @@
                         </div>
                         <div class="col-sm-4 wow fadeInUp">
                             <div class="service-icon">
-                                <a href="<?php echo site_url('lokasi-pelanggan'); ?>"><i
+                                <a href="<?php //echo site_url('lokasi-pelanggan'); ?>"><i
                                         class="fa fa-map-marker"></i></a>
                             </div>
                             <div class="service-info">
@@ -97,7 +109,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div-->
     </div>
 </div>
 <script>
@@ -107,10 +119,39 @@
         data: {
             labels: <?php echo $data['label']; ?>,
             datasets: [{
-                label: 'jumlah tabung (kg)',
+                label: 'jumlah tabung',
                 data:  <?php echo $data['result']; ?>,
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    display: false
+                }],
+                yAxes: [{
+                    ticks: {
+                        max: 400000,
+                        min: 10000,
+                        stepSize: 150000
+                    }
+                }]
+            }
+        }
+    });
+    var ctx = document.getElementById("myChart2").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: <?php echo $data2['label']; ?>,
+            datasets: [{
+                label: 'jumlah tabung',
+                data:  <?php echo $data2['result']; ?>,
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                borderColor: 'rgba(255, 206, 86, 1)',
                 borderWidth: 1,
             }]
         },

@@ -40,6 +40,20 @@ class Model_realisasi_spbe extends CI_Model {
 		return true;
 	}
 
+	public function support_chart()
+	{
+		$this->db->select('plant');
+		$this->db->select_sum('qty_tabung');
+		$this->db->from('tbl_realisasi_spbe');
+		$this->db->where('tanggal', 'JAN 2014');
+		$this->db->group_by('plant');
+		$query = $this->db->get();
+		if ($query->num_rows() > 0) {
+			return $query->result_array();
+		}
+		return false;
+	}
+
 }
 
 /* End of file model_penjadwalan.php */

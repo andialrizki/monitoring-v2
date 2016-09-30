@@ -17,6 +17,12 @@ class Fe_realisasi_spbe extends MX_Controller {
 		echo Modules::run('frontend', $content, 'realisasi_spbe');
 	}
 
+	public function get_all_realisasi_spbe()
+	{
+		$data = $this->model_realisasi_spbe->get_all_realisasi_spbe();
+		return $data;
+	}
+
 	public function add_realisasi_spbe()
 	{
 		$content = $this->load->view('add_edit_realisasi_spbe', '', TRUE);
@@ -30,6 +36,12 @@ class Fe_realisasi_spbe extends MX_Controller {
 		$data=array_map('trim',$data);
 		$content = $this->load->view('add_edit_realisasi_spbe', array('data' => $data), TRUE);
 		echo Modules::run('frontend', $content, 'realisasi_spbe');
+	}
+
+	public function get_this_data($id)
+	{
+		$data = $this->model_realisasi_spbe->get_this_data($id);
+		return $data;
 	}
 
 	public function submit_realisasi_spbe()
@@ -69,15 +81,22 @@ class Fe_realisasi_spbe extends MX_Controller {
 		echo Modules::run('frontend', $content, 'realisasi_spbe');
 	}
 
-	public function get_all_realisasi_spbe()
+	public function support_chart()
 	{
-		$data = $this->model_realisasi_spbe->get_all_realisasi_spbe();
-		return $data;
-	}
+		$data = $this->model_realisasi_spbe->support_chart();
+		$value = array();
+		foreach ($data as $key) {
+			$value[] = $key['qty_tabung'];
+		}
 
-	public function get_this_data($id)
-	{
-		$data = $this->model_realisasi_spbe->get_this_data($id);
+		$label = array();
+		foreach ($data as $key) {
+			$label[] = $key['plant'];
+		}
+
+		$data['label'] = json_encode($label);//json_encode($label);
+		$data['result'] = json_encode($value);
+
 		return $data;
 	}
 

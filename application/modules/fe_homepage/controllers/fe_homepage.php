@@ -22,7 +22,8 @@ class Fe_homepage extends MX_Controller
         $type_admin = $this->session->userdata(APP_PREFIX . 'type_admin');
         if ($type_admin == 0 || $type_admin == 1) {
             $data = Modules::run('fe_realisasi_agen/support_chart');
-            $content = $this->load->view('fe_homepage_admin', array('data' => $data), TRUE);
+            $data2 = Modules::run('fe_realisasi_spbe/support_chart');
+            $content = $this->load->view('fe_homepage_admin', array('data' => $data, 'data2' => $data2), TRUE);
             echo Modules::run('frontend', $content, 'home');
         }
 

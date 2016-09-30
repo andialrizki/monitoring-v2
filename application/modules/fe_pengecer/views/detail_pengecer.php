@@ -65,7 +65,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <img src="<?php echo base_url('assets/images'); ?>/qr_bkma_pengecer.png"
+                                <img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=<?php echo $data['id_pengecer'] ?>&choe=UTF-8"
                                      class="img-responsive">
                             </div>
                         </div>

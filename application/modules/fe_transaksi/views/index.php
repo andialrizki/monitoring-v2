@@ -54,7 +54,7 @@
                                 <td><?php echo isset($pelanggan['name']) ? $pelanggan['name'] : ''; ?></td>
                                 <td><?php echo isset($pelanggan['phone']) ? $pelanggan['phone'] : ''; ?></td>
                                 <td><?php echo isset($key['qty']) ? $key['qty'] : ''; ?></td>
-                                <td><?php echo isset($key['jml_uang']) ? $key['jml_uang'] : ''; ?></td>
+                                <td>Rp. <?php echo isset($key['jml_uang']) ? number_format($key['jml_uang']) : ''; ?> <span class="pull-right">| <?php echo jenis_pembayaran($key['jenis_pembayaran']) ?></span></td>
                                 <td><?php echo $tgl; ?></td>
                                 <td class="btn-action">
                                     <a href="<?php echo site_url('transaksi/detail/' . $id_pengecer); ?>"

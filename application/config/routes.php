@@ -62,6 +62,9 @@ $route['getdata-pangkalan'] = 'fe_singlepage/get_pangkalan';
 //konsumen
 
 $route['konsumen/lokasi-pangkalan'] = "fe_konsumen/lokasi_pangkalan";
+$route['konsumen/beli-lpg'] = "fe_konsumen/beli_lpg";
+
+$route['konsumen/tbank/saldo'] = "fe_konsumen/ceksaldo_tbank";
 
 
 $route['404'] = "fe_error";

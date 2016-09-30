@@ -13,8 +13,8 @@
         </ol>
         <div class="page-header-actions">
             <!-- for right button like add, post, etc -->
-            <a href="<?php echo site_url('pangkalan'); ?>" style="margin-bottom: 15px;">
-                <button class="btn btn-warning"><i class='icon fa-arrow-left'></i> Kembali</button>
+            <a href="<?php echo site_url('konsumen/beli-lpg'); ?>" style="margin-bottom: 15px;">
+                <button class="btn btn-warning"><i class='icon fa-usd'></i> Beli LPG</button>
             </a>
         </div>
     </div>

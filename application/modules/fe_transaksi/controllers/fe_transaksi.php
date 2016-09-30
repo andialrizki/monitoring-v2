@@ -37,7 +37,7 @@ class Fe_transaksi extends MX_Controller {
 			redirect('transaksi');
 		}
 		$act = $this->input->post('action', TRUE);
-		$arrData = array('id_pengecer','tgl', 'qty', 'jml_uang');
+		$arrData = array('id_pengecer','tgl', 'qty', 'jml_uang', 'jenis_pembayaran');
 		$data = array();
 		foreach ($arrData as $kk) {
 			$data[$kk] = trim($this->input->post($kk, TRUE));

@@ -28,6 +28,7 @@
                 <form class="form-horizontal" action="<?php echo site_url('transaksi/submit'); ?>" method="post"
                       onsubmit="return confirm('Anda Yakin?');">
                     <input type="hidden" name="id" value="<?php echo isset($data['id']) ? $data['id'] : ''; ?>">
+                    <input type="hidden" name="jenis_pembayaran" value="1"> <!-- 1. tunai; 2. transfer -->
                     <div class="form-group">
                         <label class="control-label col-sm-3">ID Pengecer</label>
                         <div class="col-sm-7">

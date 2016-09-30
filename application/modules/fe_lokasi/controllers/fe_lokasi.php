@@ -3,7 +3,7 @@
 class Fe_lokasi extends MX_Controller {
     public $config = array(
         'apiKey' => 'AIzaSyBKaimwObSjJ1qqVP3f2yb8_eTQ3DL9HmI',
-        'center' => 'auto',
+		'center' => '-7.966620,112.632632',
         'zoom' => 10
     );
 

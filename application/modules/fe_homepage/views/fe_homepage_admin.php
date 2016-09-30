@@ -11,7 +11,7 @@
         <div class="col-xlg-4 col-md-6">
             <div class="panel panel-bordered">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Realisasi Agen</h3>
+                    <h3 class="panel-title">Transaksi Agen</h3>
                 </div>
                 <div class="panel-body container-fluid">
                     <canvas id="myChart"></canvas>
@@ -23,7 +23,7 @@
         <div class="col-xlg-4 col-md-6">
             <div class="panel panel-bordered">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Realisasi SPPBE</h3>
+                    <h3 class="panel-title">Transaski SPPBE</h3>
                 </div>
                 <div class="panel-body container-fluid">
                     <canvas id="myChart2"></canvas>

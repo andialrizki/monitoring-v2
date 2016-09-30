@@ -31,9 +31,30 @@ class Fe_tbank extends MX_Controller
 			echo substr($json, 1, strlen($json)-2);
 		}
 	}
+	public function input_transaksi()
+	{
+		if ($this->is_ajax()) {
+			$data = array(
+				'id_pengecer' => $this->input->post('id_pengecer'), 
+				'tgl' => date('Y-m-d'),
+				'id_pangkalan' => $this->input->post('id_pangkalan'),
+				'qty' => $this->input->post('qty'),
+				'jml_uang' => $this->input->post('jml_uang'),
+				'jenis_pembayaran' => 2);
+			$insert = $this->db->insert('tbl_transaksi', $data);
+			if ($insert) {
+				echo "success";
+			} else {
+				echo "error";
+			}
+		}
+
+	}
+
 	private function is_ajax(){
 		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 	}
+
 }
 
 ?>

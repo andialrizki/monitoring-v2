@@ -14,8 +14,8 @@
                     <h3 class="panel-title">Tentang</h3>
                 </div>
                 <div class="panel-body container-fluid">
-                    <div id="reader" style="width:300px;height:250px">
-                    </div>
+                    <!-- <div id="reader" style="width:300px;height:250px">
+                    </div> -->
                     <p>
                         Monitoring LPG merupakan solusi keberhasilan implementasi sistem distribusi tertutup LPG 3 Kg di
                         Indonesia. Monitoring LPG mampu memenuhi kebutuhan penataan wilayah penyaluran mulai dari
@@ -32,13 +32,15 @@
 <script type="text/javascript" src="<?php echo base_url().'assets/plugins/qrcode/jsqrcode-combined.min.js' ?>"></script>
 <script type="text/javascript" src="<?php echo base_url().'assets/plugins/qrcode/html5-qrcode.min.js' ?>"></script>
 <script type="text/javascript">
-    $('#reader').html5_qrcode(function(data){
-         // do something when code is read
-        },
-        function(error){
-            //show read errors 
-        }, function(videoError){
-            //the video stream could be opened
-        }
-    );
+    // $('#reader').html5_qrcode(function(data){
+    //      // do something when code is read
+    //      console.log(data);
+    //      alert(data);
+    //     },
+    //     function(error){
+    //         //show read errors 
+    //     }, function(videoError){
+    //         //the video stream could be opened
+    //     }
+    // );
 </script>

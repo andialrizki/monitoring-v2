@@ -196,8 +196,23 @@
             success:function(data){
                 //console.log(data);
                 if (data.ResponseCode == "00") {
-                    $("#alertBayarSuccess").show();
-                    $("#alertBayarSuccess .alertDarkText").html('Terimakasih, Pembayaran Sebesar Rp. '+formData1.nominal+' Berhasil');
+                    var fdata = {
+                        id_pengecer: '<?php echo $kons->id_pengecer ?>',
+                        id_pangkalan: '<?php echo $data['id_pangkalan'] ?>',
+                        qty: $("input[name=qty]").val(),
+                        jml_uang: $("input[name=harga]").val()
+                    };
+                    $.ajax({
+                        url: "<?php echo site_url('tbank/input-transaksi') ?>",
+                        method: "POST",
+                        data: fdata,
+                        success: function(res){
+                            if(res == 'success'){     
+                                $("#alertBayarSuccess").show();
+                                $("#alertBayarSuccess .alertDarkText").html('Terimakasih, Pembayaran Sebesar Rp. '+formData1.nominal+' Berhasil');
+                            }
+                        }
+                    });
                 } else {
                     $("#alertBayarError").show();
                     $("#alertBayarError .alertDarkText").html('' + data.ResponseDescription);

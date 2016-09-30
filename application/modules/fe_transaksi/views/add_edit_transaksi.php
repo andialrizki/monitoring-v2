@@ -90,7 +90,7 @@
 </div>
 <script type="text/javascript">
     $('#datepicker').datepicker({
-        format: 'yy-mm-dd'
+        format: 'yyyy-mm-dd'
     });
     $('#select_pengecer').change(function () {
         var select = $('#select_pengecer option:selected').val();

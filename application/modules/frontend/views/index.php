@@ -33,7 +33,7 @@
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/material-design/material-design.min.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/global/fonts/brand-icons/brand-icons.min.css">
     <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:300,400,500,300italic'>
-
+    <link href="<?php echo base_url(); ?>assets/plugins/datepicker/datepicker.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/base/assets/skins/green.min.css">
     <!--[if lt IE 9]>
     <script src="../../global/vendor/html5shiv/html5shiv.min.js"></script>
@@ -52,17 +52,8 @@
     <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.min.js"></script>
     <script src="<?php echo base_url() ?>assets/global/vendor/chart-js/Chart.bundle.min.js"></script>
     <script src="<?php echo base_url() ?>assets/global/vendor/jquery/jquery.js"></script>
-    <script type="text/javascript">
-        $(window).load(function() {
-          // Animate loader off screen
-          $(".se-pre-con").fadeOut("slow");;
-        });
-        function clearFill(element) {
-            for(i=0; i<element.length; i++){
-                $(element[i]).val('');
-            }
-        }
-    </script>
+    
+    <script type="text/javascript" src="<?php echo base_url(); ?>assets/plugins/datepicker/bootstrap-datepicker.js"></script>
     <style type="text/css">
         .btn-action a {
             text-decoration: none;
@@ -266,5 +257,23 @@
 <script src="<?php echo base_url() ?>assets/global/js/components/datatables.js"></script>
 <script src="<?php echo base_url() ?>assets/base/assets/examples/js/tables/datatable.js"></script>
 <script src="<?php echo base_url() ?>assets/base/assets/examples/js/dashboard/v1.js"></script>
+<script type="text/javascript">
+        $(window).load(function() {
+          // Animate loader off screen
+          $(".se-pre-con").fadeOut("slow");;
+        });
+        function clearFill(element) {
+            for(i=0; i<element.length; i++){
+                $(element[i]).val('');
+            }
+        }
+        var tang = $(".datepicker").datepicker({
+          format: "mm-yyyy",
+          viewMode: "months", 
+          minViewMode: "months"
+        }).on('changeDate', function(ev) {
+            tang.hide();
+        }).data('datepicker');
+    </script>
 </body>
 </html>

@@ -68,6 +68,7 @@ $route['konsumen/beli-lpg'] = "fe_konsumen/beli_lpg";
 // tbank
 $route['tbank/saldo'] = "fe_tbank/ceksaldo_tbank";
 $route['tbank/transfer'] = "fe_tbank/transfer_tbank";
+$route['tbank/input-transaksi'] = "fe_tbank/input_transaksi";
 
 
 $route['404'] = "fe_error";

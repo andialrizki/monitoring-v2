@@ -2,22 +2,21 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="26"
-   height="260"
-   id="svg10280"
-   version="1.1"
-   inkscape:version="0.48.2 r9819"
-   sodipodi:docname="icons.svg"
-   inkscape:export-filename="/Users/garrett/Desktop/mapboxjs-icons@2x.png"
-   inkscape:export-xdpi="180"
-   inkscape:export-ydpi="180">
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns="http://www.w3.org/2000/svg"
+        width="26"
+        height="260"
+        id="svg10280"
+        version="1.1"
+        inkscape:version="0.48.2 r9819"
+        sodipodi:docname="icons.svg"
+        inkscape:export-filename="/Users/garrett/Desktop/mapboxjs-icons@2x.png"
+        inkscape:export-xdpi="180"
+        inkscape:export-ydpi="180">
   <defs
      id="defs10282">
     <clipPath

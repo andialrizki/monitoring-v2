@@ -167,19 +167,6 @@ class CI_DB_pdo_driver extends CI_DB {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Version number query string
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function _version()
-	{
-		return $this->conn_id->getAttribute(PDO::ATTR_CLIENT_VERSION);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Execute the query
 	 *
 	 * @access	private called by the base class
@@ -390,6 +377,19 @@ class CI_DB_pdo_driver extends CI_DB {
 		{
 			return $this->conn_id->lastInsertId($name);
 		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Version number query string
+	 *
+	 * @access    public
+	 * @return    string
+	 */
+	function _version()
+	{
+		return $this->conn_id->getAttribute(PDO::ATTR_CLIENT_VERSION);
 	}
 
 	// --------------------------------------------------------------------

@@ -45,6 +45,27 @@ class CI_DB_utility extends CI_DB_forge {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Determine if a particular database exists
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    boolean
+	 */
+	function database_exists($database_name)
+	{
+		// Some databases won't have access to the list_databases() function, so
+		// this is intended to allow them to override with their own functions as
+		// defined in $driver_utility.php
+		if (method_exists($this, '_database_exists')) {
+			return $this->_database_exists($database_name);
+		} else {
+			return (!in_array($database_name, $this->list_databases())) ? FALSE : TRUE;
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * List databases
 	 *
 	 * @access	public
@@ -70,30 +91,6 @@ class CI_DB_utility extends CI_DB_forge {
 
 		$this->data_cache['db_names'] = $dbs;
 		return $this->data_cache['db_names'];
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Determine if a particular database exists
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	boolean
-	 */
-	function database_exists($database_name)
-	{
-		// Some databases won't have access to the list_databases() function, so
-		// this is intended to allow them to override with their own functions as
-		// defined in $driver_utility.php
-		if (method_exists($this, '_database_exists'))
-		{
-			return $this->_database_exists($database_name);
-		}
-		else
-		{
-			return ( ! in_array($database_name, $this->list_databases())) ? FALSE : TRUE;
-		}
 	}
 
 

@@ -26,6 +26,19 @@ class Fe_login extends MX_Controller {
 		} 
 	}
 
+	function loginkah()
+	{
+		$username = $this->session->userdata(APP_PREFIX . 'username');
+		$name = $this->session->userdata(APP_PREFIX . 'name');
+		$id = $this->session->userdata(APP_PREFIX . 'id_admin');
+		$is_login = $this->session->userdata(APP_PREFIX . 'is_login');
+
+		if ($username == null || $name == null || $id == null || $is_login == false) {
+			echo "tidak";
+		} else {
+			echo "iya";
+		}
+	}
 	function do_login()
 	{
 		$this->load->library('user_agent');

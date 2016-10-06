@@ -127,6 +127,26 @@ class CI_Session {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Get the "now" time
+	 *
+	 * @access    private
+	 * @return    string
+	 */
+	function _get_time()
+	{
+		if (strtolower($this->time_reference) == 'gmt') {
+			$now = time();
+			$time = mktime(gmdate("H", $now), gmdate("i", $now), gmdate("s", $now), gmdate("m", $now), gmdate("d", $now), gmdate("Y", $now));
+		} else {
+			$time = time();
+		}
+
+		return $time;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Fetch the current session data if it exists
 	 *
 	 * @access	public
@@ -261,53 +281,62 @@ class CI_Session {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Write the session data
+	 * Destroy the current session
 	 *
 	 * @access	public
 	 * @return	void
 	 */
-	function sess_write()
+	function sess_destroy()
 	{
-		// Are we saving custom data to the DB?  If not, all we do is update the cookie
-		if ($this->sess_use_database === FALSE)
+		// Kill the session DB row
+		if ($this->sess_use_database === TRUE && isset($this->userdata['session_id']))
 		{
-			$this->_set_cookie();
-			return;
+			$this->CI->db->where('session_id', $this->userdata['session_id']);
+			$this->CI->db->delete($this->sess_table_name);
 		}
 
-		// set the custom userdata, the session data we will set in a second
-		$custom_userdata = $this->userdata;
-		$cookie_userdata = array();
+		// Kill the cookie
+		setcookie(
+			$this->sess_cookie_name,
+			addslashes(serialize(array())),
+			($this->now - 31500000),
+			$this->cookie_path,
+			$this->cookie_domain,
+			0
+		);
 
-		// Before continuing, we need to determine if there is any custom data to deal with.
-		// Let's determine this by removing the default indexes to see if there's anything left in the array
-		// and set the session data while we're at it
-		foreach (array('session_id','ip_address','user_agent','last_activity') as $val)
+		// Kill session data
+		$this->userdata = array();
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Unserialize
+	 *
+	 * This function unserializes a data string, then converts any
+	 * temporary slash markers back to actual slashes
+	 *
+	 * @access    private
+	 * @param    array
+	 * @return    string
+	 */
+	function _unserialize($data)
+	{
+		$data = @unserialize(strip_slashes($data));
+
+		if (is_array($data))
 		{
-			unset($custom_userdata[$val]);
-			$cookie_userdata[$val] = $this->userdata[$val];
+			foreach ($data as $key => $val) {
+				if (is_string($val)) {
+					$data[$key] = str_replace('{{slash}}', '\\', $val);
+				}
+			}
+
+			return $data;
 		}
 
-		// Did we find any custom data?  If not, we turn the empty array into a string
-		// since there's no reason to serialize and store an empty array in the DB
-		if (count($custom_userdata) === 0)
-		{
-			$custom_userdata = '';
-		}
-		else
-		{
-			// Serialize the custom data array so we can store it
-			$custom_userdata = $this->_serialize($custom_userdata);
-		}
-
-		// Run the update query
-		$this->CI->db->where('session_id', $this->userdata['session_id']);
-		$this->CI->db->update($this->sess_table_name, array('last_activity' => $this->userdata['last_activity'], 'user_data' => $custom_userdata));
-
-		// Write the cookie.  Notice that we manually pass the cookie data array to the
-		// _set_cookie() function. Normally that function will store $this->userdata, but
-		// in this case that array contains custom data, which we do not want in the cookie.
-		$this->_set_cookie($cookie_userdata);
+		return (is_string($data)) ? str_replace('{{slash}}', '\\', $data) : $data;
 	}
 
 	// --------------------------------------------------------------------
@@ -346,6 +375,71 @@ class CI_Session {
 
 		// Write the cookie
 		$this->_set_cookie();
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Write the session cookie
+	 *
+	 * @access    public
+	 * @return    void
+	 */
+	function _set_cookie($cookie_data = NULL)
+	{
+		if (is_null($cookie_data)) {
+			$cookie_data = $this->userdata;
+		}
+
+		// Serialize the userdata for the cookie
+		$cookie_data = $this->_serialize($cookie_data);
+
+		if ($this->sess_encrypt_cookie == TRUE) {
+			$cookie_data = $this->CI->encrypt->encode($cookie_data);
+		}
+
+		$cookie_data .= hash_hmac('sha1', $cookie_data, $this->encryption_key);
+
+		$expire = ($this->sess_expire_on_close === TRUE) ? 0 : $this->sess_expiration + time();
+
+		// Set the cookie
+		setcookie(
+			$this->sess_cookie_name,
+			$cookie_data,
+			$expire,
+			$this->cookie_path,
+			$this->cookie_domain,
+			$this->cookie_secure
+		);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Serialize an array
+	 *
+	 * This function first converts any slashes found in the array to a temporary
+	 * marker, so when it gets unserialized the slashes will be preserved
+	 *
+	 * @access    private
+	 * @param    array
+	 * @return    string
+	 */
+	function _serialize($data)
+	{
+		if (is_array($data)) {
+			foreach ($data as $key => $val) {
+				if (is_string($val)) {
+					$data[$key] = str_replace('\\', '{{slash}}', $val);
+				}
+			}
+		} else {
+			if (is_string($data)) {
+				$data = str_replace('\\', '{{slash}}', $data);
+			}
+		}
+
+		return serialize($data);
 	}
 
 	// --------------------------------------------------------------------
@@ -407,49 +501,25 @@ class CI_Session {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Destroy the current session
+	 * Removes all flashdata marked as 'old'
 	 *
-	 * @access	public
+	 * @access    private
 	 * @return	void
 	 */
-	function sess_destroy()
+
+	function _flashdata_sweep()
 	{
-		// Kill the session DB row
-		if ($this->sess_use_database === TRUE && isset($this->userdata['session_id']))
+		$userdata = $this->all_userdata();
+		foreach ($userdata as $key => $value)
 		{
-			$this->CI->db->where('session_id', $this->userdata['session_id']);
-			$this->CI->db->delete($this->sess_table_name);
+			if (strpos($key, ':old:')) {
+				$this->unset_userdata($key);
+			}
 		}
 
-		// Kill the cookie
-		setcookie(
-					$this->sess_cookie_name,
-					addslashes(serialize(array())),
-					($this->now - 31500000),
-					$this->cookie_path,
-					$this->cookie_domain,
-					0
-				);
-
-		// Kill session data
-		$this->userdata = array();
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Fetch a specific item from the session array
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function userdata($item)
-	{
-		return ( ! isset($this->userdata[$item])) ? FALSE : $this->userdata[$item];
-	}
-
-	// --------------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Fetch all session data
@@ -462,35 +532,7 @@ class CI_Session {
 		return $this->userdata;
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Add or change data in the "userdata" array
-	 *
-	 * @access	public
-	 * @param	mixed
-	 * @param	string
-	 * @return	void
-	 */
-	function set_userdata($newdata = array(), $newval = '')
-	{
-		if (is_string($newdata))
-		{
-			$newdata = array($newdata => $newval);
-		}
-
-		if (count($newdata) > 0)
-		{
-			foreach ($newdata as $key => $val)
-			{
-				$this->userdata[$key] = $val;
-			}
-		}
-
-		$this->sess_write();
-	}
-
-	// --------------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Delete a session variable from the "userdata" array
@@ -519,66 +561,50 @@ class CI_Session {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Add or change flashdata, only available
-	 * until the next request
+	 * Write the session data
 	 *
 	 * @access	public
-	 * @param	mixed
-	 * @param	string
 	 * @return	void
 	 */
-	function set_flashdata($newdata = array(), $newval = '')
+	function sess_write()
 	{
-		if (is_string($newdata))
+		// Are we saving custom data to the DB?  If not, all we do is update the cookie
+		if ($this->sess_use_database === FALSE)
 		{
-			$newdata = array($newdata => $newval);
+			$this->_set_cookie();
+			return;
 		}
 
-		if (count($newdata) > 0)
+		// set the custom userdata, the session data we will set in a second
+		$custom_userdata = $this->userdata;
+		$cookie_userdata = array();
+
+		// Before continuing, we need to determine if there is any custom data to deal with.
+		// Let's determine this by removing the default indexes to see if there's anything left in the array
+		// and set the session data while we're at it
+		foreach (array('session_id', 'ip_address', 'user_agent', 'last_activity') as $val)
 		{
-			foreach ($newdata as $key => $val)
-			{
-				$flashdata_key = $this->flashdata_key.':new:'.$key;
-				$this->set_userdata($flashdata_key, $val);
-			}
+			unset($custom_userdata[$val]);
+			$cookie_userdata[$val] = $this->userdata[$val];
 		}
-	}
 
-	// ------------------------------------------------------------------------
+		// Did we find any custom data?  If not, we turn the empty array into a string
+		// since there's no reason to serialize and store an empty array in the DB
+		if (count($custom_userdata) === 0) {
+			$custom_userdata = '';
+		} else {
+			// Serialize the custom data array so we can store it
+			$custom_userdata = $this->_serialize($custom_userdata);
+		}
 
-	/**
-	 * Keeps existing flashdata available to next request.
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	void
-	 */
-	function keep_flashdata($key)
-	{
-		// 'old' flashdata gets removed.  Here we mark all
-		// flashdata as 'new' to preserve it from _flashdata_sweep()
-		// Note the function will return FALSE if the $key
-		// provided cannot be found
-		$old_flashdata_key = $this->flashdata_key.':old:'.$key;
-		$value = $this->userdata($old_flashdata_key);
+		// Run the update query
+		$this->CI->db->where('session_id', $this->userdata['session_id']);
+		$this->CI->db->update($this->sess_table_name, array('last_activity' => $this->userdata['last_activity'], 'user_data' => $custom_userdata));
 
-		$new_flashdata_key = $this->flashdata_key.':new:'.$key;
-		$this->set_userdata($new_flashdata_key, $value);
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * Fetch a specific flashdata item from the session array
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function flashdata($key)
-	{
-		$flashdata_key = $this->flashdata_key.':old:'.$key;
-		return $this->userdata($flashdata_key);
+		// Write the cookie.  Notice that we manually pass the cookie data array to the
+		// _set_cookie() function. Normally that function will store $this->userdata, but
+		// in this case that array contains custom data, which we do not want in the cookie.
+		$this->_set_cookie($cookie_userdata);
 	}
 
 	// ------------------------------------------------------------------------
@@ -608,151 +634,28 @@ class CI_Session {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Removes all flashdata marked as 'old'
+	 * Add or change data in the "userdata" array
 	 *
-	 * @access	private
+	 * @access    public
+	 * @param    mixed
+	 * @param    string
 	 * @return	void
 	 */
-
-	function _flashdata_sweep()
+	function set_userdata($newdata = array(), $newval = '')
 	{
-		$userdata = $this->all_userdata();
-		foreach ($userdata as $key => $value)
+		if (is_string($newdata))
 		{
-			if (strpos($key, ':old:'))
+			$newdata = array($newdata => $newval);
+		}
+
+		if (count($newdata) > 0) {
+			foreach ($newdata as $key => $val)
 			{
-				$this->unset_userdata($key);
+				$this->userdata[$key] = $val;
 			}
 		}
 
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get the "now" time
-	 *
-	 * @access	private
-	 * @return	string
-	 */
-	function _get_time()
-	{
-		if (strtolower($this->time_reference) == 'gmt')
-		{
-			$now = time();
-			$time = mktime(gmdate("H", $now), gmdate("i", $now), gmdate("s", $now), gmdate("m", $now), gmdate("d", $now), gmdate("Y", $now));
-		}
-		else
-		{
-			$time = time();
-		}
-
-		return $time;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Write the session cookie
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function _set_cookie($cookie_data = NULL)
-	{
-		if (is_null($cookie_data))
-		{
-			$cookie_data = $this->userdata;
-		}
-
-		// Serialize the userdata for the cookie
-		$cookie_data = $this->_serialize($cookie_data);
-
-		if ($this->sess_encrypt_cookie == TRUE)
-		{
-			$cookie_data = $this->CI->encrypt->encode($cookie_data);
-		}
-
-		$cookie_data .= hash_hmac('sha1', $cookie_data, $this->encryption_key);
-
-		$expire = ($this->sess_expire_on_close === TRUE) ? 0 : $this->sess_expiration + time();
-
-		// Set the cookie
-		setcookie(
-			$this->sess_cookie_name,
-			$cookie_data,
-			$expire,
-			$this->cookie_path,
-			$this->cookie_domain,
-			$this->cookie_secure
-		);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Serialize an array
-	 *
-	 * This function first converts any slashes found in the array to a temporary
-	 * marker, so when it gets unserialized the slashes will be preserved
-	 *
-	 * @access	private
-	 * @param	array
-	 * @return	string
-	 */
-	function _serialize($data)
-	{
-		if (is_array($data))
-		{
-			foreach ($data as $key => $val)
-			{
-				if (is_string($val))
-				{
-					$data[$key] = str_replace('\\', '{{slash}}', $val);
-				}
-			}
-		}
-		else
-		{
-			if (is_string($data))
-			{
-				$data = str_replace('\\', '{{slash}}', $data);
-			}
-		}
-
-		return serialize($data);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Unserialize
-	 *
-	 * This function unserializes a data string, then converts any
-	 * temporary slash markers back to actual slashes
-	 *
-	 * @access	private
-	 * @param	array
-	 * @return	string
-	 */
-	function _unserialize($data)
-	{
-		$data = @unserialize(strip_slashes($data));
-
-		if (is_array($data))
-		{
-			foreach ($data as $key => $val)
-			{
-				if (is_string($val))
-				{
-					$data[$key] = str_replace('{{slash}}', '\\', $val);
-				}
-			}
-
-			return $data;
-		}
-
-		return (is_string($data)) ? str_replace('{{slash}}', '\\', $data) : $data;
+		$this->sess_write();
 	}
 
 	// --------------------------------------------------------------------
@@ -763,8 +666,8 @@ class CI_Session {
 	 * This deletes expired session rows from database
 	 * if the probability percentage is met
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access    public
+	 * @return    void
 	 */
 	function _sess_gc()
 	{
@@ -783,6 +686,84 @@ class CI_Session {
 
 			log_message('debug', 'Session garbage collection performed.');
 		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add or change flashdata, only available
+	 * until the next request
+	 *
+	 * @access	public
+	 * @param    mixed
+	 * @param    string
+	 * @return	void
+	 */
+	function set_flashdata($newdata = array(), $newval = '')
+	{
+		if (is_string($newdata))
+		{
+			$newdata = array($newdata => $newval);
+		}
+
+		if (count($newdata) > 0)
+		{
+			foreach ($newdata as $key => $val) {
+				$flashdata_key = $this->flashdata_key . ':new:' . $key;
+				$this->set_userdata($flashdata_key, $val);
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Keeps existing flashdata available to next request.
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    void
+	 */
+	function keep_flashdata($key)
+	{
+		// 'old' flashdata gets removed.  Here we mark all
+		// flashdata as 'new' to preserve it from _flashdata_sweep()
+		// Note the function will return FALSE if the $key
+		// provided cannot be found
+		$old_flashdata_key = $this->flashdata_key . ':old:' . $key;
+		$value = $this->userdata($old_flashdata_key);
+
+		$new_flashdata_key = $this->flashdata_key . ':new:' . $key;
+		$this->set_userdata($new_flashdata_key, $value);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Fetch a specific item from the session array
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return	string
+	 */
+	function userdata($item)
+	{
+		return (!isset($this->userdata[$item])) ? FALSE : $this->userdata[$item];
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Fetch a specific flashdata item from the session array
+	 *
+	 * @access	public
+	 * @param    string
+	 * @return    string
+	 */
+	function flashdata($key)
+	{
+		$flashdata_key = $this->flashdata_key . ':old:' . $key;
+		return $this->userdata($flashdata_key);
 	}
 
 

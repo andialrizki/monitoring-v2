@@ -160,6 +160,58 @@
         public $data; 
         
         //----------------------------------------------------------------------
+
+        public static function png($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4, $saveandprint = false)
+        {
+            $enc = QRencode::factory($level, $size, $margin);
+            return $enc->encodePNG($text, $outfile, $saveandprint = false);
+        }
+
+        //----------------------------------------------------------------------
+
+        public static function text($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4)
+        {
+            $enc = QRencode::factory($level, $size, $margin);
+            return $enc->encode($text, $outfile);
+        }
+
+        //----------------------------------------------------------------------
+
+        public static function raw($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4)
+        {
+            $enc = QRencode::factory($level, $size, $margin);
+            return $enc->encodeRAW($text, $outfile);
+        }
+
+        //----------------------------------------------------------------------
+
+        public function encodeString8bit($string, $version, $level)
+        {
+            if (string == NULL) {
+                throw new Exception('empty string!');
+                return NULL;
+            }
+
+            $input = new QRinput($version, $level);
+            if ($input == NULL) return NULL;
+
+            $ret = $input->append($input, QR_MODE_8, strlen($string), str_split($string));
+            if ($ret < 0) {
+                unset($input);
+                return NULL;
+            }
+            return $this->encodeInput($input);
+        }
+
+        //----------------------------------------------------------------------
+
+        public function encodeInput(QRinput $input)
+        {
+            return $this->encodeMask($input, -1);
+        }
+
+        //----------------------------------------------------------------------
+
         public function encodeMask(QRinput $input, $mask)
         {
             if($input->getVersion() < 0 || $input->getVersion() > QRSPEC_VERSION_MAX) {
@@ -233,33 +285,9 @@
             
             return $this;
         }
-    
-        //----------------------------------------------------------------------
-        public function encodeInput(QRinput $input)
-        {
-            return $this->encodeMask($input, -1);
-        }
-        
-        //----------------------------------------------------------------------
-        public function encodeString8bit($string, $version, $level)
-        {
-            if(string == NULL) {
-                throw new Exception('empty string!');
-                return NULL;
-            }
-
-            $input = new QRinput($version, $level);
-            if($input == NULL) return NULL;
-
-            $ret = $input->append($input, QR_MODE_8, strlen($string), str_split($string));
-            if($ret < 0) {
-                unset($input);
-                return NULL;
-            }
-            return $this->encodeInput($input);
-        }
 
         //----------------------------------------------------------------------
+
         public function encodeString($string, $version, $level, $hint, $casesensitive)
         {
 
@@ -277,27 +305,6 @@
             }
 
             return $this->encodeInput($input);
-        }
-        
-        //----------------------------------------------------------------------
-        public static function png($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4, $saveandprint=false) 
-        {
-            $enc = QRencode::factory($level, $size, $margin);
-            return $enc->encodePNG($text, $outfile, $saveandprint=false);
-        }
-
-        //----------------------------------------------------------------------
-        public static function text($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4) 
-        {
-            $enc = QRencode::factory($level, $size, $margin);
-            return $enc->encode($text, $outfile);
-        }
-
-        //----------------------------------------------------------------------
-        public static function raw($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4) 
-        {
-            $enc = QRencode::factory($level, $size, $margin);
-            return $enc->encodeRAW($text, $outfile);
         }
     }
     
@@ -457,26 +464,7 @@
         }
 
         //----------------------------------------------------------------------
-        public function encode($intext, $outfile = false) 
-        {
-            $code = new QRcode();
 
-            if($this->eightbit) {
-                $code->encodeString8bit($intext, $this->version, $this->level);
-            } else {
-                $code->encodeString($intext, $this->version, $this->level, $this->hint, $this->casesensitive);
-            }
-            
-            QRtools::markTime('after_encode');
-            
-            if ($outfile!== false) {
-                file_put_contents($outfile, join("\n", QRtools::binarize($code->data)));
-            } else {
-                return QRtools::binarize($code->data);
-            }
-        }
-        
-        //----------------------------------------------------------------------
         public function encodePNG($intext, $outfile = false,$saveandprint=false) 
         {
             try {
@@ -496,7 +484,28 @@
             } catch (Exception $e) {
             
                 QRtools::log($outfile, $e->getMessage());
-            
+
+            }
+        }
+
+        //----------------------------------------------------------------------
+
+        public function encode($intext, $outfile = false)
+        {
+            $code = new QRcode();
+
+            if ($this->eightbit) {
+                $code->encodeString8bit($intext, $this->version, $this->level);
+            } else {
+                $code->encodeString($intext, $this->version, $this->level, $this->hint, $this->casesensitive);
+            }
+
+            QRtools::markTime('after_encode');
+
+            if ($outfile !== false) {
+                file_put_contents($outfile, join("\n", QRtools::binarize($code->data)));
+            } else {
+                return QRtools::binarize($code->data);
             }
         }
     }

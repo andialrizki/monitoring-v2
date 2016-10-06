@@ -53,25 +53,6 @@ class CI_Parser {
 	// --------------------------------------------------------------------
 
 	/**
-	 *  Parse a String
-	 *
-	 * Parses pseudo-variables contained in the specified string,
-	 * replacing them with the data in the second param
-	 *
-	 * @access	public
-	 * @param	string
-	 * @param	array
-	 * @param	bool
-	 * @return	string
-	 */
-	function parse_string($template, $data, $return = FALSE)
-	{
-		return $this->_parse($template, $data, $return);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 *  Parse a template
 	 *
 	 * Parses pseudo-variables contained in the specified template,
@@ -109,38 +90,6 @@ class CI_Parser {
 		}
 
 		return $template;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Set the left/right variable delimiters
-	 *
-	 * @access	public
-	 * @param	string
-	 * @param	string
-	 * @return	void
-	 */
-	function set_delimiters($l = '{', $r = '}')
-	{
-		$this->l_delim = $l;
-		$this->r_delim = $r;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Parse a single key/value
-	 *
-	 * @access	private
-	 * @param	string
-	 * @param	string
-	 * @param	string
-	 * @return	string
-	 */
-	function _parse_single($key, $val, $string)
-	{
-		return str_replace($this->l_delim.$key.$this->r_delim, $val, $string);
 	}
 
 	// --------------------------------------------------------------------
@@ -203,6 +152,57 @@ class CI_Parser {
 		}
 
 		return $match;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 *  Parse a single key/value
+	 *
+	 * @access    private
+	 * @param    string
+	 * @param    string
+	 * @param    string
+	 * @return    string
+	 */
+	function _parse_single($key, $val, $string)
+	{
+		return str_replace($this->l_delim . $key . $this->r_delim, $val, $string);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 *  Parse a String
+	 *
+	 * Parses pseudo-variables contained in the specified string,
+	 * replacing them with the data in the second param
+	 *
+	 * @access    public
+	 * @param    string
+	 * @param    array
+	 * @param    bool
+	 * @return    string
+	 */
+	function parse_string($template, $data, $return = FALSE)
+	{
+		return $this->_parse($template, $data, $return);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 *  Set the left/right variable delimiters
+	 *
+	 * @access    public
+	 * @param    string
+	 * @param    string
+	 * @return    void
+	 */
+	function set_delimiters($l = '{', $r = '}')
+	{
+		$this->l_delim = $l;
+		$this->r_delim = $r;
 	}
 
 }

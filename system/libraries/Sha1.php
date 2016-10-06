@@ -121,22 +121,56 @@ class CI_SHA1 {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Convert a decimal to hex
+	 * Bitwise rotate a 32-bit number
 	 *
 	 * @access	private
-	 * @param	string
+	 * @return    integer
+	 */
+	function _rol($num, $cnt)
+	{
+		return ($num << $cnt) | $this->_zero_fill($num, 32 - $cnt);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Pad string with zero
+	 *
+	 * @access    private
 	 * @return	string
 	 */
-	function _hex($str)
+	function _zero_fill($a, $b)
 	{
-		$str = dechex($str);
+		$bin = decbin($a);
 
-		if (strlen($str) == 7)
+		if (strlen($bin) < $b)
 		{
-			$str = '0'.$str;
+			$bin = 0;
+		} else {
+			$bin = substr($bin, 0, strlen($bin) - $b);
 		}
 
-		return $str;
+		for ($i = 0; $i < $b; $i++) {
+			$bin = "0" . $bin;
+		}
+
+		return bindec($bin);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add integers, wrapping at 2^32
+	 *
+	 * @access    private
+	 * @return    string
+	 */
+	function _safe_add($x, $y)
+	{
+		$lsw = ($x & 0xFFFF) + ($y & 0xFFFF);
+		$msw = ($x >> 16) + ($y >> 16) + ($lsw >> 16);
+
+		return ($msw << 16) | ($lsw & 0xFFFF);
 	}
 
 	// --------------------------------------------------------------------
@@ -190,59 +224,22 @@ class CI_SHA1 {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Add integers, wrapping at 2^32
+	 * Convert a decimal to hex
 	 *
 	 * @access	private
+	 * @param    string
 	 * @return	string
 	 */
-	function _safe_add($x, $y)
+	function _hex($str)
 	{
-		$lsw = ($x & 0xFFFF) + ($y & 0xFFFF);
-		$msw = ($x >> 16) + ($y >> 16) + ($lsw >> 16);
+		$str = dechex($str);
 
-		return ($msw << 16) | ($lsw & 0xFFFF);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Bitwise rotate a 32-bit number
-	 *
-	 * @access	private
-	 * @return	integer
-	 */
-	function _rol($num, $cnt)
-	{
-		return ($num << $cnt) | $this->_zero_fill($num, 32 - $cnt);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Pad string with zero
-	 *
-	 * @access	private
-	 * @return	string
-	 */
-	function _zero_fill($a, $b)
-	{
-		$bin = decbin($a);
-
-		if (strlen($bin) < $b)
+		if (strlen($str) == 7)
 		{
-			$bin = 0;
-		}
-		else
-		{
-			$bin = substr($bin, 0, strlen($bin) - $b);
+			$str = '0' . $str;
 		}
 
-		for ($i=0; $i < $b; $i++)
-		{
-			$bin = "0".$bin;
-		}
-
-		return bindec($bin);
+		return $str;
 	}
 }
 // END CI_SHA

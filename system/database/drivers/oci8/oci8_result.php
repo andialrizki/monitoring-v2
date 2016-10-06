@@ -57,22 +57,40 @@ class CI_DB_oci8_result extends CI_DB_result {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Number of fields in the result set
+	 * Query result.  "array" version.
 	 *
 	 * @access  public
-	 * @return  integer
+	 * @return  array
 	 */
-	public function num_fields()
+	public function result_array()
 	{
-		$count = @oci_num_fields($this->stmt_id);
-
-		// if we used a limit we subtract it
-		if ($this->limit_used)
-		{
-			$count = $count - 1;
+		if (count($this->result_array) > 0) {
+			return $this->result_array;
 		}
 
-		return $count;
+		$row = NULL;
+		while ($row = $this->_fetch_assoc())
+		{
+			$this->result_array[] = $row;
+		}
+
+		return $this->result_array;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Result - associative array
+	 *
+	 * Returns the result set as an array
+	 *
+	 * @access  protected
+	 * @return  array
+	 */
+	protected function _fetch_assoc()
+	{
+		$id = ($this->curs_id) ? $this->curs_id : $this->stmt_id;
+		return oci_fetch_assoc($id);
 	}
 
 	// --------------------------------------------------------------------
@@ -93,6 +111,26 @@ class CI_DB_oci8_result extends CI_DB_result {
 			$field_names[] = oci_field_name($this->stmt_id, $c);
 		}
 		return $field_names;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Number of fields in the result set
+	 *
+	 * @access  public
+	 * @return  integer
+	 */
+	public function num_fields()
+	{
+		$count = @oci_num_fields($this->stmt_id);
+
+		// if we used a limit we subtract it
+		if ($this->limit_used) {
+			$count = $count - 1;
+		}
+
+		return $count;
 	}
 
 	// --------------------------------------------------------------------
@@ -140,22 +178,6 @@ class CI_DB_oci8_result extends CI_DB_result {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Result - associative array
-	 *
-	 * Returns the result set as an array
-	 *
-	 * @access  protected
-	 * @return  array
-	 */
-	protected function _fetch_assoc()
-	{
-		$id = ($this->curs_id) ? $this->curs_id : $this->stmt_id;
-		return oci_fetch_assoc($id);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Result - object
 	 *
 	 * Returns the result set as an object
@@ -167,30 +189,6 @@ class CI_DB_oci8_result extends CI_DB_result {
 	{
 		$id = ($this->curs_id) ? $this->curs_id : $this->stmt_id;
 		return @oci_fetch_object($id);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Query result.  "array" version.
-	 *
-	 * @access  public
-	 * @return  array
-	 */
-	public function result_array()
-	{
-		if (count($this->result_array) > 0)
-		{
-			return $this->result_array;
-		}
-
-		$row = NULL;
-		while ($row = $this->_fetch_assoc())
-		{
-			$this->result_array[] = $row;
-		}
-
-		return $this->result_array;
 	}
 
 	// --------------------------------------------------------------------

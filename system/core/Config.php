@@ -85,6 +85,21 @@ class CI_Config {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set a config file item
+	 *
+	 * @access    public
+	 * @param    string    the config item key
+	 * @param    string    the config item value
+	 * @return    void
+	 */
+	function set_item($item, $value)
+	{
+		$this->config[$item] = $value;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Load Config File
 	 *
 	 * @access	public
@@ -177,42 +192,28 @@ class CI_Config {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Fetch a config file item
-	 *
+	 * Site URL
+	 * Returns base_url . index_page [. uri_string]
 	 *
 	 * @access	public
-	 * @param	string	the config item name
-	 * @param	string	the index name
-	 * @param	bool
+	 * @param    string    the URI string
 	 * @return	string
 	 */
-	function item($item, $index = '')
+	function site_url($uri = '')
 	{
-		if ($index == '')
+		if ($uri == '')
 		{
-			if ( ! isset($this->config[$item]))
-			{
-				return FALSE;
-			}
+			return $this->slash_item('base_url') . $this->item('index_page');
+		}
 
-			$pref = $this->config[$item];
+		if ($this->item('enable_query_strings') == FALSE) {
+			$suffix = ($this->item('url_suffix') == FALSE) ? '' : $this->item('url_suffix');
+			return $this->slash_item('base_url') . $this->slash_item('index_page') . $this->_uri_string($uri) . $suffix;
 		}
 		else
 		{
-			if ( ! isset($this->config[$index]))
-			{
-				return FALSE;
-			}
-
-			if ( ! isset($this->config[$index][$item]))
-			{
-				return FALSE;
-			}
-
-			$pref = $this->config[$index][$item];
+			return $this->slash_item('base_url') . $this->item('index_page') . '?' . $this->_uri_string($uri);
 		}
-
-		return $pref;
 	}
 
 	// --------------------------------------------------------------------
@@ -239,47 +240,42 @@ class CI_Config {
 		return rtrim($this->config[$item], '/').'/';
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Site URL
-	 * Returns base_url . index_page [. uri_string]
-	 *
-	 * @access	public
-	 * @param	string	the URI string
-	 * @return	string
-	 */
-	function site_url($uri = '')
-	{
-		if ($uri == '')
-		{
-			return $this->slash_item('base_url').$this->item('index_page');
-		}
-
-		if ($this->item('enable_query_strings') == FALSE)
-		{
-			$suffix = ($this->item('url_suffix') == FALSE) ? '' : $this->item('url_suffix');
-			return $this->slash_item('base_url').$this->slash_item('index_page').$this->_uri_string($uri).$suffix;
-		}
-		else
-		{
-			return $this->slash_item('base_url').$this->item('index_page').'?'.$this->_uri_string($uri);
-		}
-	}
-
 	// -------------------------------------------------------------
 
 	/**
-	 * Base URL
-	 * Returns base_url [. uri_string]
+	 * Fetch a config file item
 	 *
-	 * @access public
-	 * @param string $uri
-	 * @return string
+	 *
+	 * @access	public
+	 * @param    string    the config item name
+	 * @param    string    the index name
+	 * @param    bool
+	 * @return	string
 	 */
-	function base_url($uri = '')
+	function item($item, $index = '')
 	{
-		return $this->slash_item('base_url').ltrim($this->_uri_string($uri), '/');
+		if ($index == '')
+		{
+			if (!isset($this->config[$item])) {
+				return FALSE;
+			}
+
+			$pref = $this->config[$item];
+		}
+		else
+		{
+			if (!isset($this->config[$index])) {
+				return FALSE;
+			}
+
+			if (!isset($this->config[$index][$item])) {
+				return FALSE;
+			}
+
+			$pref = $this->config[$index][$item];
+		}
+
+		return $pref;
 	}
 
 	// -------------------------------------------------------------
@@ -322,30 +318,30 @@ class CI_Config {
 	// --------------------------------------------------------------------
 
 	/**
-	 * System URL
+	 * Base URL
+	 * Returns base_url [. uri_string]
 	 *
-	 * @access	public
-	 * @return	string
+	 * @access public
+	 * @param string $uri
+	 * @return string
 	 */
-	function system_url()
+	function base_url($uri = '')
 	{
-		$x = explode("/", preg_replace("|/*(.+?)/*$|", "\\1", BASEPATH));
-		return $this->slash_item('base_url').end($x).'/';
+		return $this->slash_item('base_url') . ltrim($this->_uri_string($uri), '/');
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set a config file item
+	 * System URL
 	 *
 	 * @access	public
-	 * @param	string	the config item key
-	 * @param	string	the config item value
-	 * @return	void
+	 * @return    string
 	 */
-	function set_item($item, $value)
+	function system_url()
 	{
-		$this->config[$item] = $value;
+		$x = explode("/", preg_replace("|/*(.+?)/*$|", "\\1", BASEPATH));
+		return $this->slash_item('base_url') . end($x) . '/';
 	}
 
 	// --------------------------------------------------------------------

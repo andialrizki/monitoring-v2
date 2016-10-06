@@ -307,6 +307,65 @@ class CI_Output {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Update/serve a cached file
+	 *
+	 * @access    public
+	 * @param    object    config class
+	 * @param    object    uri class
+	 * @return    void
+	 */
+	function _display_cache(&$CFG, &$URI)
+	{
+		$cache_path = ($CFG->item('cache_path') == '') ? APPPATH . 'cache/' : $CFG->item('cache_path');
+
+		// Build the file path.  The file name is an MD5 hash of the full URI
+		$uri = $CFG->item('base_url') .
+			$CFG->item('index_page') .
+			$URI->uri_string;
+
+		$filepath = $cache_path . md5($uri);
+
+		if (!@file_exists($filepath)) {
+			return FALSE;
+		}
+
+		if (!$fp = @fopen($filepath, FOPEN_READ)) {
+			return FALSE;
+		}
+
+		flock($fp, LOCK_SH);
+
+		$cache = '';
+		if (filesize($filepath) > 0) {
+			$cache = fread($fp, filesize($filepath));
+		}
+
+		flock($fp, LOCK_UN);
+		fclose($fp);
+
+		// Strip out the embedded timestamp
+		if (!preg_match("/(\d+TS--->)/", $cache, $match)) {
+			return FALSE;
+		}
+
+		// Has the file expired? If so we'll delete it.
+		if (time() >= trim(str_replace('TS--->', '', $match['1']))) {
+			if (is_really_writable($cache_path)) {
+				@unlink($filepath);
+				log_message('debug', "Cache file has expired. File deleted");
+				return FALSE;
+			}
+		}
+
+		// Display the cache
+		$this->_display(str_replace($match['0'], '', $cache));
+		log_message('debug', "Cache file is current. Sending it to browser.");
+		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Display Output
 	 *
 	 * All "view" data is automatically put into this variable by the controller class:
@@ -499,71 +558,6 @@ class CI_Output {
 		@chmod($cache_path, FILE_WRITE_MODE);
 
 		log_message('debug', "Cache file written: ".$cache_path);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Update/serve a cached file
-	 *
-	 * @access	public
-	 * @param 	object	config class
-	 * @param 	object	uri class
-	 * @return	void
-	 */
-	function _display_cache(&$CFG, &$URI)
-	{
-		$cache_path = ($CFG->item('cache_path') == '') ? APPPATH.'cache/' : $CFG->item('cache_path');
-
-		// Build the file path.  The file name is an MD5 hash of the full URI
-		$uri =	$CFG->item('base_url').
-				$CFG->item('index_page').
-				$URI->uri_string;
-
-		$filepath = $cache_path.md5($uri);
-
-		if ( ! @file_exists($filepath))
-		{
-			return FALSE;
-		}
-
-		if ( ! $fp = @fopen($filepath, FOPEN_READ))
-		{
-			return FALSE;
-		}
-
-		flock($fp, LOCK_SH);
-
-		$cache = '';
-		if (filesize($filepath) > 0)
-		{
-			$cache = fread($fp, filesize($filepath));
-		}
-
-		flock($fp, LOCK_UN);
-		fclose($fp);
-
-		// Strip out the embedded timestamp
-		if ( ! preg_match("/(\d+TS--->)/", $cache, $match))
-		{
-			return FALSE;
-		}
-
-		// Has the file expired? If so we'll delete it.
-		if (time() >= trim(str_replace('TS--->', '', $match['1'])))
-		{
-			if (is_really_writable($cache_path))
-			{
-				@unlink($filepath);
-				log_message('debug', "Cache file has expired. File deleted");
-				return FALSE;
-			}
-		}
-
-		// Display the cache
-		$this->_display(str_replace($match['0'], '', $cache));
-		log_message('debug', "Cache file is current. Sending it to browser.");
-		return TRUE;
 	}
 
 

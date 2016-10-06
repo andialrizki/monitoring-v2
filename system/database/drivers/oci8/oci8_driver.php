@@ -143,69 +143,6 @@ class CI_DB_oci8_driver extends CI_DB {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Version number query string
-	 *
-	 * @access  protected
-	 * @return  string
-	 */
-	protected function _version()
-	{
-		return oci_server_version($this->conn_id);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Execute the query
-	 *
-	 * @access  protected  called by the base class
-	 * @param   string  an SQL query
-	 * @return  resource
-	 */
-	protected function _execute($sql)
-	{
-		// oracle must parse the query before it is run. All of the actions with
-		// the query are based on the statement id returned by ociparse
-		$this->stmt_id = FALSE;
-		$this->_set_stmt_id($sql);
-		oci_set_prefetch($this->stmt_id, 1000);
-		return @oci_execute($this->stmt_id, $this->_commit);
-	}
-
-	/**
-	 * Generate a statement ID
-	 *
-	 * @access  private
-	 * @param   string  an SQL query
-	 * @return  none
-	 */
-	private function _set_stmt_id($sql)
-	{
-		if ( ! is_resource($this->stmt_id))
-		{
-			$this->stmt_id = oci_parse($this->conn_id, $this->_prep_query($sql));
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Prep the query
-	 *
-	 * If needed, each database adapter can prep the query string
-	 *
-	 * @access  private called by execute()
-	 * @param   string  an SQL query
-	 * @return  string
-	 */
-	private function _prep_query($sql)
-	{
-		return $sql;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * getCursor.  Returns a cursor from the datbase
 	 *
 	 * @access  public
@@ -268,6 +205,36 @@ class CI_DB_oci8_driver extends CI_DB {
 		$this->_set_stmt_id($sql);
 		$this->_bind_params($params);
 		$this->query($sql, FALSE, $have_cursor);
+	}
+
+	/**
+	 * Generate a statement ID
+	 *
+	 * @access  private
+	 * @param   string  an SQL query
+	 * @return  none
+	 */
+	private function _set_stmt_id($sql)
+	{
+		if (!is_resource($this->stmt_id)) {
+			$this->stmt_id = oci_parse($this->conn_id, $this->_prep_query($sql));
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep the query
+	 *
+	 * If needed, each database adapter can prep the query string
+	 *
+	 * @access  private called by execute()
+	 * @param   string  an SQL query
+	 * @return  string
+	 */
+	private function _prep_query($sql)
+	{
+		return $sql;
 	}
 
 	// --------------------------------------------------------------------
@@ -472,6 +439,38 @@ class CI_DB_oci8_driver extends CI_DB {
 		$row = $query->row();
 		$this->_reset_select();
 		return (int) $row->numrows;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Version number query string
+	 *
+	 * @access  protected
+	 * @return  string
+	 */
+	protected function _version()
+	{
+		return oci_server_version($this->conn_id);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Execute the query
+	 *
+	 * @access  protected  called by the base class
+	 * @param   string  an SQL query
+	 * @return  resource
+	 */
+	protected function _execute($sql)
+	{
+		// oracle must parse the query before it is run. All of the actions with
+		// the query are based on the statement id returned by ociparse
+		$this->stmt_id = FALSE;
+		$this->_set_stmt_id($sql);
+		oci_set_prefetch($this->stmt_id, 1000);
+		return @oci_execute($this->stmt_id, $this->_commit);
 	}
 
 	// --------------------------------------------------------------------

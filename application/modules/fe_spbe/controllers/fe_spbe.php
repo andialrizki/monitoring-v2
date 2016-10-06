@@ -17,6 +17,12 @@ class Fe_spbe extends MX_Controller {
 		echo Modules::run('frontend', $content, 'spbe');
 	}
 
+	public function get_all_spbe()
+	{
+		$data = $this->model_spbe->get_all_spbe();
+		return $data;
+	}
+
 	public function add_spbe()
 	{
 		Modules::run('myhelper/permission', array(1));
@@ -31,6 +37,12 @@ class Fe_spbe extends MX_Controller {
 		$data = $this->get_this_data($id);
 		$content = $this->load->view('add_edit_spbe', array('data' => $data), TRUE);
 		echo Modules::run('frontend', $content, 'spbe');
+	}
+
+	public function get_this_data($id)
+	{
+		$data = $this->model_spbe->get_this_data($id);
+		return $data;
 	}
 
 	public function submit_spbe()
@@ -68,18 +80,6 @@ class Fe_spbe extends MX_Controller {
 		$data = $this->get_all_spbe();
 		$content = $this->load->view('index', array('data' => $data, 'error' => $msg), TRUE);
 		echo Modules::run('frontend', $content, 'spbe');
-	}
-
-	public function get_all_spbe()
-	{
-		$data = $this->model_spbe->get_all_spbe();
-		return $data;
-	}
-
-	public function get_this_data($id)
-	{
-		$data = $this->model_spbe->get_this_data($id);
-		return $data;
 	}
 
 }

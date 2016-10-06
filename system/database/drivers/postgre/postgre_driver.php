@@ -47,6 +47,19 @@ class CI_DB_postgre_driver extends CI_DB {
 	var $_random_keyword = ' RANDOM()'; // database specific random keyword
 
 	/**
+	 * Non-persistent database connection
+	 *
+	 * @access    private called by the base class
+	 * @return    resource
+	 */
+	function db_connect()
+	{
+		return @pg_connect($this->_connect_string());
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Connection String
 	 *
 	 * @access	private
@@ -71,19 +84,6 @@ class CI_DB_postgre_driver extends CI_DB {
 			}
 		}
 		return trim($connect_string);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Non-persistent database connection
-	 *
-	 * @access	private called by the base class
-	 * @return	resource
-	 */
-	function db_connect()
-	{
-		return @pg_connect($this->_connect_string());
 	}
 
 	// --------------------------------------------------------------------
@@ -146,19 +146,6 @@ class CI_DB_postgre_driver extends CI_DB {
 	{
 		// @todo - add support if needed
 		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Version number query string
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function _version()
-	{
-		return "SELECT version() AS ver";
 	}
 
 	// --------------------------------------------------------------------
@@ -356,6 +343,19 @@ class CI_DB_postgre_driver extends CI_DB {
 		$query = $this->query($sql);
 		$row = $query->row();
 		return $row->ins_id;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Version number query string
+	 *
+	 * @access    public
+	 * @return    string
+	 */
+	function _version()
+	{
+		return "SELECT version() AS ver";
 	}
 
 	// --------------------------------------------------------------------

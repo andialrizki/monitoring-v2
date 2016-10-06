@@ -57,6 +57,60 @@ class CI_DB_cubrid_forge extends CI_DB_forge {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Create Table
+	 *
+	 * @access    private
+	 * @param    string    the table name
+	 * @param    mixed    the fields
+	 * @param    mixed    primary key(s)
+	 * @param    mixed    key(s)
+	 * @param    boolean    should 'IF NOT EXISTS' be added to the SQL
+	 * @return    bool
+	 */
+	function _create_table($table, $fields, $primary_keys, $keys, $if_not_exists)
+	{
+		$sql = 'CREATE TABLE ';
+
+		if ($if_not_exists === TRUE) {
+			//$sql .= 'IF NOT EXISTS ';
+			// As of version 8.4.0 CUBRID does not support this SQL syntax.
+		}
+
+		$sql .= $this->db->_escape_identifiers($table) . " (";
+
+		$sql .= $this->_process_fields($fields);
+
+		// If there is a PK defined
+		if (count($primary_keys) > 0) {
+			$key_name = "pk_" . $table . "_" .
+				$this->db->_protect_identifiers(implode('_', $primary_keys));
+
+			$primary_keys = $this->db->_protect_identifiers($primary_keys);
+			$sql .= ",\n\tCONSTRAINT " . $key_name . " PRIMARY KEY(" . implode(', ', $primary_keys) . ")";
+		}
+
+		if (is_array($keys) && count($keys) > 0) {
+			foreach ($keys as $key) {
+				if (is_array($key)) {
+					$key_name = $this->db->_protect_identifiers(implode('_', $key));
+					$key = $this->db->_protect_identifiers($key);
+				} else {
+					$key_name = $this->db->_protect_identifiers($key);
+					$key = array($key_name);
+				}
+
+				$sql .= ",\n\tKEY \"{$key_name}\" (" . implode(', ', $key) . ")";
+			}
+		}
+
+		$sql .= "\n);";
+
+		return $sql;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Process Fields
 	 *
 	 * @access	private
@@ -151,67 +205,6 @@ class CI_DB_cubrid_forge extends CI_DB_forge {
 				$sql .= ',';
 			}
 		}
-
-		return $sql;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Create Table
-	 *
-	 * @access	private
-	 * @param	string	the table name
-	 * @param	mixed	the fields
-	 * @param	mixed	primary key(s)
-	 * @param	mixed	key(s)
-	 * @param	boolean	should 'IF NOT EXISTS' be added to the SQL
-	 * @return	bool
-	 */
-	function _create_table($table, $fields, $primary_keys, $keys, $if_not_exists)
-	{
-		$sql = 'CREATE TABLE ';
-
-		if ($if_not_exists === TRUE)
-		{
-			//$sql .= 'IF NOT EXISTS ';
-			// As of version 8.4.0 CUBRID does not support this SQL syntax.
-		}
-
-		$sql .= $this->db->_escape_identifiers($table)." (";
-
-		$sql .= $this->_process_fields($fields);
-
-		// If there is a PK defined
-		if (count($primary_keys) > 0)
-		{
-			$key_name = "pk_" . $table . "_" .
-				$this->db->_protect_identifiers(implode('_', $primary_keys));
-			
-			$primary_keys = $this->db->_protect_identifiers($primary_keys);
-			$sql .= ",\n\tCONSTRAINT " . $key_name . " PRIMARY KEY(" . implode(', ', $primary_keys) . ")";
-		}
-
-		if (is_array($keys) && count($keys) > 0)
-		{
-			foreach ($keys as $key)
-			{
-				if (is_array($key))
-				{
-					$key_name = $this->db->_protect_identifiers(implode('_', $key));
-					$key = $this->db->_protect_identifiers($key);
-				}
-				else
-				{
-					$key_name = $this->db->_protect_identifiers($key);
-					$key = array($key_name);
-				}
-				
-				$sql .= ",\n\tKEY \"{$key_name}\" (" . implode(', ', $key) . ")";
-			}
-		}
-
-		$sql .= "\n);";
 
 		return $sql;
 	}

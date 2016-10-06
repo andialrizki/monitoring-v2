@@ -86,30 +86,109 @@
         );
         
         //----------------------------------------------------------------------
-        public static function getDataLength($version, $level)
-        {
-            return self::$capacity[$version][QRCAP_WORDS] - self::$capacity[$version][QRCAP_EC][$level];
-        }
+        public static $lengthTableBits = array(
+            array(10, 12, 14),
+            array(9, 11, 13),
+            array(8, 16, 16),
+            array(8, 10, 12)
+        );
         
         //----------------------------------------------------------------------
-        public static function getECCLength($version, $level)
-        {
-            return self::$capacity[$version][QRCAP_EC][$level];
-        }
+        public static $eccTable = array(
+            array(array(0, 0), array(0, 0), array(0, 0), array(0, 0)),
+            array(array(1, 0), array(1, 0), array(1, 0), array(1, 0)), // 1
+            array(array(1, 0), array(1, 0), array(1, 0), array(1, 0)),
+            array(array(1, 0), array(1, 0), array(2, 0), array(2, 0)),
+            array(array(1, 0), array(2, 0), array(2, 0), array(4, 0)),
+            array(array(1, 0), array(2, 0), array(2, 2), array(2, 2)), // 5
+            array(array(2, 0), array(4, 0), array(4, 0), array(4, 0)),
+            array(array(2, 0), array(4, 0), array(2, 4), array(4, 1)),
+            array(array(2, 0), array(2, 2), array(4, 2), array(4, 2)),
+            array(array(2, 0), array(3, 2), array(4, 4), array(4, 4)),
+            array(array(2, 2), array(4, 1), array(6, 2), array(6, 2)), //10
+            array(array(4, 0), array(1, 4), array(4, 4), array(3, 8)),
+            array(array(2, 2), array(6, 2), array(4, 6), array(7, 4)),
+            array(array(4, 0), array(8, 1), array(8, 4), array(12, 4)),
+            array(array(3, 1), array(4, 5), array(11, 5), array(11, 5)),
+            array(array(5, 1), array(5, 5), array(5, 7), array(11, 7)), //15
+            array(array(5, 1), array(7, 3), array(15, 2), array(3, 13)),
+            array(array(1, 5), array(10, 1), array(1, 15), array(2, 17)),
+            array(array(5, 1), array(9, 4), array(17, 1), array(2, 19)),
+            array(array(3, 4), array(3, 11), array(17, 4), array(9, 16)),
+            array(array(3, 5), array(3, 13), array(15, 5), array(15, 10)), //20
+            array(array(4, 4), array(17, 0), array(17, 6), array(19, 6)),
+            array(array(2, 7), array(17, 0), array(7, 16), array(34, 0)),
+            array(array(4, 5), array(4, 14), array(11, 14), array(16, 14)),
+            array(array(6, 4), array(6, 14), array(11, 16), array(30, 2)),
+            array(array(8, 4), array(8, 13), array(7, 22), array(22, 13)), //25
+            array(array(10, 2), array(19, 4), array(28, 6), array(33, 4)),
+            array(array(8, 4), array(22, 3), array(8, 26), array(12, 28)),
+            array(array(3, 10), array(3, 23), array(4, 31), array(11, 31)),
+            array(array(7, 7), array(21, 7), array(1, 37), array(19, 26)),
+            array(array(5, 10), array(19, 10), array(15, 25), array(23, 25)), //30
+            array(array(13, 3), array(2, 29), array(42, 1), array(23, 28)),
+            array(array(17, 0), array(10, 23), array(10, 35), array(19, 35)),
+            array(array(17, 1), array(14, 21), array(29, 19), array(11, 46)),
+            array(array(13, 6), array(14, 23), array(44, 7), array(59, 1)),
+            array(array(12, 7), array(12, 26), array(39, 14), array(22, 41)), //35
+            array(array(6, 14), array(6, 34), array(46, 10), array(2, 64)),
+            array(array(17, 4), array(29, 14), array(49, 10), array(24, 46)),
+            array(array(4, 18), array(13, 32), array(48, 14), array(42, 32)),
+            array(array(20, 4), array(40, 7), array(43, 22), array(10, 67)),
+            array(array(19, 6), array(18, 31), array(34, 34), array(20, 61)),//40
+        );                                                                       
         
         //----------------------------------------------------------------------
+        public static $alignmentPattern = array(
+            array(0, 0),
+            array(0, 0), array(18, 0), array(22, 0), array(26, 0), array(30, 0), // 1- 5
+            array(34, 0), array(22, 38), array(24, 42), array(26, 46), array(28, 50), // 6-10
+            array(30, 54), array(32, 58), array(34, 62), array(26, 46), array(26, 48), //11-15
+            array(26, 50), array(30, 54), array(30, 56), array(30, 58), array(34, 62), //16-20
+            array(28, 50), array(26, 50), array(30, 54), array(28, 54), array(32, 58), //21-25
+            array(30, 58), array(34, 62), array(26, 50), array(30, 54), array(26, 52), //26-30
+            array(30, 56), array(34, 60), array(30, 58), array(34, 62), array(30, 54), //31-35
+            array(24, 50), array(28, 54), array(32, 58), array(26, 54), array(30, 58), //35-40
+        );
+
+        //----------------------------------------------------------------------
+        public static $versionPattern = array(
+            0x07c94, 0x085bc, 0x09a99, 0x0a4d3, 0x0bbf6, 0x0c762, 0x0d847, 0x0e60d,
+            0x0f928, 0x10b78, 0x1145d, 0x12a17, 0x13532, 0x149a6, 0x15683, 0x168c9,
+            0x177ec, 0x18ec4, 0x191e1, 0x1afab, 0x1b08e, 0x1cc1a, 0x1d33f, 0x1ed75,
+            0x1f250, 0x209d5, 0x216f0, 0x228ba, 0x2379f, 0x24b0b, 0x2542e, 0x26a64,
+            0x27541, 0x28c69
+        );
+
+        //----------------------------------------------------------------------
+        public static $formatInfo = array(
+            array(0x77c4, 0x72f3, 0x7daa, 0x789d, 0x662f, 0x6318, 0x6c41, 0x6976),
+            array(0x5412, 0x5125, 0x5e7c, 0x5b4b, 0x45f9, 0x40ce, 0x4f97, 0x4aa0),
+            array(0x355f, 0x3068, 0x3f31, 0x3a06, 0x24b4, 0x2183, 0x2eda, 0x2bed),
+            array(0x1689, 0x13be, 0x1ce7, 0x19d0, 0x0762, 0x0255, 0x0d0c, 0x083b)
+        );
+
+        //######################################################################
+        public static $frames = array();
+
+        //----------------------------------------------------------------------
+
         public static function getWidth($version)
         {
             return self::$capacity[$version][QRCAP_WIDTH];
         }
         
         //----------------------------------------------------------------------
+
         public static function getRemainder($version)
         {
             return self::$capacity[$version][QRCAP_REMINDER];
         }
-        
-        //----------------------------------------------------------------------
+
+        // Error correction code -----------------------------------------------
+        // Table of the error correction code (Reed-Solomon block)
+        // See Table 12-16 (pp.30-36), JIS X0510:2004.
+
         public static function getMinimumVersion($size, $level)
         {
 
@@ -121,17 +200,10 @@
 
             return -1;
         }
-    
-        //######################################################################
-        
-        public static $lengthTableBits = array(
-            array(10, 12, 14),
-            array( 9, 11, 13),
-            array( 8, 16, 16),
-            array( 8, 10, 12)
-        );
-        
+
         //----------------------------------------------------------------------
+        // CACHEABLE!!!
+        
         public static function lengthIndicator($mode, $version)
         {
             if ($mode == QR_MODE_STRUCTURE)
@@ -147,8 +219,16 @@
 
             return self::$lengthTableBits[$mode][$l];
         }
-        
-        //----------------------------------------------------------------------
+
+        // Alignment pattern ---------------------------------------------------
+
+        // Positions of alignment patterns.
+        // This array includes only the second and the third position of the 
+        // alignment patterns. Rest of them can be calculated from the distance 
+        // between them.
+
+        // See Table 1 in Appendix E (pp.71) of JIS X0510:2004.
+         
         public static function maximumWords($mode, $version)
         {
             if($mode == QR_MODE_STRUCTURE) 
@@ -172,57 +252,6 @@
             return $words;
         }
 
-        // Error correction code -----------------------------------------------
-        // Table of the error correction code (Reed-Solomon block)
-        // See Table 12-16 (pp.30-36), JIS X0510:2004.
-
-        public static $eccTable = array(
-            array(array( 0,  0), array( 0,  0), array( 0,  0), array( 0,  0)),
-            array(array( 1,  0), array( 1,  0), array( 1,  0), array( 1,  0)), // 1
-            array(array( 1,  0), array( 1,  0), array( 1,  0), array( 1,  0)),
-            array(array( 1,  0), array( 1,  0), array( 2,  0), array( 2,  0)),
-            array(array( 1,  0), array( 2,  0), array( 2,  0), array( 4,  0)),
-            array(array( 1,  0), array( 2,  0), array( 2,  2), array( 2,  2)), // 5
-            array(array( 2,  0), array( 4,  0), array( 4,  0), array( 4,  0)),
-            array(array( 2,  0), array( 4,  0), array( 2,  4), array( 4,  1)),
-            array(array( 2,  0), array( 2,  2), array( 4,  2), array( 4,  2)),
-            array(array( 2,  0), array( 3,  2), array( 4,  4), array( 4,  4)),
-            array(array( 2,  2), array( 4,  1), array( 6,  2), array( 6,  2)), //10
-            array(array( 4,  0), array( 1,  4), array( 4,  4), array( 3,  8)),
-            array(array( 2,  2), array( 6,  2), array( 4,  6), array( 7,  4)),
-            array(array( 4,  0), array( 8,  1), array( 8,  4), array(12,  4)),
-            array(array( 3,  1), array( 4,  5), array(11,  5), array(11,  5)),
-            array(array( 5,  1), array( 5,  5), array( 5,  7), array(11,  7)), //15
-            array(array( 5,  1), array( 7,  3), array(15,  2), array( 3, 13)),
-            array(array( 1,  5), array(10,  1), array( 1, 15), array( 2, 17)),
-            array(array( 5,  1), array( 9,  4), array(17,  1), array( 2, 19)),
-            array(array( 3,  4), array( 3, 11), array(17,  4), array( 9, 16)),
-            array(array( 3,  5), array( 3, 13), array(15,  5), array(15, 10)), //20
-            array(array( 4,  4), array(17,  0), array(17,  6), array(19,  6)),
-            array(array( 2,  7), array(17,  0), array( 7, 16), array(34,  0)),
-            array(array( 4,  5), array( 4, 14), array(11, 14), array(16, 14)),
-            array(array( 6,  4), array( 6, 14), array(11, 16), array(30,  2)),
-            array(array( 8,  4), array( 8, 13), array( 7, 22), array(22, 13)), //25
-            array(array(10,  2), array(19,  4), array(28,  6), array(33,  4)),
-            array(array( 8,  4), array(22,  3), array( 8, 26), array(12, 28)),
-            array(array( 3, 10), array( 3, 23), array( 4, 31), array(11, 31)),
-            array(array( 7,  7), array(21,  7), array( 1, 37), array(19, 26)),
-            array(array( 5, 10), array(19, 10), array(15, 25), array(23, 25)), //30
-            array(array(13,  3), array( 2, 29), array(42,  1), array(23, 28)),
-            array(array(17,  0), array(10, 23), array(10, 35), array(19, 35)),
-            array(array(17,  1), array(14, 21), array(29, 19), array(11, 46)),
-            array(array(13,  6), array(14, 23), array(44,  7), array(59,  1)),
-            array(array(12,  7), array(12, 26), array(39, 14), array(22, 41)), //35
-            array(array( 6, 14), array( 6, 34), array(46, 10), array( 2, 64)),
-            array(array(17,  4), array(29, 14), array(49, 10), array(24, 46)),
-            array(array( 4, 18), array(13, 32), array(48, 14), array(42, 32)),
-            array(array(20,  4), array(40,  7), array(43, 22), array(10, 67)),
-            array(array(19,  6), array(18, 31), array(34, 34), array(20, 61)),//40
-        );                                                                       
-
-        //----------------------------------------------------------------------
-        // CACHEABLE!!!
-        
         public static function getEccSpec($version, $level, array &$spec)
         {
             if (count($spec) < 5) {
@@ -249,88 +278,11 @@
             }
         }
 
-        // Alignment pattern ---------------------------------------------------
-
-        // Positions of alignment patterns.
-        // This array includes only the second and the third position of the 
-        // alignment patterns. Rest of them can be calculated from the distance 
-        // between them.
-         
-        // See Table 1 in Appendix E (pp.71) of JIS X0510:2004.
-         
-        public static $alignmentPattern = array(      
-            array( 0,  0),
-            array( 0,  0), array(18,  0), array(22,  0), array(26,  0), array(30,  0), // 1- 5
-            array(34,  0), array(22, 38), array(24, 42), array(26, 46), array(28, 50), // 6-10
-            array(30, 54), array(32, 58), array(34, 62), array(26, 46), array(26, 48), //11-15
-            array(26, 50), array(30, 54), array(30, 56), array(30, 58), array(34, 62), //16-20
-            array(28, 50), array(26, 50), array(30, 54), array(28, 54), array(32, 58), //21-25
-            array(30, 58), array(34, 62), array(26, 50), array(30, 54), array(26, 52), //26-30
-            array(30, 56), array(34, 60), array(30, 58), array(34, 62), array(30, 54), //31-35
-            array(24, 50), array(28, 54), array(32, 58), array(26, 54), array(30, 58), //35-40
-        );                                                                                  
-
-        
-        /** --------------------------------------------------------------------
-         * Put an alignment marker.
-         * @param frame
-         * @param width
-         * @param ox,oy center coordinate of the pattern
-         */
-        public static function putAlignmentMarker(array &$frame, $ox, $oy)
-        {
-            $finder = array(
-                "\xa1\xa1\xa1\xa1\xa1",
-                "\xa1\xa0\xa0\xa0\xa1",
-                "\xa1\xa0\xa1\xa0\xa1",
-                "\xa1\xa0\xa0\xa0\xa1",
-                "\xa1\xa1\xa1\xa1\xa1"
-            );                        
-            
-            $yStart = $oy-2;         
-            $xStart = $ox-2;
-            
-            for($y=0; $y<5; $y++) {
-                QRstr::set($frame, $xStart, $yStart+$y, $finder[$y]);
-            }
-        }
-
         //----------------------------------------------------------------------
-        public static function putAlignmentPattern($version, &$frame, $width)
+
+        public static function getDataLength($version, $level)
         {
-            if($version < 2)
-                return;
-
-            $d = self::$alignmentPattern[$version][1] - self::$alignmentPattern[$version][0];
-            if($d < 0) {
-                $w = 2;
-            } else {
-                $w = (int)(($width - self::$alignmentPattern[$version][0]) / $d + 2);
-            }
-
-            if($w * $w - 3 == 1) {
-                $x = self::$alignmentPattern[$version][0];
-                $y = self::$alignmentPattern[$version][0];
-                self::putAlignmentMarker($frame, $x, $y);
-                return;
-            }
-
-            $cx = self::$alignmentPattern[$version][0];
-            for($x=1; $x<$w - 1; $x++) {
-                self::putAlignmentMarker($frame, 6, $cx);
-                self::putAlignmentMarker($frame, $cx,  6);
-                $cx += $d;
-            }
-
-            $cy = self::$alignmentPattern[$version][0];
-            for($y=0; $y<$w-1; $y++) {
-                $cx = self::$alignmentPattern[$version][0];
-                for($x=0; $x<$w-1; $x++) {
-                    self::putAlignmentMarker($frame, $cx, $cy);
-                    $cx += $d;
-                }
-                $cy += $d;
-            }
+            return self::$capacity[$version][QRCAP_WORDS] - self::$capacity[$version][QRCAP_EC][$level];
         }
 
         // Version information pattern -----------------------------------------
@@ -339,74 +291,135 @@
         // See Table 1 in Appendix D (pp.68) of JIS X0510:2004.
         
 		// size: [QRSPEC_VERSION_MAX - 6]
-		
-        public static $versionPattern = array(
-            0x07c94, 0x085bc, 0x09a99, 0x0a4d3, 0x0bbf6, 0x0c762, 0x0d847, 0x0e60d,
-            0x0f928, 0x10b78, 0x1145d, 0x12a17, 0x13532, 0x149a6, 0x15683, 0x168c9,
-            0x177ec, 0x18ec4, 0x191e1, 0x1afab, 0x1b08e, 0x1cc1a, 0x1d33f, 0x1ed75,
-            0x1f250, 0x209d5, 0x216f0, 0x228ba, 0x2379f, 0x24b0b, 0x2542e, 0x26a64,
-            0x27541, 0x28c69
-        );
 
-        //----------------------------------------------------------------------
-        public static function getVersionPattern($version)
+        public static function getECCLength($version, $level)
         {
-            if($version < 7 || $version > QRSPEC_VERSION_MAX)
-                return 0;
-
-            return self::$versionPattern[$version -7];
+            return self::$capacity[$version][QRCAP_EC][$level];
         }
 
-        // Format information --------------------------------------------------
-        // See calcFormatInfo in tests/test_qrspec.c (orginal qrencode c lib)
-        
-        public static $formatInfo = array(
-            array(0x77c4, 0x72f3, 0x7daa, 0x789d, 0x662f, 0x6318, 0x6c41, 0x6976),
-            array(0x5412, 0x5125, 0x5e7c, 0x5b4b, 0x45f9, 0x40ce, 0x4f97, 0x4aa0),
-            array(0x355f, 0x3068, 0x3f31, 0x3a06, 0x24b4, 0x2183, 0x2eda, 0x2bed),
-            array(0x1689, 0x13be, 0x1ce7, 0x19d0, 0x0762, 0x0255, 0x0d0c, 0x083b)
-        );
+        //----------------------------------------------------------------------
 
         public static function getFormatInfo($mask, $level)
         {
-            if($mask < 0 || $mask > 7)
+            if ($mask < 0 || $mask > 7)
                 return 0;
-                
-            if($level < 0 || $level > 3)
-                return 0;                
+
+            if ($level < 0 || $level > 3)
+                return 0;
 
             return self::$formatInfo[$level][$mask];
         }
 
-        // Frame ---------------------------------------------------------------
-        // Cache of initial frames.
-         
-        public static $frames = array();
+        // Format information --------------------------------------------------
+        // See calcFormatInfo in tests/test_qrspec.c (orginal qrencode c lib)
 
-        /** --------------------------------------------------------------------
-         * Put a finder pattern.
-         * @param frame
-         * @param width
-         * @param ox,oy upper-left coordinate of the pattern
-         */
-        public static function putFinderPattern(&$frame, $ox, $oy)
+        public static function debug($frame, $binary_mode = false)
         {
-            $finder = array(
-                "\xc1\xc1\xc1\xc1\xc1\xc1\xc1",
-                "\xc1\xc0\xc0\xc0\xc0\xc0\xc1",
-                "\xc1\xc0\xc1\xc1\xc1\xc0\xc1",
-                "\xc1\xc0\xc1\xc1\xc1\xc0\xc1",
-                "\xc1\xc0\xc1\xc1\xc1\xc0\xc1",
-                "\xc1\xc0\xc0\xc0\xc0\xc0\xc1",
-                "\xc1\xc1\xc1\xc1\xc1\xc1\xc1"
-            );                            
-            
-            for($y=0; $y<7; $y++) {
-                QRstr::set($frame, $ox, $oy+$y, $finder[$y]);
+            if ($binary_mode) {
+
+                foreach ($frame as &$frameLine) {
+                    $frameLine = join('<span class="m">&nbsp;&nbsp;</span>', explode('0', $frameLine));
+                    $frameLine = join('&#9608;&#9608;', explode('1', $frameLine));
+                }
+
+                ?>
+                <style>
+                    .m {
+                        background-color: white;
+                    }
+                </style>
+                <?php
+                echo '<pre><tt><br/ ><br/ ><br/ >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                echo join("<br/ >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $frame);
+                echo '</tt></pre><br/ ><br/ ><br/ ><br/ ><br/ ><br/ >';
+
+            } else {
+
+                foreach ($frame as &$frameLine) {
+                    $frameLine = join('<span class="m">&nbsp;</span>', explode("\xc0", $frameLine));
+                    $frameLine = join('<span class="m">&#9618;</span>', explode("\xc1", $frameLine));
+                    $frameLine = join('<span class="p">&nbsp;</span>', explode("\xa0", $frameLine));
+                    $frameLine = join('<span class="p">&#9618;</span>', explode("\xa1", $frameLine));
+                    $frameLine = join('<span class="s">&#9671;</span>', explode("\x84", $frameLine)); //format 0
+                    $frameLine = join('<span class="s">&#9670;</span>', explode("\x85", $frameLine)); //format 1
+                    $frameLine = join('<span class="x">&#9762;</span>', explode("\x81", $frameLine)); //special bit
+                    $frameLine = join('<span class="c">&nbsp;</span>', explode("\x90", $frameLine)); //clock 0
+                    $frameLine = join('<span class="c">&#9719;</span>', explode("\x91", $frameLine)); //clock 1
+                    $frameLine = join('<span class="f">&nbsp;</span>', explode("\x88", $frameLine)); //version
+                    $frameLine = join('<span class="f">&#9618;</span>', explode("\x89", $frameLine)); //version
+                    $frameLine = join('&#9830;', explode("\x01", $frameLine));
+                    $frameLine = join('&#8901;', explode("\0", $frameLine));
+                }
+
+                ?>
+                <style>
+                    .p {
+                        background-color: yellow;
+                    }
+
+                    .m {
+                        background-color: #00FF00;
+                    }
+
+                    .s {
+                        background-color: #FF0000;
+                    }
+
+                    .c {
+                        background-color: aqua;
+                    }
+
+                    .x {
+                        background-color: pink;
+                    }
+
+                    .f {
+                        background-color: gold;
+                    }
+                </style>
+                <?php
+                echo "<pre><tt>";
+                echo join("<br/ >", $frame);
+                echo "</tt></pre>";
+
             }
         }
 
-        //----------------------------------------------------------------------
+        public static function newFrame($version)
+        {
+            if ($version < 1 || $version > QRSPEC_VERSION_MAX)
+                return null;
+
+            if (!isset(self::$frames[$version])) {
+
+                $fileName = QR_CACHE_DIR . 'frame_' . $version . '.dat';
+
+                if (QR_CACHEABLE) {
+                    if (file_exists($fileName)) {
+                        self::$frames[$version] = self::unserial(file_get_contents($fileName));
+                    } else {
+                        self::$frames[$version] = self::createFrame($version);
+                        file_put_contents($fileName, self::serial(self::$frames[$version]));
+                    }
+                } else {
+                    self::$frames[$version] = self::createFrame($version);
+                }
+            }
+
+            if (is_null(self::$frames[$version]))
+                return null;
+
+            return self::$frames[$version];
+        }
+
+        // Frame ---------------------------------------------------------------
+        // Cache of initial frames.
+
+        public static function unserial($code)
+        {
+            return explode("\n", gzuncompress($code));
+        }
+
         public static function createFrame($version)
         {
             $width = self::$capacity[$version][QRCAP_WIDTH];
@@ -485,100 +498,114 @@
         }
 
         //----------------------------------------------------------------------
-        public static function debug($frame, $binary_mode = false)
+
+        /** --------------------------------------------------------------------
+         * Put a finder pattern.
+         * @param frame
+         * @param width
+         * @param ox ,oy upper-left coordinate of the pattern
+         */
+        public static function putFinderPattern(&$frame, $ox, $oy)
         {
-            if ($binary_mode) {
-            
-                    foreach ($frame as &$frameLine) {
-                        $frameLine = join('<span class="m">&nbsp;&nbsp;</span>', explode('0', $frameLine));
-                        $frameLine = join('&#9608;&#9608;', explode('1', $frameLine));
-                    }
-                    
-                    ?>
-                <style>
-                    .m { background-color: white; }
-                </style>
-                <?php
-                    echo '<pre><tt><br/ ><br/ ><br/ >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                    echo join("<br/ >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $frame);
-                    echo '</tt></pre><br/ ><br/ ><br/ ><br/ ><br/ ><br/ >';
-            
-            } else {
-            
-                foreach ($frame as &$frameLine) {
-                    $frameLine = join('<span class="m">&nbsp;</span>',  explode("\xc0", $frameLine));
-                    $frameLine = join('<span class="m">&#9618;</span>', explode("\xc1", $frameLine));
-                    $frameLine = join('<span class="p">&nbsp;</span>',  explode("\xa0", $frameLine));
-                    $frameLine = join('<span class="p">&#9618;</span>', explode("\xa1", $frameLine));
-                    $frameLine = join('<span class="s">&#9671;</span>', explode("\x84", $frameLine)); //format 0
-                    $frameLine = join('<span class="s">&#9670;</span>', explode("\x85", $frameLine)); //format 1
-                    $frameLine = join('<span class="x">&#9762;</span>', explode("\x81", $frameLine)); //special bit
-                    $frameLine = join('<span class="c">&nbsp;</span>',  explode("\x90", $frameLine)); //clock 0
-                    $frameLine = join('<span class="c">&#9719;</span>', explode("\x91", $frameLine)); //clock 1
-                    $frameLine = join('<span class="f">&nbsp;</span>',  explode("\x88", $frameLine)); //version
-                    $frameLine = join('<span class="f">&#9618;</span>', explode("\x89", $frameLine)); //version
-                    $frameLine = join('&#9830;', explode("\x01", $frameLine));
-                    $frameLine = join('&#8901;', explode("\0", $frameLine));
-                }
-                
-                ?>
-                <style>
-                    .p { background-color: yellow; }
-                    .m { background-color: #00FF00; }
-                    .s { background-color: #FF0000; }
-                    .c { background-color: aqua; }
-                    .x { background-color: pink; }
-                    .f { background-color: gold; }
-                </style>
-                <?php
-                echo "<pre><tt>";
-                echo join("<br/ >", $frame);
-                echo "</tt></pre>";
-            
+            $finder = array(
+                "\xc1\xc1\xc1\xc1\xc1\xc1\xc1",
+                "\xc1\xc0\xc0\xc0\xc0\xc0\xc1",
+                "\xc1\xc0\xc1\xc1\xc1\xc0\xc1",
+                "\xc1\xc0\xc1\xc1\xc1\xc0\xc1",
+                "\xc1\xc0\xc1\xc1\xc1\xc0\xc1",
+                "\xc1\xc0\xc0\xc0\xc0\xc0\xc1",
+                "\xc1\xc1\xc1\xc1\xc1\xc1\xc1"
+            );
+
+            for ($y = 0; $y < 7; $y++) {
+                QRstr::set($frame, $ox, $oy + $y, $finder[$y]);
             }
         }
 
         //----------------------------------------------------------------------
+
+        public static function putAlignmentPattern($version, &$frame, $width)
+        {
+            if ($version < 2)
+                return;
+
+            $d = self::$alignmentPattern[$version][1] - self::$alignmentPattern[$version][0];
+            if ($d < 0) {
+                $w = 2;
+            } else {
+                $w = (int)(($width - self::$alignmentPattern[$version][0]) / $d + 2);
+            }
+
+            if ($w * $w - 3 == 1) {
+                $x = self::$alignmentPattern[$version][0];
+                $y = self::$alignmentPattern[$version][0];
+                self::putAlignmentMarker($frame, $x, $y);
+                return;
+            }
+
+            $cx = self::$alignmentPattern[$version][0];
+            for ($x = 1; $x < $w - 1; $x++) {
+                self::putAlignmentMarker($frame, 6, $cx);
+                self::putAlignmentMarker($frame, $cx, 6);
+                $cx += $d;
+            }
+
+            $cy = self::$alignmentPattern[$version][0];
+            for ($y = 0; $y < $w - 1; $y++) {
+                $cx = self::$alignmentPattern[$version][0];
+                for ($x = 0; $x < $w - 1; $x++) {
+                    self::putAlignmentMarker($frame, $cx, $cy);
+                    $cx += $d;
+                }
+                $cy += $d;
+            }
+        }
+
+        //----------------------------------------------------------------------
+
+        /** --------------------------------------------------------------------
+         * Put an alignment marker.
+         * @param frame
+         * @param width
+         * @param ox ,oy center coordinate of the pattern
+         */
+        public static function putAlignmentMarker(array &$frame, $ox, $oy)
+        {
+            $finder = array(
+                "\xa1\xa1\xa1\xa1\xa1",
+                "\xa1\xa0\xa0\xa0\xa1",
+                "\xa1\xa0\xa1\xa0\xa1",
+                "\xa1\xa0\xa0\xa0\xa1",
+                "\xa1\xa1\xa1\xa1\xa1"
+            );
+
+            $yStart = $oy - 2;
+            $xStart = $ox - 2;
+
+            for ($y = 0; $y < 5; $y++) {
+                QRstr::set($frame, $xStart, $yStart + $y, $finder[$y]);
+            }
+        }
+        
+        //----------------------------------------------------------------------
+
+        public static function getVersionPattern($version)
+        {
+            if ($version < 7 || $version > QRSPEC_VERSION_MAX)
+                return 0;
+
+            return self::$versionPattern[$version - 7];
+        }
+        
+        //----------------------------------------------------------------------
+
         public static function serial($frame)
         {
             return gzcompress(join("\n", $frame), 9);
         }
-        
-        //----------------------------------------------------------------------
-        public static function unserial($code)
-        {
-            return explode("\n", gzuncompress($code));
-        }
-        
-        //----------------------------------------------------------------------
-        public static function newFrame($version)
-        {
-            if($version < 1 || $version > QRSPEC_VERSION_MAX) 
-                return null;
-
-            if(!isset(self::$frames[$version])) {
-                
-                $fileName = QR_CACHE_DIR.'frame_'.$version.'.dat';
-                
-                if (QR_CACHEABLE) {
-                    if (file_exists($fileName)) {
-                        self::$frames[$version] = self::unserial(file_get_contents($fileName));
-                    } else {
-                        self::$frames[$version] = self::createFrame($version);
-                        file_put_contents($fileName, self::serial(self::$frames[$version]));
-                    }
-                } else {
-                    self::$frames[$version] = self::createFrame($version);
-                }
-            }
-            
-            if(is_null(self::$frames[$version]))
-                return null;
-
-            return self::$frames[$version];
-        }
 
         //----------------------------------------------------------------------
+
         public static function rsBlockNum($spec)     { return $spec[0] + $spec[3]; }
         public static function rsBlockNum1($spec)    { return $spec[0]; }
         public static function rsDataCodes1($spec)   { return $spec[1]; }

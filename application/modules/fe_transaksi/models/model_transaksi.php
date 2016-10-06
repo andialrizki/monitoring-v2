@@ -7,7 +7,7 @@ class Model_transaksi extends CI_Model {
 		$this->db->select('tbl_transaksi.*, tbl_pangkalan.name as pangkalan');
 		$this->db->join('tbl_pangkalan', 'tbl_transaksi.id_pangkalan = tbl_pangkalan.id_pangkalan');
 		if ($this->session->userdata(APP_PREFIX.'type_admin') != 0 && $this->session->userdata(APP_PREFIX.'type_admin') != 6) {
-			$this->db->where('id_pangkalan', $this->session->userdata(APP_PREFIX.'id_admin'));
+			$this->db->where('tbl_transaksi.id_pangkalan', $this->session->userdata(APP_PREFIX . 'id_admin'));
 		}
 		if ($this->session->userdata(APP_PREFIX.'type_admin') == 6) {
 			$this->db->where('jenis_pembayaran', 2);

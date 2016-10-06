@@ -81,8 +81,29 @@ class AesCtr extends Aes {
     $ciphertext = base64_encode($ciphertext);
     return $ciphertext;
   }
-  
-  
+
+  private static function urs($a, $b)
+  {
+    $a &= 0xffffffff;
+    $b &= 0x1f;  // (bounds check)
+    if ($a & 0x80000000 && $b > 0) {   // if left-most bit set
+      $a = ($a >> 1) & 0x7fffffff;   //   right-shift one bit & clear left-most bit
+      $a = $a >> ($b - 1);           //   remaining right-shifts
+    } else {                       // otherwise
+      $a = ($a >> $b);               //   use normal right-shift
+    }
+    return $a;
+  }
+
+
+  /*
+   * Unsigned right shift function, since PHP has neither >>> operator nor unsigned ints
+   *
+   * @param a  number to be shifted (32-bit integer)
+   * @param b  number of bits to shift a to the right (0..31)
+   * @return   a right-shifted and zero-filled by b bits
+   */
+
   /** 
    * Decrypt a text encrypted by AES in counter mode of operation
    *
@@ -141,25 +162,6 @@ class AesCtr extends Aes {
     $plaintext = implode('',$plaintxt);
     
     return $plaintext;
-  }
-  
-  
-  /*
-   * Unsigned right shift function, since PHP has neither >>> operator nor unsigned ints
-   *
-   * @param a  number to be shifted (32-bit integer)
-   * @param b  number of bits to shift a to the right (0..31)
-   * @return   a right-shifted and zero-filled by b bits
-   */
-  private static function urs($a, $b) {
-    $a &= 0xffffffff; $b &= 0x1f;  // (bounds check)
-    if ($a&0x80000000 && $b>0) {   // if left-most bit set
-      $a = ($a>>1) & 0x7fffffff;   //   right-shift one bit & clear left-most bit
-      $a = $a >> ($b-1);           //   remaining right-shifts
-    } else {                       // otherwise
-      $a = ($a>>$b);               //   use normal right-shift
-    } 
-    return $a; 
   }
 
 }  

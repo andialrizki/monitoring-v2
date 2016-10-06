@@ -17,6 +17,12 @@ class Fe_admin extends MX_Controller {
 		echo Modules::run('frontend', $content, 'admin');
 	}
 
+	public function get_all_admin()
+	{
+		$data = $this->model_admin->get_all_admin();
+		return $data;
+	}
+
 	public function add_admin()
 	{
 		$content = $this->load->view('add_edit_admin', '', TRUE);
@@ -30,6 +36,12 @@ class Fe_admin extends MX_Controller {
 		$data['password'] = Modules::run('myhelper/decrypt_text', $data['password']);
 		$content = $this->load->view('add_edit_admin', array('data' => $data), TRUE);
 		echo Modules::run('frontend', $content, 'admin');
+	}
+
+	public function get_this_data($id)
+	{
+		$data = $this->model_admin->get_this_data($id);
+		return $data;
 	}
 
 	public function submit_admin()
@@ -73,18 +85,6 @@ class Fe_admin extends MX_Controller {
 		$data = $this->get_all_admin();
 		$content = $this->load->view('index', array('data' => $data, 'error' => $msg), TRUE);
 		echo Modules::run('frontend', $content, 'admin');
-	}
-
-	public function get_all_admin()
-	{
-		$data = $this->model_admin->get_all_admin();
-		return $data;
-	}
-
-	public function get_this_data($id)
-	{
-		$data = $this->model_admin->get_this_data($id);
-		return $data;
 	}
 
 }

@@ -95,6 +95,22 @@ class CI_Utf8 {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Is ASCII?
+	 *
+	 * Tests if a string is standard 7-bit ASCII or not
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    bool
+	 */
+	function _is_ascii($str)
+	{
+		return (preg_match('/[^\x00-\x7F]/S', $str) == 0);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Remove ASCII control characters
 	 *
 	 * Removes all ASCII control characters except horizontal tabs,
@@ -138,22 +154,6 @@ class CI_Utf8 {
 		}
 
 		return $str;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Is ASCII?
-	 *
-	 * Tests if a string is standard 7-bit ASCII or not
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	bool
-	 */
-	function _is_ascii($str)
-	{
-		return (preg_match('/[^\x00-\x7F]/S', $str) == 0);
 	}
 
 	// --------------------------------------------------------------------

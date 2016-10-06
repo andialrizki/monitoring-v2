@@ -70,7 +70,7 @@ $route['tbank/saldo'] = "fe_tbank/ceksaldo_tbank";
 $route['tbank/transfer'] = "fe_tbank/transfer_tbank";
 $route['tbank/input-transaksi'] = "fe_tbank/input_transaksi";
 
-
+$route['check-login'] = "fe_login/loginkah";
 $route['404'] = "fe_error";
 $route['sign-in'] = "fe_login";
 $route['sign-in/auth'] = "fe_login/do_login";
@@ -97,12 +97,17 @@ $route['([a-z]+)/submit'] = "fe_$1/submit_$1";
 $route['([a-z]+)/del'] = "fe_$1/del_$1";
 $route['([a-z]+)/detail/(:any)'] = "fe_$1/detail_$1";
 
+$route['transaksi/add/(:num)'] = "fe_transaksi/add_transaksi/$1";
+
 $route['([a-z]+)-([a-z]+)'] = "fe_$1_$2";
 $route['([a-z]+)-([a-z]+)/add'] = "fe_$1_$2/add_$1_$2";
 $route['([a-z]+)-([a-z]+)/edit/(:num)'] = "fe_$1_$2/edit_$1_$2";
 $route['([a-z]+)-([a-z]+)/submit'] = "fe_$1_$2/submit_$1_$2";
 $route['([a-z]+)-([a-z]+)/del'] = "fe_$1_$2/del_$1_$2";
 $route['([a-z]+)-([a-z]+)/detail/(:num)'] = "fe_$1_$2/detail_$1_$2";
+
+
+$route['transaksi-agen'] = "fe_transaksi/transaksi_agen";
 
 $route['perubahan-pangkalan'] = "fe_pangkalan/perubahan_pangkalan";
 $route['profile/password'] = "fe_profile/edit_password";

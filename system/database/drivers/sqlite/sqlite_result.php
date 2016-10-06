@@ -40,19 +40,6 @@ class CI_DB_sqlite_result extends CI_DB_result {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Number of fields in the result set
-	 *
-	 * @access	public
-	 * @return	integer
-	 */
-	function num_fields()
-	{
-		return @sqlite_num_fields($this->result_id);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Fetch Field Names
 	 *
 	 * Generates an array of column names
@@ -69,6 +56,19 @@ class CI_DB_sqlite_result extends CI_DB_result {
 		}
 
 		return $field_names;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Number of fields in the result set
+	 *
+	 * @access    public
+	 * @return    integer
+	 */
+	function num_fields()
+	{
+		return @sqlite_num_fields($this->result_id);
 	}
 
 	// --------------------------------------------------------------------

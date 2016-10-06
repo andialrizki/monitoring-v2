@@ -52,6 +52,24 @@ class CI_Jquery extends CI_Javascript {
 	// --------------------------------------------------------------------	
 
 	/**
+	 * Script Tag
+	 *
+	 * Outputs the script tag that loads the jquery.js file into an HTML document
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    string
+	 */
+	function script($library_src = '', $relative = FALSE)
+	{
+		$library_src = $this->external($library_src, $relative);
+		$this->jquery_code_for_load[] = $library_src;
+		return $library_src;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Blur
 	 *
 	 * Outputs a jQuery blur event
@@ -69,6 +87,53 @@ class CI_Jquery extends CI_Javascript {
 	// --------------------------------------------------------------------
 	
 	/**
+	 * Add Event
+	 *
+	 * Constructs the syntax for an event, and adds to into the array for compilation
+	 *
+	 * @access    private
+	 * @param    string    The element to attach the event to
+	 * @param    string    The code to execute
+	 * @param    string    The event to pass
+	 * @return    string
+	 */
+	function _add_event($element, $js, $event)
+	{
+		if (is_array($js)) {
+			$js = implode("\n\t\t", $js);
+
+		}
+
+		$event = "\n\t$(" . $this->_prep_element($element) . ").{$event}(function(){\n\t\t{$js}\n\t});\n";
+		$this->jquery_code_for_compile[] = $event;
+		return $event;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep Element
+	 *
+	 * Puts HTML element in quotes for use in jQuery code
+	 * unless the supplied element is the Javascript 'this'
+	 * object, in which case no quotes are added
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    string
+	 */
+	function _prep_element($element)
+	{
+		if ($element != 'this') {
+			$element = '"' . $element . '"';
+		}
+
+		return $element;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Change
 	 *
 	 * Outputs a jQuery change event
@@ -82,7 +147,7 @@ class CI_Jquery extends CI_Javascript {
 	{
 		return $this->_add_event($element, $js, 'change');
 	}
-	
+
 	// --------------------------------------------------------------------
 	
 	/**
@@ -234,9 +299,9 @@ class CI_Jquery extends CI_Javascript {
 	{
 		return $this->_add_event($element, $js, 'load');
 	}	
-	
+
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Mousedown
 	 *
@@ -253,7 +318,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Mouse Out
 	 *
@@ -270,7 +335,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Mouse Over
 	 *
@@ -328,8 +393,10 @@ class CI_Jquery extends CI_Javascript {
 		}
 	}
 
-	// --------------------------------------------------------------------
-
+	// --------------------------------------------------------------------	 
+	// Effects
+	// --------------------------------------------------------------------	
+	
 	/**
 	 * Resize
 	 *
@@ -361,9 +428,9 @@ class CI_Jquery extends CI_Javascript {
 	{
 		return $this->_add_event($element, $js, 'scroll');
 	}
-	
-	// --------------------------------------------------------------------
 
+	// --------------------------------------------------------------------
+		
 	/**
 	 * Unload
 	 *
@@ -379,9 +446,7 @@ class CI_Jquery extends CI_Javascript {
 		return $this->_add_event($element, $js, 'unload');
 	}
 
-	// --------------------------------------------------------------------	 
-	// Effects
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 	
 	/**
 	 * Add Class
@@ -442,7 +507,29 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
-		
+
+	/**
+	 * Validate Speed
+	 *
+	 * Ensures the speed parameter is valid for jQuery
+	 *
+	 * @access    private
+	 * @param    string
+	 * @return    string
+	 */
+	function _validate_speed($speed)
+	{
+		if (in_array($speed, array('slow', 'normal', 'fast'))) {
+			$speed = '"' . $speed . '"';
+		} elseif (preg_match("/[^0-9]/", $speed)) {
+			$speed = '';
+		}
+
+		return $speed;
+	}
+
+	// --------------------------------------------------------------------
+
 	/**
 	 * Fade In
 	 *
@@ -524,7 +611,7 @@ class CI_Jquery extends CI_Javascript {
 
 		return $str;
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -544,7 +631,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
-			
+
 	/**
 	 * Slide Up
 	 *
@@ -570,7 +657,7 @@ class CI_Jquery extends CI_Javascript {
 		
 		return $str;
 	}
-		
+
 	// --------------------------------------------------------------------
 	
 	/**
@@ -600,7 +687,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Slide Toggle
 	 *
@@ -626,9 +713,12 @@ class CI_Jquery extends CI_Javascript {
 		
 		return $str;
 	}
-		
+
+
 	// --------------------------------------------------------------------
-	
+	// Pre-written handy stuff
+	// --------------------------------------------------------------------
+	 
 	/**
 	 * Toggle
 	 *
@@ -644,7 +734,11 @@ class CI_Jquery extends CI_Javascript {
 		$str  = "$({$element}).toggle();";
 		return $str;
 	}
-	
+
+
+
+	// --------------------------------------------------------------------
+	// Plugins
 	// --------------------------------------------------------------------
 	
 	/**
@@ -664,7 +758,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 	
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Show
 	 *
@@ -737,11 +831,8 @@ class CI_Jquery extends CI_Javascript {
 		return $updater;
 	}
 
+	// --------------------------------------------------------------------
 
-	// --------------------------------------------------------------------
-	// Pre-written handy stuff
-	// --------------------------------------------------------------------
-	 
 	/**
 	 * Zebra tables
 	 *
@@ -766,12 +857,8 @@ class CI_Jquery extends CI_Javascript {
 		return $zebra;
 	}
 
-
-
 	// --------------------------------------------------------------------
-	// Plugins
-	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Corner Plugin
 	 *
@@ -793,7 +880,6 @@ class CI_Jquery extends CI_Javascript {
 
 		return "$(" . $this->_prep_element($element) . ").corner(".$corner_style.");";
 	}
-	
 	// --------------------------------------------------------------------
 
 	/**
@@ -825,6 +911,8 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
+	// Class functions
+	// --------------------------------------------------------------------
 
 	/**
 	 * Plugin
@@ -853,6 +941,7 @@ class CI_Jquery extends CI_Javascript {
 	{
 		$this->jquery_code_for_load[] = $this->external($src, $relative);
 	}
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -897,34 +986,6 @@ class CI_Jquery extends CI_Javascript {
 	{
 		$this->jquery_code_for_compile[] = "\t$(" . $this->_prep_element($table) . ").tablesorter($options);\n";
 	}
-	
-	// --------------------------------------------------------------------
-	// Class functions
-	// --------------------------------------------------------------------
-
-	/**
-	 * Add Event
-	 *
-	 * Constructs the syntax for an event, and adds to into the array for compilation
-	 *
-	 * @access	private
-	 * @param	string	The element to attach the event to
-	 * @param	string	The code to execute
-	 * @param	string	The event to pass
-	 * @return	string
-	 */	
-	function _add_event($element, $js, $event)
-	{
-		if (is_array($js))
-		{
-			$js = implode("\n\t\t", $js);
-
-		}
-
-		$event = "\n\t$(" . $this->_prep_element($element) . ").{$event}(function(){\n\t\t{$js}\n\t});\n";
-		$this->jquery_code_for_compile[] = $event;
-		return $event;
-	}
 
 	// --------------------------------------------------------------------
 
@@ -961,7 +1022,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 	
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Clear Compile
 	 *
@@ -976,7 +1037,7 @@ class CI_Jquery extends CI_Javascript {
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Document Ready
 	 *
@@ -997,72 +1058,6 @@ class CI_Jquery extends CI_Javascript {
 		{
 			$this->jquery_code_for_compile[] = $script;
 		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Script Tag
-	 *
-	 * Outputs the script tag that loads the jquery.js file into an HTML document
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function script($library_src = '', $relative = FALSE)
-	{
-		$library_src = $this->external($library_src, $relative);
-		$this->jquery_code_for_load[] = $library_src;
-		return $library_src;
-	}
-	
-	// --------------------------------------------------------------------
-
-	/**
-	 * Prep Element
-	 *
-	 * Puts HTML element in quotes for use in jQuery code
-	 * unless the supplied element is the Javascript 'this'
-	 * object, in which case no quotes are added
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function _prep_element($element)
-	{
-		if ($element != 'this')
-		{
-			$element = '"'.$element.'"';
-		}
-		
-		return $element;
-	}
-	
-	// --------------------------------------------------------------------
-
-	/**
-	 * Validate Speed
-	 *
-	 * Ensures the speed parameter is valid for jQuery
-	 *
-	 * @access	private
-	 * @param	string
-	 * @return	string
-	 */	
-	function _validate_speed($speed)
-	{
-		if (in_array($speed, array('slow', 'normal', 'fast')))
-		{
-			$speed = '"'.$speed.'"';
-		}
-		elseif (preg_match("/[^0-9]/", $speed))
-		{
-			$speed = '';
-		}
-	
-		return $speed;
 	}
 
 }

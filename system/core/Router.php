@@ -176,79 +176,87 @@ class CI_Router {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set the default controller
+	 *  Set the directory name
 	 *
-	 * @access	private
+	 * @access    public
+	 * @param    string
 	 * @return	void
 	 */
-	function _set_default_controller()
+	function set_directory($dir)
 	{
-		if ($this->default_controller === FALSE)
-		{
-			show_error("Unable to determine what should be displayed. A default route has not been specified in the routing file.");
-		}
-		// Is the method being specified?
-		if (strpos($this->default_controller, '/') !== FALSE)
-		{
-			$x = explode('/', $this->default_controller);
-
-			$this->set_class($x[0]);
-			$this->set_method($x[1]);
-			$this->_set_request($x);
-		}
-		else
-		{
-			$this->set_class($this->default_controller);
-			$this->set_method('index');
-			$this->_set_request(array($this->default_controller, 'index'));
-		}
-
-		// re-index the routed segments array so it starts with 1 rather than 0
-		$this->uri->_reindex_segments();
-
-		log_message('debug', "No URI present. Default controller set.");
+		$this->directory = str_replace(array('/', '.'), '', $dir) . '/';
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set the Route
+	 *  Fetch the sub-directory (if any) that contains the requested controller class
 	 *
-	 * This function takes an array of URI segments as
-	 * input, and sets the current class/method
+	 * @access    public
+	 * @return    string
+	 */
+	function fetch_directory()
+	{
+		return $this->directory;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the class name
 	 *
-	 * @access	private
-	 * @param	array
-	 * @param	bool
+	 * @access    public
+	 * @param    string
+	 * @return    void
+	 */
+	function set_class($class)
+	{
+		$this->class = str_replace(array('/', '.'), '', $class);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Fetch the current class
+	 *
+	 * @access    public
+	 * @return    string
+	 */
+	function fetch_class()
+	{
+		return $this->class;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 *  Set the method name
+	 *
+	 * @access    public
+	 * @param    string
 	 * @return	void
 	 */
-	function _set_request($segments = array())
+	function set_method($method)
 	{
-		$segments = $this->_validate_request($segments);
+		$this->method = $method;
+	}
 
-		if (count($segments) == 0)
+	// --------------------------------------------------------------------
+
+	/**
+	 *  Fetch the current method
+	 *
+	 * @access    public
+	 * @return    string
+	 */
+	function fetch_method()
+	{
+		if ($this->method == $this->fetch_class())
 		{
-			return $this->_set_default_controller();
+			return 'index';
 		}
 
-		$this->set_class($segments[0]);
-
-		if (isset($segments[1]))
-		{
-			// A standard method request
-			$this->set_method($segments[1]);
-		}
-		else
-		{
-			// This lets the "routed" segment array identify that the default
-			// index method is being used.
-			$segments[1] = 'index';
-		}
-
-		// Update our "routed" segment array to contain the segments.
-		// Note: If there is no custom routing, this array will be
-		// identical to $this->uri->segments
-		$this->uri->rsegments = $segments;
+		return $this->method;
 	}
 
 	// --------------------------------------------------------------------
@@ -351,6 +359,76 @@ class CI_Router {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set the default controller
+	 *
+	 * @access    private
+	 * @return    void
+	 */
+	function _set_default_controller()
+	{
+		if ($this->default_controller === FALSE) {
+			show_error("Unable to determine what should be displayed. A default route has not been specified in the routing file.");
+		}
+		// Is the method being specified?
+		if (strpos($this->default_controller, '/') !== FALSE) {
+			$x = explode('/', $this->default_controller);
+
+			$this->set_class($x[0]);
+			$this->set_method($x[1]);
+			$this->_set_request($x);
+		} else {
+			$this->set_class($this->default_controller);
+			$this->set_method('index');
+			$this->_set_request(array($this->default_controller, 'index'));
+		}
+
+		// re-index the routed segments array so it starts with 1 rather than 0
+		$this->uri->_reindex_segments();
+
+		log_message('debug', "No URI present. Default controller set.");
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the Route
+	 *
+	 * This function takes an array of URI segments as
+	 * input, and sets the current class/method
+	 *
+	 * @access    private
+	 * @param    array
+	 * @param    bool
+	 * @return    void
+	 */
+	function _set_request($segments = array())
+	{
+		$segments = $this->_validate_request($segments);
+
+		if (count($segments) == 0) {
+			return $this->_set_default_controller();
+		}
+
+		$this->set_class($segments[0]);
+
+		if (isset($segments[1])) {
+			// A standard method request
+			$this->set_method($segments[1]);
+		} else {
+			// This lets the "routed" segment array identify that the default
+			// index method is being used.
+			$segments[1] = 'index';
+		}
+
+		// Update our "routed" segment array to contain the segments.
+		// Note: If there is no custom routing, this array will be
+		// identical to $this->uri->segments
+		$this->uri->rsegments = $segments;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 *  Parse Routes
 	 *
 	 * This function matches any routes that may exist in
@@ -393,92 +471,6 @@ class CI_Router {
 		// If we got this far it means we didn't encounter a
 		// matching route so we'll set the site default route
 		$this->_set_request($this->uri->segments);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set the class name
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	void
-	 */
-	function set_class($class)
-	{
-		$this->class = str_replace(array('/', '.'), '', $class);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Fetch the current class
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function fetch_class()
-	{
-		return $this->class;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Set the method name
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	void
-	 */
-	function set_method($method)
-	{
-		$this->method = $method;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Fetch the current method
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function fetch_method()
-	{
-		if ($this->method == $this->fetch_class())
-		{
-			return 'index';
-		}
-
-		return $this->method;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Set the directory name
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	void
-	 */
-	function set_directory($dir)
-	{
-		$this->directory = str_replace(array('/', '.'), '', $dir).'/';
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Fetch the sub-directory (if any) that contains the requested controller class
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function fetch_directory()
-	{
-		return $this->directory;
 	}
 
 	// --------------------------------------------------------------------

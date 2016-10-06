@@ -107,12 +107,10 @@ class CI_Driver_Library {
  * @link
  */
 class CI_Driver {
+	private static $reflections = array();
 	protected $parent;
-
 	private $methods = array();
 	private $properties = array();
-
-	private static $reflections = array();
 
 	/**
 	 * Decorate

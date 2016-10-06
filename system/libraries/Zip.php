@@ -147,6 +147,33 @@ class CI_Zip  {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Read the contents of a file and add it to the zip
+	 *
+	 * @access    public
+	 * @return    bool
+	 */
+	function read_file($path, $preserve_filepath = FALSE)
+	{
+		if (!file_exists($path)) {
+			return FALSE;
+		}
+
+		if (FALSE !== ($data = file_get_contents($path))) {
+			$name = str_replace("\\", "/", $path);
+
+			if ($preserve_filepath === FALSE) {
+				$name = preg_replace("|.*/(.+)|", "\\1", $name);
+			}
+
+			$this->add_data($name, $data);
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Add Data to Zip
 	 *
 	 * Lets you add files to the archive. If the path is included
@@ -231,36 +258,6 @@ class CI_Zip  {
 		$this->file_num++;
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Read the contents of a file and add it to the zip
-	 *
-	 * @access	public
-	 * @return	bool
-	 */
-	function read_file($path, $preserve_filepath = FALSE)
-	{
-		if ( ! file_exists($path))
-		{
-			return FALSE;
-		}
-
-		if (FALSE !== ($data = file_get_contents($path)))
-		{
-			$name = str_replace("\\", "/", $path);
-
-			if ($preserve_filepath === FALSE)
-			{
-				$name = preg_replace("|.*/(.+)|", "\\1", $name);
-			}
-
-			$this->add_data($name, $data);
-			return TRUE;
-		}
-		return FALSE;
-	}
-
 	// ------------------------------------------------------------------------
 
 	/**
@@ -320,44 +317,17 @@ class CI_Zip  {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Get the Zip file
-	 *
-	 * @access	public
-	 * @return	binary string
-	 */
-	function get_zip()
-	{
-		// Is there any data to return?
-		if ($this->entries == 0)
-		{
-			return FALSE;
-		}
-
-		$zip_data = $this->zipdata;
-		$zip_data .= $this->directory."\x50\x4b\x05\x06\x00\x00\x00\x00";
-		$zip_data .= pack('v', $this->entries); // total # of entries "on this disk"
-		$zip_data .= pack('v', $this->entries); // total # of entries overall
-		$zip_data .= pack('V', strlen($this->directory)); // size of central dir
-		$zip_data .= pack('V', strlen($this->zipdata)); // offset to start of central dir
-		$zip_data .= "\x00\x00"; // .zip file comment length
-
-		return $zip_data;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Write File to the specified directory
 	 *
 	 * Lets you write a file
 	 *
 	 * @access	public
-	 * @param	string	the file name
-	 * @return	bool
+	 * @param    string    the file name
+	 * @return    bool
 	 */
 	function archive($filepath)
 	{
-		if ( ! ($fp = @fopen($filepath, FOPEN_WRITE_CREATE_DESTRUCTIVE)))
+		if (!($fp = @fopen($filepath, FOPEN_WRITE_CREATE_DESTRUCTIVE)))
 		{
 			return FALSE;
 		}
@@ -368,6 +338,33 @@ class CI_Zip  {
 		fclose($fp);
 
 		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get the Zip file
+	 *
+	 * @access	public
+	 * @return    binary string
+	 */
+	function get_zip()
+	{
+		// Is there any data to return?
+		if ($this->entries == 0)
+		{
+			return FALSE;
+		}
+
+		$zip_data = $this->zipdata;
+		$zip_data .= $this->directory . "\x50\x4b\x05\x06\x00\x00\x00\x00";
+		$zip_data .= pack('v', $this->entries); // total # of entries "on this disk"
+		$zip_data .= pack('v', $this->entries); // total # of entries overall
+		$zip_data .= pack('V', strlen($this->directory)); // size of central dir
+		$zip_data .= pack('V', strlen($this->zipdata)); // offset to start of central dir
+		$zip_data .= "\x00\x00"; // .zip file comment length
+
+		return $zip_data;
 	}
 
 	// --------------------------------------------------------------------

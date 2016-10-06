@@ -63,6 +63,97 @@ class JSMin {
   // -- Protected Instance Methods ---------------------------------------------
 
   /**
+   * Perform minification, return result
+   *
+   * @uses action()
+   * @uses isAlphaNum()
+   * @return string
+   */
+  function min($js)
+  {
+
+    $this->input = str_replace("\r\n", "\n", $js);
+    $this->inputLength = strlen($this->input);
+
+    $this->a = "\n";
+    $this->action(self::ACTION_DELETE_A_B);
+
+    while ($this->a !== null) {
+      switch ($this->a) {
+        case ' ':
+          if ($this->isAlphaNum($this->b)) {
+            $this->action(self::ACTION_KEEP_A);
+          } else {
+            $this->action(self::ACTION_DELETE_A);
+          }
+          break;
+
+        case "\n":
+          switch ($this->b) {
+            case '{':
+            case '[':
+            case '(':
+            case '+':
+            case '-':
+              $this->action(self::ACTION_KEEP_A);
+              break;
+
+            case ' ':
+              $this->action(self::ACTION_DELETE_A_B);
+              break;
+
+            default:
+              if ($this->isAlphaNum($this->b)) {
+                $this->action(self::ACTION_KEEP_A);
+              } else {
+                $this->action(self::ACTION_DELETE_A);
+              }
+          }
+          break;
+
+        default:
+          switch ($this->b) {
+            case ' ':
+              if ($this->isAlphaNum($this->a)) {
+                $this->action(self::ACTION_KEEP_A);
+                break;
+              }
+
+              $this->action(self::ACTION_DELETE_A_B);
+              break;
+
+            case "\n":
+              switch ($this->a) {
+                case '}':
+                case ']':
+                case ')':
+                case '+':
+                case '-':
+                case '"':
+                case "'":
+                  $this->action(self::ACTION_KEEP_A);
+                  break;
+
+                default:
+                  if ($this->isAlphaNum($this->a)) {
+                    $this->action(self::ACTION_KEEP_A);
+                  } else {
+                    $this->action(self::ACTION_DELETE_A_B);
+                  }
+              }
+              break;
+
+            default:
+              $this->action(self::ACTION_KEEP_A);
+              break;
+          }
+      }
+    }
+
+    return $this->output;
+  }
+
+  /**
    * Action -- do something! What to do is determined by the $command argument.
    *
    * action treats a string as a single character. Wow!
@@ -187,107 +278,6 @@ class JSMin {
   }
 
   /**
-   * Is $c a letter, digit, underscore, dollar sign, or non-ASCII character.
-   *
-   * @return bool
-   */
-  protected function isAlphaNum($c) {
-    return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
-  }
-
-  /**
-   * Perform minification, return result
-   *
-   * @uses action()
-   * @uses isAlphaNum()
-   * @return string
-   */
-  function min($js) {
-  	
-  	$this->input       = str_replace("\r\n", "\n", $js);
-    $this->inputLength = strlen($this->input);
-  	
-    $this->a = "\n";
-    $this->action(self::ACTION_DELETE_A_B);
-
-    while ($this->a !== null) {
-      switch ($this->a) {
-        case ' ':
-          if ($this->isAlphaNum($this->b)) {
-            $this->action(self::ACTION_KEEP_A);
-          } else {
-            $this->action(self::ACTION_DELETE_A);
-          }
-          break;
-
-        case "\n":
-          switch ($this->b) {
-            case '{':
-            case '[':
-            case '(':
-            case '+':
-            case '-':
-              $this->action(self::ACTION_KEEP_A);
-              break;
-
-            case ' ':
-              $this->action(self::ACTION_DELETE_A_B);
-              break;
-
-            default:
-              if ($this->isAlphaNum($this->b)) {
-                $this->action(self::ACTION_KEEP_A);
-              }
-              else {
-                $this->action(self::ACTION_DELETE_A);
-              }
-          }
-          break;
-
-        default:
-          switch ($this->b) {
-            case ' ':
-              if ($this->isAlphaNum($this->a)) {
-                $this->action(self::ACTION_KEEP_A);
-                break;
-              }
-
-              $this->action(self::ACTION_DELETE_A_B);
-              break;
-
-            case "\n":
-              switch ($this->a) {
-                case '}':
-                case ']':
-                case ')':
-                case '+':
-                case '-':
-                case '"':
-                case "'":
-                  $this->action(self::ACTION_KEEP_A);
-                  break;
-
-                default:
-                  if ($this->isAlphaNum($this->a)) {
-                    $this->action(self::ACTION_KEEP_A);
-                  }
-                  else {
-                    $this->action(self::ACTION_DELETE_A_B);
-                  }
-              }
-              break;
-
-            default:
-              $this->action(self::ACTION_KEEP_A);
-              break;
-          }
-      }
-    }
-
-    return $this->output;
-  }
-
-  /**
    * Get the next character, skipping over comments. peek() is used to see
    *  if a '/' is followed by a '/' or '*'.
    *
@@ -344,6 +334,16 @@ class JSMin {
   protected function peek() {
     $this->lookAhead = $this->get();
     return $this->lookAhead;
+  }
+
+  /**
+   * Is $c a letter, digit, underscore, dollar sign, or non-ASCII character.
+   *
+   * @return bool
+   */
+  protected function isAlphaNum($c)
+  {
+    return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
   }
 }
 

@@ -43,17 +43,7 @@
         public $gfpoly;
     
         //----------------------------------------------------------------------
-        public function modnn($x)
-        {
-            while ($x >= $this->nn) {
-                $x -= $this->nn;
-                $x = ($x >> $this->mm) + ($x & $this->nn);
-            }
-            
-            return $x;
-        }
-        
-        //----------------------------------------------------------------------
+
         public static function init_rs_char($symsize, $gfpoly, $fcr, $prim, $nroots, $pad)
         {
             // Common code for intializing a Reed-Solomon control block (char or int symbols)
@@ -140,6 +130,19 @@
         }
         
         //----------------------------------------------------------------------
+
+        public function modnn($x)
+        {
+            while ($x >= $this->nn) {
+                $x -= $this->nn;
+                $x = ($x >> $this->mm) + ($x & $this->nn);
+            }
+
+            return $x;
+        }
+
+        //----------------------------------------------------------------------
+
         public function encode_rs_char($data, &$parity)
         {
             $MM       =& $this->mm;

@@ -243,6 +243,48 @@ class CI_Typography {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Format Newlines
+	 *
+	 * Converts newline characters into either <p> tags or <br />
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    string
+	 */
+	function _format_newlines($str)
+	{
+		if ($str == '') {
+			return $str;
+		}
+
+		if (strpos($str, "\n") === FALSE && !in_array($this->last_block_element, $this->inner_block_required)) {
+			return $str;
+		}
+
+		// Convert two consecutive newlines to paragraphs
+		$str = str_replace("\n\n", "</p>\n\n<p>", $str);
+
+		// Convert single spaces to <br /> tags
+		$str = preg_replace("/([^\n])(\n)([^\n])/", "\\1<br />\\2\\3", $str);
+
+		// Wrap the whole enchilada in enclosing paragraphs
+		if ($str != "\n") {
+			// We trim off the right-side new line so that the closing </p> tag
+			// will be positioned immediately following the string, matching
+			// the behavior of the opening <p> tag
+			$str = '<p>' . rtrim($str) . '</p>';
+		}
+
+		// Remove empty paragraphs if they are on the first line, as this
+		// is a potential unintended consequence of the previous code
+		$str = preg_replace("/<p><\/p>(.*)/", "\\1", $str, 1);
+
+		return $str;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Format Characters
 	 *
 	 * This function mainly converts double and single quotes
@@ -304,51 +346,6 @@ class CI_Typography {
 		}
 
 		return preg_replace(array_keys($table), $table, $str);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Format Newlines
-	 *
-	 * Converts newline characters into either <p> tags or <br />
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function _format_newlines($str)
-	{
-		if ($str == '')
-		{
-			return $str;
-		}
-
-		if (strpos($str, "\n") === FALSE  && ! in_array($this->last_block_element, $this->inner_block_required))
-		{
-			return $str;
-		}
-
-		// Convert two consecutive newlines to paragraphs
-		$str = str_replace("\n\n", "</p>\n\n<p>", $str);
-
-		// Convert single spaces to <br /> tags
-		$str = preg_replace("/([^\n])(\n)([^\n])/", "\\1<br />\\2\\3", $str);
-
-		// Wrap the whole enchilada in enclosing paragraphs
-		if ($str != "\n")
-		{
-			// We trim off the right-side new line so that the closing </p> tag
-			// will be positioned immediately following the string, matching
-			// the behavior of the opening <p> tag
-			$str =  '<p>'.rtrim($str).'</p>';
-		}
-
-		// Remove empty paragraphs if they are on the first line, as this
-		// is a potential unintended consequence of the previous code
-		$str = preg_replace("/<p><\/p>(.*)/", "\\1", $str, 1);
-
-		return $str;
 	}
 
 	// ------------------------------------------------------------------------

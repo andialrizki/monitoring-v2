@@ -45,6 +45,36 @@ class CI_DB_Cache {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Retrieve a cached query
+	 *
+	 * The URI being requested will become the name of the cache sub-folder.
+	 * An MD5 hash of the SQL statement will become the cache file name
+	 *
+	 * @access    public
+	 * @return    string
+	 */
+	function read($sql)
+	{
+		if (!$this->check_path()) {
+			return $this->db->cache_off();
+		}
+
+		$segment_one = ($this->CI->uri->segment(1) == FALSE) ? 'default' : $this->CI->uri->segment(1);
+
+		$segment_two = ($this->CI->uri->segment(2) == FALSE) ? 'index' : $this->CI->uri->segment(2);
+
+		$filepath = $this->db->cachedir . $segment_one . '+' . $segment_two . '/' . md5($sql);
+
+		if (FALSE === ($cachedata = read_file($filepath))) {
+			return FALSE;
+		}
+
+		return unserialize($cachedata);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Set Cache Directory Path
 	 *
 	 * @access	public
@@ -74,38 +104,6 @@ class CI_DB_Cache {
 
 		$this->db->cachedir = $path;
 		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Retrieve a cached query
-	 *
-	 * The URI being requested will become the name of the cache sub-folder.
-	 * An MD5 hash of the SQL statement will become the cache file name
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function read($sql)
-	{
-		if ( ! $this->check_path())
-		{
-			return $this->db->cache_off();
-		}
-
-		$segment_one = ($this->CI->uri->segment(1) == FALSE) ? 'default' : $this->CI->uri->segment(1);
-
-		$segment_two = ($this->CI->uri->segment(2) == FALSE) ? 'index' : $this->CI->uri->segment(2);
-
-		$filepath = $this->db->cachedir.$segment_one.'+'.$segment_two.'/'.md5($sql);
-
-		if (FALSE === ($cachedata = read_file($filepath)))
-		{
-			return FALSE;
-		}
-
-		return unserialize($cachedata);
 	}
 
 	// --------------------------------------------------------------------

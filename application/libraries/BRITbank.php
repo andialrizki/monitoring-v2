@@ -5,7 +5,7 @@
 /**
 * 
 */
-class BRITbank
+class Britbank
 {
 	
 

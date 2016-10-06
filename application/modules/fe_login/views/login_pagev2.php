@@ -64,13 +64,13 @@
       <?php endif ?>
         <p>Sign into your pages account</p>
         <form method="post" action="<?php echo site_url('sign-in/auth'); ?>">
-            <div class="form-group form-material floating">
-                <input type="text" class="form-control empty" id="inputName" name="username">
-                <label class="floating-label" for="inputName">Username</label>
+            <div class="form-group form-material ">
+                <input type="text" class="form-control" id="inputName" name="username" placeholder="Username">
+                <!-- <label class="floating-label" for="inputName">Username</label> -->
             </div>
-            <div class="form-group form-material floating">
-                <input type="password" class="form-control empty" id="inputPassword" name="password">
-                <label class="floating-label" for="inputPassword">Password</label>
+            <div class="form-group form-material">
+                <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password">
+                <!-- <label class="floating-label" for="inputPassword">Password</label> -->
             </div>
             <button type="submit" class="btn btn-primary btn-block">Sign in</button>
         </form>

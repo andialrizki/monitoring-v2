@@ -25,20 +25,6 @@
     class QRtools {
     
         //----------------------------------------------------------------------
-        public static function binarize($frame)
-        {
-            $len = count($frame);
-            foreach ($frame as &$frameLine) {
-                
-                for($i=0; $i<$len; $i++) {
-                    $frameLine[$i] = (ord($frameLine[$i])&1)?'1':'0';
-                }
-            }
-            
-            return $frame;
-        }
-        
-        //----------------------------------------------------------------------
         public static function tcpdfBarcodeArray($code, $mode = 'QR,L', $tcPdfVersion = '4.5.037')
         {
             $barcode_array = array();
@@ -70,12 +56,14 @@
         }
         
         //----------------------------------------------------------------------
+
         public static function clearCache()
         {
             self::$frames = array();
         }
         
         //----------------------------------------------------------------------
+
         public static function buildCache()
         {
 			QRtools::markTime('before_build_cache');
@@ -98,6 +86,35 @@
         }
 
         //----------------------------------------------------------------------
+
+        public static function markTime($markerId)
+        {
+            list($usec, $sec) = explode(" ", microtime());
+            $time = ((float)$usec + (float)$sec);
+
+            if (!isset($GLOBALS['qr_time_bench']))
+                $GLOBALS['qr_time_bench'] = array();
+
+            $GLOBALS['qr_time_bench'][$markerId] = $time;
+        }
+
+        //----------------------------------------------------------------------
+
+        public static function binarize($frame)
+        {
+            $len = count($frame);
+            foreach ($frame as &$frameLine) {
+
+                for ($i = 0; $i < $len; $i++) {
+                    $frameLine[$i] = (ord($frameLine[$i]) & 1) ? '1' : '0';
+                }
+            }
+
+            return $frame;
+        }
+
+        //----------------------------------------------------------------------
+
         public static function log($outfile, $err)
         {
             if (QR_LOG_DIR !== false) {
@@ -112,6 +129,7 @@
         }
         
         //----------------------------------------------------------------------
+
         public static function dumpMask($frame) 
         {
             $width = count($frame);
@@ -123,18 +141,7 @@
         }
         
         //----------------------------------------------------------------------
-        public static function markTime($markerId)
-        {
-            list($usec, $sec) = explode(" ", microtime());
-            $time = ((float)$usec + (float)$sec);
-            
-            if (!isset($GLOBALS['qr_time_bench']))
-                $GLOBALS['qr_time_bench'] = array();
-            
-            $GLOBALS['qr_time_bench'][$markerId] = $time;
-        }
-        
-        //----------------------------------------------------------------------
+
         public static function timeBenchmark()
         {
             self::markTime('finish');

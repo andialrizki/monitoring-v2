@@ -30,19 +30,25 @@
         public $data = array();
         
         //----------------------------------------------------------------------
-        public function size()
+
+        public function appendNum($bits, $num)
         {
-            return count($this->data);
+            if ($bits == 0)
+                return 0;
+
+            $b = QRbitstream::newFromNum($bits, $num);
+
+            if (is_null($b))
+                return -1;
+
+            $ret = $this->append($b);
+            unset($b);
+
+            return $ret;
         }
         
         //----------------------------------------------------------------------
-        public function allocate($setLength)
-        {
-            $this->data = array_fill(0, $setLength, 0);
-            return 0;
-        }
-    
-        //----------------------------------------------------------------------
+
         public static function newFromNum($bits, $num)
         {
             $bstream = new QRbitstream();
@@ -60,31 +66,17 @@
 
             return $bstream;
         }
-        
+
         //----------------------------------------------------------------------
-        public static function newFromBytes($size, $data)
+
+        public function allocate($setLength)
         {
-            $bstream = new QRbitstream();
-            $bstream->allocate($size * 8);
-            $p=0;
-
-            for($i=0; $i<$size; $i++) {
-                $mask = 0x80;
-                for($j=0; $j<8; $j++) {
-                    if($data[$i] & $mask) {
-                        $bstream->data[$p] = 1;
-                    } else {
-                        $bstream->data[$p] = 0;
-                    }
-                    $p++;
-                    $mask = $mask >> 1;
-                }
-            }
-
-            return $bstream;
+            $this->data = array_fill(0, $setLength, 0);
+            return 0;
         }
         
         //----------------------------------------------------------------------
+
         public function append(QRbitstream $arg)
         {
             if (is_null($arg)) {
@@ -106,23 +98,14 @@
         }
         
         //----------------------------------------------------------------------
-        public function appendNum($bits, $num)
+
+        public function size()
         {
-            if ($bits == 0) 
-                return 0;
-
-            $b = QRbitstream::newFromNum($bits, $num);
-            
-            if(is_null($b))
-                return -1;
-
-            $ret = $this->append($b);
-            unset($b);
-
-            return $ret;
+            return count($this->data);
         }
 
         //----------------------------------------------------------------------
+
         public function appendBytes($size, $data)
         {
             if ($size == 0) 
@@ -138,8 +121,33 @@
 
             return $ret;
         }
+
+        //----------------------------------------------------------------------
+
+        public static function newFromBytes($size, $data)
+        {
+            $bstream = new QRbitstream();
+            $bstream->allocate($size * 8);
+            $p = 0;
+
+            for ($i = 0; $i < $size; $i++) {
+                $mask = 0x80;
+                for ($j = 0; $j < 8; $j++) {
+                    if ($data[$i] & $mask) {
+                        $bstream->data[$p] = 1;
+                    } else {
+                        $bstream->data[$p] = 0;
+                    }
+                    $p++;
+                    $mask = $mask >> 1;
+                }
+            }
+
+            return $bstream;
+        }
         
         //----------------------------------------------------------------------
+
         public function toByte()
         {
         

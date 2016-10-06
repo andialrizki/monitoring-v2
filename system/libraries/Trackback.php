@@ -125,94 +125,156 @@ class CI_Trackback {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Receive Trackback  Data
+	 * Set error message
 	 *
-	 * This function simply validates the incoming TB data.
-	 * It returns FALSE on failure and TRUE on success.
-	 * If the data is valid it is set to the $this->data array
-	 * so that it can be inserted into a database.
-	 *
-	 * @access	public
-	 * @return	bool
+	 * @access    public
+	 * @param    string
+	 * @return    void
 	 */
-	function receive()
+	function set_error($msg)
 	{
-		foreach (array('url', 'title', 'blog_name', 'excerpt') as $val)
-		{
-			if ( ! isset($_POST[$val]) OR $_POST[$val] == '')
-			{
-				$this->set_error('The following required POST variable is missing: '.$val);
-				return FALSE;
-			}
-
-			$this->data['charset'] = ( ! isset($_POST['charset'])) ? 'auto' : strtoupper(trim($_POST['charset']));
-
-			if ($val != 'url' && function_exists('mb_convert_encoding'))
-			{
-				$_POST[$val] = mb_convert_encoding($_POST[$val], $this->charset, $this->data['charset']);
-			}
-
-			$_POST[$val] = ($val != 'url') ? $this->convert_xml(strip_tags($_POST[$val])) : strip_tags($_POST[$val]);
-
-			if ($val == 'excerpt')
-			{
-				$_POST['excerpt'] = $this->limit_characters($_POST['excerpt']);
-			}
-
-			$this->data[$val] = $_POST[$val];
-		}
-
-		return TRUE;
+		log_message('error', $msg);
+		$this->error_msg[] = $msg;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Send Trackback Error Message
+	 * Extract Trackback URLs
 	 *
-	 * Allows custom errors to be set.  By default it
-	 * sends the "incomplete information" error, as that's
-	 * the most common one.
+	 * This function lets multiple trackbacks be sent.
+	 * It takes a string of URLs (separated by comma or
+	 * space) and puts each URL into an array
+	 *
+	 * @access	public
+	 * @param    string
+	 * @return    string
+	 */
+	function extract_urls($urls)
+	{
+		// Remove the pesky white space and replace with a comma.
+		$urls = preg_replace("/\s*(\S+)\s*/", "\\1,", $urls);
+
+		// If they use commas get rid of the doubles.
+		$urls = str_replace(",,", ",", $urls);
+
+		// Remove any comma that might be at the end
+		if (substr($urls, -1) == ",") {
+			$urls = substr($urls, 0, -1);
+		}
+
+		// Break into an array via commas
+		$urls = preg_split('/[,]/', $urls);
+
+		// Removes duplicates
+		$urls = array_unique($urls);
+
+		array_walk($urls, array($this, 'validate_url'));
+
+		return $urls;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Character limiter
+	 *
+	 * Limits the string based on the character count. Will preserve complete words.
 	 *
 	 * @access	public
 	 * @param	string
-	 * @return	void
+	 * @param    integer
+	 * @param    string
+	 * @return    string
 	 */
-	function send_error($message = 'Incomplete Information')
+	function limit_characters($str, $n = 500, $end_char = '&#8230;')
 	{
-		echo "<?xml version=\"1.0\" encoding=\"utf-8\"?".">\n<response>\n<error>1</error>\n<message>".$message."</message>\n</response>";
-		exit;
+		if (strlen($str) < $n) {
+			return $str;
+		}
+
+		$str = preg_replace("/\s+/", ' ', str_replace(array("\r\n", "\r", "\n"), ' ', $str));
+
+		if (strlen($str) <= $n) {
+			return $str;
+		}
+
+		$out = "";
+		foreach (explode(' ', trim($str)) as $val) {
+			$out .= $val . ' ';
+			if (strlen($out) >= $n) {
+				return trim($out) . $end_char;
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Send Trackback Success Message
-	 *
-	 * This should be called when a trackback has been
-	 * successfully received and inserted.
+	 * Convert Reserved XML characters to Entities
 	 *
 	 * @access	public
-	 * @return	void
+	 * @param    string
+	 * @return    string
 	 */
-	function send_success()
+	function convert_xml($str)
 	{
-		echo "<?xml version=\"1.0\" encoding=\"utf-8\"?".">\n<response>\n<error>0</error>\n</response>";
-		exit;
+		$temp = '__TEMP_AMPERSANDS__';
+
+		$str = preg_replace("/&#(\d+);/", "$temp\\1;", $str);
+		$str = preg_replace("/&(\w+);/", "$temp\\1;", $str);
+
+		$str = str_replace(array("&", "<", ">", "\"", "'", "-"),
+			array("&amp;", "&lt;", "&gt;", "&quot;", "&#39;", "&#45;"),
+			$str);
+
+		$str = preg_replace("/$temp(\d+);/", "&#\\1;", $str);
+		$str = preg_replace("/$temp(\w+);/", "&\\1;", $str);
+
+		return $str;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Fetch a particular item
+	 * High ASCII to Entities
+	 *
+	 * Converts Hight ascii text and MS Word special chars
+	 * to character entities
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	function data($item)
+	function convert_ascii($str)
 	{
-		return ( ! isset($this->data[$item])) ? '' : $this->data[$item];
+		$count = 1;
+		$out = '';
+		$temp = array();
+
+		for ($i = 0, $s = strlen($str); $i < $s; $i++) {
+			$ordinal = ord($str[$i]);
+
+			if ($ordinal < 128) {
+				$out .= $str[$i];
+			} else {
+				if (count($temp) == 0) {
+					$count = ($ordinal < 224) ? 2 : 3;
+				}
+
+				$temp[] = $ordinal;
+
+				if (count($temp) == $count) {
+					$number = ($count == 3) ? (($temp['0'] % 16) * 4096) + (($temp['1'] % 64) * 64) + ($temp['2'] % 64) : (($temp['0'] % 32) * 64) + ($temp['1'] % 64);
+
+					$out .= '&#' . $number . ';';
+					$count = 1;
+					$temp = array();
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	// --------------------------------------------------------------------
@@ -287,65 +349,6 @@ class CI_Trackback {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Extract Trackback URLs
-	 *
-	 * This function lets multiple trackbacks be sent.
-	 * It takes a string of URLs (separated by comma or
-	 * space) and puts each URL into an array
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function extract_urls($urls)
-	{
-		// Remove the pesky white space and replace with a comma.
-		$urls = preg_replace("/\s*(\S+)\s*/", "\\1,", $urls);
-
-		// If they use commas get rid of the doubles.
-		$urls = str_replace(",,", ",", $urls);
-
-		// Remove any comma that might be at the end
-		if (substr($urls, -1) == ",")
-		{
-			$urls = substr($urls, 0, -1);
-		}
-
-		// Break into an array via commas
-		$urls = preg_split('/[,]/', $urls);
-
-		// Removes duplicates
-		$urls = array_unique($urls);
-
-		array_walk($urls, array($this, 'validate_url'));
-
-		return $urls;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Validate URL
-	 *
-	 * Simply adds "http://" if missing
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	function validate_url($url)
-	{
-		$url = trim($url);
-
-		if (substr($url, 0, 4) != "http")
-		{
-			$url = "http://".$url;
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Find the Trackback URL's ID
 	 *
 	 * @access	public
@@ -395,129 +398,110 @@ class CI_Trackback {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Convert Reserved XML characters to Entities
+	 * Receive Trackback  Data
+	 *
+	 * This function simply validates the incoming TB data.
+	 * It returns FALSE on failure and TRUE on success.
+	 * If the data is valid it is set to the $this->data array
+	 * so that it can be inserted into a database.
 	 *
 	 * @access	public
-	 * @param	string
-	 * @return	string
+	 * @return    bool
 	 */
-	function convert_xml($str)
+	function receive()
 	{
-		$temp = '__TEMP_AMPERSANDS__';
+		foreach (array('url', 'title', 'blog_name', 'excerpt') as $val) {
+			if (!isset($_POST[$val]) OR $_POST[$val] == '') {
+				$this->set_error('The following required POST variable is missing: ' . $val);
+				return FALSE;
+			}
 
-		$str = preg_replace("/&#(\d+);/", "$temp\\1;", $str);
-		$str = preg_replace("/&(\w+);/",  "$temp\\1;", $str);
+			$this->data['charset'] = (!isset($_POST['charset'])) ? 'auto' : strtoupper(trim($_POST['charset']));
 
-		$str = str_replace(array("&","<",">","\"", "'", "-"),
-							array("&amp;", "&lt;", "&gt;", "&quot;", "&#39;", "&#45;"),
-							$str);
+			if ($val != 'url' && function_exists('mb_convert_encoding')) {
+				$_POST[$val] = mb_convert_encoding($_POST[$val], $this->charset, $this->data['charset']);
+			}
 
-		$str = preg_replace("/$temp(\d+);/","&#\\1;",$str);
-		$str = preg_replace("/$temp(\w+);/","&\\1;", $str);
+			$_POST[$val] = ($val != 'url') ? $this->convert_xml(strip_tags($_POST[$val])) : strip_tags($_POST[$val]);
 
-		return $str;
+			if ($val == 'excerpt') {
+				$_POST['excerpt'] = $this->limit_characters($_POST['excerpt']);
+			}
+
+			$this->data[$val] = $_POST[$val];
+		}
+
+		return TRUE;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Character limiter
+	 * Send Trackback Error Message
 	 *
-	 * Limits the string based on the character count. Will preserve complete words.
+	 * Allows custom errors to be set.  By default it
+	 * sends the "incomplete information" error, as that's
+	 * the most common one.
 	 *
 	 * @access	public
 	 * @param	string
-	 * @param	integer
-	 * @param	string
-	 * @return	string
+	 * @return    void
 	 */
-	function limit_characters($str, $n = 500, $end_char = '&#8230;')
+	function send_error($message = 'Incomplete Information')
 	{
-		if (strlen($str) < $n)
-		{
-			return $str;
-		}
-
-		$str = preg_replace("/\s+/", ' ', str_replace(array("\r\n", "\r", "\n"), ' ', $str));
-
-		if (strlen($str) <= $n)
-		{
-			return $str;
-		}
-
-		$out = "";
-		foreach (explode(' ', trim($str)) as $val)
-		{
-			$out .= $val.' ';
-			if (strlen($out) >= $n)
-			{
-				return trim($out).$end_char;
-			}
-		}
+		echo "<?xml version=\"1.0\" encoding=\"utf-8\"?" . ">\n<response>\n<error>1</error>\n<message>" . $message . "</message>\n</response>";
+		exit;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * High ASCII to Entities
+	 * Send Trackback Success Message
 	 *
-	 * Converts Hight ascii text and MS Word special chars
-	 * to character entities
+	 * This should be called when a trackback has been
+	 * successfully received and inserted.
 	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
+	 * @access    public
+	 * @return    void
 	 */
-	function convert_ascii($str)
+	function send_success()
 	{
-		$count	= 1;
-		$out	= '';
-		$temp	= array();
-
-		for ($i = 0, $s = strlen($str); $i < $s; $i++)
-		{
-			$ordinal = ord($str[$i]);
-
-			if ($ordinal < 128)
-			{
-				$out .= $str[$i];
-			}
-			else
-			{
-				if (count($temp) == 0)
-				{
-					$count = ($ordinal < 224) ? 2 : 3;
-				}
-
-				$temp[] = $ordinal;
-
-				if (count($temp) == $count)
-				{
-					$number = ($count == 3) ? (($temp['0'] % 16) * 4096) + (($temp['1'] % 64) * 64) + ($temp['2'] % 64) : (($temp['0'] % 32) * 64) + ($temp['1'] % 64);
-
-					$out .= '&#'.$number.';';
-					$count = 1;
-					$temp = array();
-				}
-			}
-		}
-
-		return $out;
+		echo "<?xml version=\"1.0\" encoding=\"utf-8\"?" . ">\n<response>\n<error>0</error>\n</response>";
+		exit;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set error message
+	 * Fetch a particular item
 	 *
 	 * @access	public
 	 * @param	string
-	 * @return	void
+	 * @return	string
 	 */
-	function set_error($msg)
+	function data($item)
 	{
-		log_message('error', $msg);
-		$this->error_msg[] = $msg;
+		return (!isset($this->data[$item])) ? '' : $this->data[$item];
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Validate URL
+	 *
+	 * Simply adds "http://" if missing
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return    string
+	 */
+	function validate_url($url)
+	{
+		$url = trim($url);
+
+		if (substr($url, 0, 4) != "http") {
+			$url = "http://" . $url;
+		}
 	}
 
 	// --------------------------------------------------------------------

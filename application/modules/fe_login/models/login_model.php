@@ -35,32 +35,9 @@ class Login_model extends CI_Model {
 
         return false;
     }
-    protected function _check_pelanggan($username, $password){
-        $this->db->where('id_pengecer', $username);
-        //$this->db->or_where('phone', $username);
-        $query = $this->db->get('tbl_pengecer');
-        if($query->num_rows() != 0) 
-        {
-            $dt = $query->row(); 
-            if ($dt->password == md5(sha1($password).'monitoringlpg')){ 
-                
-                // set session user login
-                $val = array(
-                    APP_PREFIX.'username' => $username,
-                    APP_PREFIX.'name' => $dt->name,
-                    APP_PREFIX.'id_admin' => $dt->id_pengecer,
-                    APP_PREFIX.'is_login' => true,
-                    APP_PREFIX.'type_admin' => 5,
-                );
-                $this->session->set_userdata($val);
-                return true; // fix
-            } else {
-                return false;   
-            }
-        }
-        return false;
-    }
-    protected function _check_bri($username, $password){
+
+    protected function _check_bri($username, $password)
+    {
         $this->db->where('username', $username);
         //$this->db->or_where('phone', $username);
         $query = $this->db->get('tbl_bri');
@@ -73,9 +50,9 @@ class Login_model extends CI_Model {
                 $val = array(
                     APP_PREFIX.'username' => $username,
                     APP_PREFIX.'name' => $dt->name,
-                    APP_PREFIX.'id_admin' => $dt->id_bri,
+                    APP_PREFIX . 'id_admin' => $dt->id_bri,
                     APP_PREFIX.'is_login' => true,
-                    APP_PREFIX.'type_admin' => 6,
+                    APP_PREFIX . 'type_admin' => 6,
                 );
                 $this->session->set_userdata($val);
                 return true; // fix
@@ -86,41 +63,35 @@ class Login_model extends CI_Model {
         return false;
     }
 
-
-    protected function _check_admin($username, $password){
-        $this->db->where('username', $username);
-        $this->db->limit(1);
-        $query = $this->db->get('tbl_admin');
+    protected function _check_pelanggan($username, $password)
+    {
+        $this->db->where('id_pengecer', $username);
+        //$this->db->or_where('phone', $username);
+        $query = $this->db->get('tbl_pengecer');
         if($query->num_rows() != 0) 
         {
-            foreach ($query->result() as $k) 
-            {
-                foreach ($k as $v => $value) 
-                {
-                    if ($v == 'password' && $password != Modules::run('myhelper/decrypt_text', $value)) {
-                        return false;
-                    }
-
-                    $$v = $value;
-                }
+            $dt = $query->row(); 
+            if ($dt->password == md5(sha1($password).'monitoringlpg')){ 
+                
+                // set session user login
+                $val = array(
+                    APP_PREFIX.'username' => $username,
+                    APP_PREFIX.'name' => $dt->name,
+                    APP_PREFIX . 'id_admin' => $dt->id_pengecer,
+                    APP_PREFIX.'is_login' => true,
+                    APP_PREFIX . 'type_admin' => 5,
+                );
+                $this->session->set_userdata($val);
+                return true; // fix
+            } else {
+                return false;   
             }
-            // set session user login
-            $val = array(
-                APP_PREFIX.'username' => $username,
-                APP_PREFIX.'name' => $name,
-                APP_PREFIX.'id_admin' => $id_admin,
-                APP_PREFIX.'is_login' => true,
-                APP_PREFIX.'status' => $status,
-                APP_PREFIX.'type_admin' => 0,
-            );
-            $this->session->set_userdata($val);
-            $this->update_login($id_admin);
-            return true; // fix
         }
         return false;
     }
 
-    protected function _check_pangkalan($username, $password){
+    protected function _check_pangkalan($username, $password)
+    {
         $this->db->where('no_registrasi', $username);
         $this->db->limit(1);
         $query = $this->db->get('tbl_pangkalan');
@@ -139,11 +110,11 @@ class Login_model extends CI_Model {
             }
             // set session user login
             $val = array(
-                APP_PREFIX.'username' => $no_registrasi,
+                APP_PREFIX . 'username' => $no_registrasi,
                 APP_PREFIX.'name' => $name,
-                APP_PREFIX.'id_admin' => $id_pangkalan,
+                APP_PREFIX . 'id_admin' => $id_pangkalan,
                 APP_PREFIX.'is_login' => true,
-                APP_PREFIX.'type_admin' => 2,
+                APP_PREFIX . 'type_admin' => 2,
             );
             $this->session->set_userdata($val);
             return true; // fix
@@ -151,6 +122,37 @@ class Login_model extends CI_Model {
         return false;
     }
 
+    protected function _check_agen($username, $password)
+    {
+        $this->db->where('username', $username);
+        $this->db->limit(1);
+        $query = $this->db->get('tbl_agen');
+        if($query->num_rows() != 0) 
+        {
+            foreach ($query->result() as $k) 
+            {
+                foreach ($k as $v => $value) 
+                {
+                    if ($v == 'password' && $password != Modules::run('myhelper/decrypt_text', $value)) {
+                        return false;
+                    }
+
+                    $$v = $value;
+                }
+            }
+            // set session user login
+            $val = array(
+                APP_PREFIX . 'username' => $username,
+                APP_PREFIX.'name' => $name,
+                APP_PREFIX . 'id_admin' => $id,
+                APP_PREFIX.'is_login' => true,
+                APP_PREFIX . 'type_admin' => 3,
+            );
+            $this->session->set_userdata($val);
+            return true; // fix
+        }
+        return false;
+    }
 
     protected function _check_spbe($username, $password){
         $this->db->where('username', $username);
@@ -183,10 +185,11 @@ class Login_model extends CI_Model {
         return false;
     }
 
-    protected function _check_agen($username, $password){
+    protected function _check_admin($username, $password)
+    {
         $this->db->where('username', $username);
         $this->db->limit(1);
-        $query = $this->db->get('tbl_agen');
+        $query = $this->db->get('tbl_admin');
         if($query->num_rows() != 0) 
         {
             foreach ($query->result() as $k) 
@@ -204,11 +207,13 @@ class Login_model extends CI_Model {
             $val = array(
                 APP_PREFIX.'username' => $username,
                 APP_PREFIX.'name' => $name,
-                APP_PREFIX.'id_admin' => $id,
+                APP_PREFIX . 'id_admin' => $id_admin,
                 APP_PREFIX.'is_login' => true,
-                APP_PREFIX.'type_admin' => 3,
+                APP_PREFIX . 'status' => $status,
+                APP_PREFIX . 'type_admin' => 0,
             );
             $this->session->set_userdata($val);
+            $this->update_login($id_admin);
             return true; // fix
         }
         return false;

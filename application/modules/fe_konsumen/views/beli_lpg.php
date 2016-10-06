@@ -23,26 +23,39 @@
                 <h3 class="panel-title">Beli LPG Tanpa Bawa Uang Tunai</h3>
             </div>
             <div class="panel-body container-fluid">
-                <p>
-                    Anda hanya dapat membeli LPG dipangkalan yang telah Anda pilih saat mendaftar, Anda dapat langsung mendatangi Pangkalan 
-                    <b><?php echo isset($data['name']) ? $data['name'] : ''; ?></b> di alamat <?php echo isset($data['address']) ? $data['address'] : ''; ?>. Anda dapat melakukan pembayaran langsung/tunai atau memanfaatkan layanan Tbank dari BRI yang telah terintegrasi dengan sistem kami.
-                </p>
-                <p>
-                    Jika Anda ingin melakukan pembayaran dengan menggunakan BRI Tbank namun belum mendaftar sebagai pengguna Tbank berikut syarat yang perlu Anda penuhi:<br>
+                <div class="col-sm-4">
+
+                    <img src="<?php echo base_url() ?>assets/images/bri_tbank.png" class="img-responsive">
+                </div>
+                <div class="col-sm-8">
+                    <p>
+                        Anda hanya dapat membeli LPG dipangkalan yang telah Anda pilih saat mendaftar, Anda dapat
+                        langsung mendatangi Pangkalan
+                        <b><?php echo isset($data['name']) ? $data['name'] : ''; ?></b> di
+                        alamat <?php echo isset($data['address']) ? $data['address'] : ''; ?>. Anda dapat melakukan
+                        pembayaran langsung/tunai atau memanfaatkan layanan Tbank dari BRI yang telah terintegrasi
+                        dengan sistem kami.
+                    </p>
+                    <p>
+                        Jika Anda ingin melakukan pembayaran dengan menggunakan BRI Tbank namun belum mendaftar sebagai
+                        pengguna Tbank berikut syarat yang perlu Anda penuhi:<br>
                     <ol>
                         <li>Memiliki KTP</li>
                         <li>Memiliki nomor handphone yang aktif (karena akan digunakan sebagai no. rekening)</li>
                     </ol>
-                    Setelah Anda mendaftar dan punya rekening Tbank, langkah terakhir Anda hanya perlu mengisi saldo/Topup ke rekening Tbank Anda di agen-agen Tbank BRI terdekat.<br>
-                    Apabila saldo Anda sudah terisi maka Anda dapat melakukan transaksi (pembelian LPG 3kg) melalui layanan BRI Tbank tanpa perlu lagi Anda membawa uang tunai.
-                </p>
-                <p>
-                    Syarat lain yg harus terpenuhi adalah:<br>
+                    Setelah Anda mendaftar dan punya rekening Tbank, langkah terakhir Anda hanya perlu mengisi
+                    saldo/Topup ke rekening Tbank Anda di agen-agen Tbank BRI terdekat.<br>
+                    Apabila saldo Anda sudah terisi maka Anda dapat melakukan transaksi (pembelian LPG 3kg) melalui
+                    layanan BRI Tbank tanpa perlu lagi Anda membawa uang tunai.
+                    </p>
+                    <p>
+                        Syarat lain yg harus terpenuhi adalah:<br>
                     <ol>
                         <li>Pangkalan LPG harus mempunyai rekening Tbank</li>
                         <li>Saldo Anda mencukupi (akan dicek otomatis oleh sistem)</li>
                     </ol>
-                </p>
+                    </p>
+                </div>
                 <hr>
                 <div class="col-sm-6">
                     <b>Cek Saldo Tbank Anda</b>

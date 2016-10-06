@@ -81,6 +81,44 @@ class CI_Table {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Prep Args
+	 *
+	 * Ensures a standard associative array format for all cell data
+	 *
+	 * @access    public
+	 * @param    type
+	 * @return    type
+	 */
+	function _prep_args($args)
+	{
+		// If there is no $args[0], skip this and treat as an associative array
+		// This can happen if there is only a single key, for example this is passed to table->generate
+		// array(array('foo'=>'bar'))
+		if (isset($args[0]) AND (count($args) == 1 && is_array($args[0]))) {
+			// args sent as indexed array
+			if (!isset($args[0]['data'])) {
+				foreach ($args[0] as $key => $val) {
+					if (is_array($val) && isset($val['data'])) {
+						$args[$key] = $val;
+					} else {
+						$args[$key] = array('data' => $val);
+					}
+				}
+			}
+		} else {
+			foreach ($args as $key => $val) {
+				if (!is_array($val)) {
+					$args[$key] = array('data' => $val);
+				}
+			}
+		}
+
+		return $args;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Set columns.  Takes a one-dimensional array as input and creates
 	 * a multi-dimensional array with a depth equal to the number of
 	 * columns.  This allows a single array with many elements to  be
@@ -157,54 +195,6 @@ class CI_Table {
 	{
 		$args = func_get_args();
 		$this->rows[] = $this->_prep_args($args);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Prep Args
-	 *
-	 * Ensures a standard associative array format for all cell data
-	 *
-	 * @access	public
-	 * @param	type
-	 * @return	type
-	 */
-	function _prep_args($args)
-	{
-		// If there is no $args[0], skip this and treat as an associative array
-		// This can happen if there is only a single key, for example this is passed to table->generate
-		// array(array('foo'=>'bar'))
-		if (isset($args[0]) AND (count($args) == 1 && is_array($args[0])))
-		{
-			// args sent as indexed array
-			if ( ! isset($args[0]['data']))
-			{
-				foreach ($args[0] as $key => $val)
-				{
-					if (is_array($val) && isset($val['data']))
-					{
-						$args[$key] = $val;
-					}
-					else
-					{
-						$args[$key] = array('data' => $val);
-					}
-				}
-			}
-		}
-		else
-		{
-			foreach ($args as $key => $val)
-			{
-				if ( ! is_array($val))
-				{
-					$args[$key] = array('data' => $val);
-				}
-			}
-		}
-
-		return $args;
 	}
 
 	// --------------------------------------------------------------------
@@ -376,21 +366,6 @@ class CI_Table {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Clears the table arrays.  Useful if multiple tables are being generated
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function clear()
-	{
-		$this->rows				= array();
-		$this->heading			= array();
-		$this->auto_heading		= TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Set table data from a database result object
 	 *
 	 * @access	public
@@ -521,6 +496,21 @@ class CI_Table {
 
 						'table_close'			=> '</table>'
 					);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Clears the table arrays.  Useful if multiple tables are being generated
+	 *
+	 * @access    public
+	 * @return    void
+	 */
+	function clear()
+	{
+		$this->rows = array();
+		$this->heading = array();
+		$this->auto_heading = TRUE;
 	}
 
 

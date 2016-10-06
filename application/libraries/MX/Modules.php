@@ -107,7 +107,34 @@ class Modules
 		
 		return self::$registry[$alias];
 	}
-	
+
+	/** Load a module file **/
+	public static function load_file($file, $path, $type = 'other', $result = TRUE)
+	{
+
+		$file = str_replace(EXT, '', $file);
+		$location = $path . $file . EXT;
+
+		if ($type === 'other') {
+			if (class_exists($file, FALSE)) {
+				log_message('debug', "File already loaded: {$location}");
+				return $result;
+			}
+			include_once $location;
+		} else {
+
+			/* load config or language array */
+			include $location;
+
+			if (!isset($$type) OR !is_array($$type))
+				show_error("{$location} does not contain a valid {$type} array");
+
+			$result = $$type;
+		}
+		log_message('debug', "File loaded: {$location}");
+		return $result;
+	}
+
 	/** Library base class autoload **/
 	public static function autoload($class) {
 		
@@ -133,30 +160,31 @@ class Modules
 		}		
 	}
 
-	/** Load a module file **/
-	public static function load_file($file, $path, $type = 'other', $result = TRUE)	{
-		
-		$file = str_replace(EXT, '', $file);		
-		$location = $path.$file.EXT;
-		
-		if ($type === 'other') {			
-			if (class_exists($file, FALSE))	{
-				log_message('debug', "File already loaded: {$location}");				
-				return $result;
-			}	
-			include_once $location;
-		} else { 
-		
-			/* load config or language array */
-			include $location;
+	/** Parse module routes **/
+	public static function parse_routes($module, $uri)
+	{
 
-			if ( ! isset($$type) OR ! is_array($$type))				
-				show_error("{$location} does not contain a valid {$type} array");
-
-			$result = $$type;
+		/* load the route file */
+		if (!isset(self::$routes[$module])) {
+			if (list($path) = self::find('routes', $module, 'config/') AND $path)
+				self::$routes[$module] = self::load_file('routes', $path, 'route');
 		}
-		log_message('debug', "File loaded: {$location}");
-		return $result;
+
+		if (!isset(self::$routes[$module])) return;
+
+		/* parse module routes */
+		foreach (self::$routes[$module] as $key => $val) {
+
+			$key = str_replace(array(':any', ':num'), array('.+', '[0-9]+'), $key);
+
+			if (preg_match('#^' . $key . '$#', $uri)) {
+				if (strpos($val, '$') !== FALSE AND strpos($key, '(') !== FALSE) {
+					$val = preg_replace('#^' . $key . '$#', $val, $uri);
+				}
+
+				return explode('/', $module . '/' . $val);
+			}
+		}
 	}
 
 	/** 
@@ -191,31 +219,5 @@ class Modules
 		}
 		
 		return array(FALSE, $file);	
-	}
-	
-	/** Parse module routes **/
-	public static function parse_routes($module, $uri) {
-		
-		/* load the route file */
-		if ( ! isset(self::$routes[$module])) {
-			if (list($path) = self::find('routes', $module, 'config/') AND $path)
-				self::$routes[$module] = self::load_file('routes', $path, 'route');
-		}
-
-		if ( ! isset(self::$routes[$module])) return;
-			
-		/* parse module routes */
-		foreach (self::$routes[$module] as $key => $val) {						
-					
-			$key = str_replace(array(':any', ':num'), array('.+', '[0-9]+'), $key);
-			
-			if (preg_match('#^'.$key.'$#', $uri)) {							
-				if (strpos($val, '$') !== FALSE AND strpos($key, '(') !== FALSE) {
-					$val = preg_replace('#^'.$key.'$#', $val, $uri);
-				}
-
-				return explode('/', $module.'/'.$val);
-			}
-		}
 	}
 }

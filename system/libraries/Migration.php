@@ -84,6 +84,52 @@ class CI_Migration {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set's the schema to the latest migration
+	 *
+	 * @return    mixed    true if already latest, false if failed, int if upgraded
+	 */
+	public function latest()
+	{
+		if (!$migrations = $this->find_migrations()) {
+			$this->_error_string = $this->lang->line('migration_none_found');
+			return false;
+		}
+
+		$last_migration = basename(end($migrations));
+
+		// Calculate the last migration step from existing migration
+		// filenames and procceed to the standard version migration
+		return $this->version((int)substr($last_migration, 0, 3));
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set's the schema to the latest migration
+	 *
+	 * @return    mixed    true if already latest, false if failed, int if upgraded
+	 */
+	protected function find_migrations()
+	{
+		// Load all *_*.php files in the migrations path
+		$files = glob($this->_migration_path . '*_*.php');
+		$file_count = count($files);
+
+		for ($i = 0; $i < $file_count; $i++) {
+			// Mark wrongly formatted files as false for later filtering
+			$name = basename($files[$i], '.php');
+			if (!preg_match('/^\d{3}_(\w+)$/', $name)) {
+				$files[$i] = FALSE;
+			}
+		}
+
+		sort($files);
+		return $files;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Migrate to a schema version
 	 *
 	 * Calls each migration step required to get to the schema version of
@@ -212,23 +258,29 @@ class CI_Migration {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set's the schema to the latest migration
+	 * Retrieves current schema version
 	 *
-	 * @return	mixed	true if already latest, false if failed, int if upgraded
+	 * @return    int    Current Migration
 	 */
-	public function latest()
+	protected function _get_version()
 	{
-		if ( ! $migrations = $this->find_migrations())
-		{
-			$this->_error_string = $this->lang->line('migration_none_found');
-			return false;
-		}
+		$row = $this->db->get('migrations')->row();
+		return $row ? $row->version : 0;
+	}
 
-		$last_migration = basename(end($migrations));
+	// --------------------------------------------------------------------
 
-		// Calculate the last migration step from existing migration
-		// filenames and procceed to the standard version migration
-		return $this->version((int) substr($last_migration, 0, 3));
+	/**
+	 * Stores the current schema version
+	 *
+	 * @param    int    Migration reached
+	 * @return    bool
+	 */
+	protected function _update_version($migrations)
+	{
+		return $this->db->update('migrations', array(
+			'version' => $migrations
+		));
 	}
 
 	// --------------------------------------------------------------------
@@ -253,61 +305,6 @@ class CI_Migration {
 	public function error_string()
 	{
 		return $this->_error_string;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set's the schema to the latest migration
-	 *
-	 * @return	mixed	true if already latest, false if failed, int if upgraded
-	 */
-	protected function find_migrations()
-	{
-		// Load all *_*.php files in the migrations path
-		$files = glob($this->_migration_path . '*_*.php');
-		$file_count = count($files);
-
-		for ($i = 0; $i < $file_count; $i++)
-		{
-			// Mark wrongly formatted files as false for later filtering
-			$name = basename($files[$i], '.php');
-			if ( ! preg_match('/^\d{3}_(\w+)$/', $name))
-			{
-				$files[$i] = FALSE;
-			}
-		}
-
-		sort($files);
-		return $files;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Retrieves current schema version
-	 *
-	 * @return	int	Current Migration
-	 */
-	protected function _get_version()
-	{
-		$row = $this->db->get('migrations')->row();
-		return $row ? $row->version : 0;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Stores the current schema version
-	 *
-	 * @param	int	Migration reached
-	 * @return	bool
-	 */
-	protected function _update_version($migrations)
-	{
-		return $this->db->update('migrations', array(
-			'version' => $migrations
-		));
 	}
 
 	// --------------------------------------------------------------------

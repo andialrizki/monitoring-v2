@@ -22,6 +22,12 @@ class Fe_tbank extends MX_Controller
 			echo substr($json, 1, strlen($json)-2);
 		}
 	}
+
+	private function is_ajax()
+	{
+		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+	}
+
 	public function transfer_tbank()
 	{
 		if ($this->is_ajax()) {
@@ -31,6 +37,7 @@ class Fe_tbank extends MX_Controller
 			echo substr($json, 1, strlen($json)-2);
 		}
 	}
+
 	public function input_transaksi()
 	{
 		if ($this->is_ajax()) {
@@ -49,10 +56,6 @@ class Fe_tbank extends MX_Controller
 			}
 		}
 
-	}
-
-	private function is_ajax(){
-		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 	}
 
 }

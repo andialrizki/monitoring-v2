@@ -126,6 +126,29 @@ class CI_Unit_test {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Generate a backtrace
+	 *
+	 * This lets us show file names and line numbers
+	 *
+	 * @access    private
+	 * @return    array
+	 */
+	function _backtrace()
+	{
+		if (function_exists('debug_backtrace')) {
+			$back = debug_backtrace();
+
+			$file = (!isset($back['1']['file'])) ? '' : $back['1']['file'];
+			$line = (!isset($back['1']['line'])) ? '' : $back['1']['line'];
+
+			return array('file' => $file, 'line' => $line);
+		}
+		return array('file' => 'Unknown', 'line' => 'Unknown');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Generate a report
 	 *
 	 * Displays a table with the test data
@@ -174,38 +197,6 @@ class CI_Unit_test {
 		}
 
 		return $r;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Use strict comparison
-	 *
-	 * Causes the evaluation to use === rather than ==
-	 *
-	 * @access	public
-	 * @param	bool
-	 * @return	null
-	 */
-	function use_strict($state = TRUE)
-	{
-		$this->strict = ($state == FALSE) ? FALSE : TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Make Unit testing active
-	 *
-	 * Enables/disables unit testing
-	 *
-	 * @access	public
-	 * @param	bool
-	 * @return	null
-	 */
-	function active($state = TRUE)
-	{
-		$this->active = ($state == FALSE) ? FALSE : TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -269,41 +260,32 @@ class CI_Unit_test {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set the template
+	 * Parse Template
 	 *
-	 * This lets us set the template to be used to display results
+	 * Harvests the data within the template {pseudo-variables}
 	 *
-	 * @access	public
-	 * @param	string
+	 * @access    private
 	 * @return	void
 	 */
-	function set_template($template)
+	function _parse_template()
 	{
-		$this->_template = $template;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Generate a backtrace
-	 *
-	 * This lets us show file names and line numbers
-	 *
-	 * @access	private
-	 * @return	array
-	 */
-	function _backtrace()
-	{
-		if (function_exists('debug_backtrace'))
-		{
-			$back = debug_backtrace();
-
-			$file = ( ! isset($back['1']['file'])) ? '' : $back['1']['file'];
-			$line = ( ! isset($back['1']['line'])) ? '' : $back['1']['line'];
-
-			return array('file' => $file, 'line' => $line);
+		if (!is_null($this->_template_rows)) {
+			return;
 		}
-		return array('file' => 'Unknown', 'line' => 'Unknown');
+
+		if (is_null($this->_template))
+		{
+			$this->_default_template();
+			return;
+		}
+
+		if (!preg_match("/\{rows\}(.*?)\{\/rows\}/si", $this->_template, $match)) {
+			$this->_default_template();
+			return;
+		}
+
+		$this->_template_rows = $match['1'];
+		$this->_template = str_replace($match['0'], '{rows}', $this->_template);
 	}
 
 	// --------------------------------------------------------------------
@@ -329,34 +311,49 @@ class CI_Unit_test {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Parse Template
+	 * Use strict comparison
 	 *
-	 * Harvests the data within the template {pseudo-variables}
+	 * Causes the evaluation to use === rather than ==
 	 *
-	 * @access	private
-	 * @return	void
+	 * @access    public
+	 * @param    bool
+	 * @return    null
 	 */
-	function _parse_template()
+	function use_strict($state = TRUE)
 	{
-		if ( ! is_null($this->_template_rows))
-		{
-			return;
-		}
+		$this->strict = ($state == FALSE) ? FALSE : TRUE;
+	}
 
-		if (is_null($this->_template))
-		{
-			$this->_default_template();
-			return;
-		}
+	// --------------------------------------------------------------------
 
-		if ( ! preg_match("/\{rows\}(.*?)\{\/rows\}/si", $this->_template, $match))
-		{
-			$this->_default_template();
-			return;
-		}
+	/**
+	 * Make Unit testing active
+	 *
+	 * Enables/disables unit testing
+	 *
+	 * @access    public
+	 * @param    bool
+	 * @return    null
+	 */
+	function active($state = TRUE)
+	{
+		$this->active = ($state == FALSE) ? FALSE : TRUE;
+	}
 
-		$this->_template_rows = $match['1'];
-		$this->_template = str_replace($match['0'], '{rows}', $this->_template);
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the template
+	 *
+	 * This lets us set the template to be used to display results
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    void
+	 */
+	function set_template($template)
+	{
+		$this->_template = $template;
 	}
 
 }

@@ -52,6 +52,38 @@ class CI_Cache extends CI_Driver_Library {
 	// ------------------------------------------------------------------------
 
 	/**
+	 * Initialize
+	 *
+	 * Initialize class properties based on the configuration array.
+	 *
+	 * @param    array
+	 * @return    void
+	 */
+	private function _initialize($config)
+	{
+		$default_config = array(
+			'adapter',
+			'memcached'
+		);
+
+		foreach ($default_config as $key) {
+			if (isset($config[$key])) {
+				$param = '_' . $key;
+
+				$this->{$param} = $config[$key];
+			}
+		}
+
+		if (isset($config['backup'])) {
+			if (in_array('cache_' . $config['backup'], $this->valid_drivers)) {
+				$this->_backup_driver = $config['backup'];
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
 	 * Get
 	 *
 	 * Look for a value in the cache.  If it exists, return the data
@@ -135,37 +167,21 @@ class CI_Cache extends CI_Driver_Library {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Initialize
+	 * __get()
 	 *
-	 * Initialize class properties based on the configuration array.
-	 *
-	 * @param	array
-	 * @return 	void
+	 * @param    child
+	 * @return    object
 	 */
-	private function _initialize($config)
+	public function __get($child)
 	{
-		$default_config = array(
-				'adapter',
-				'memcached'
-			);
+		$obj = parent::__get($child);
 
-		foreach ($default_config as $key)
+		if (!$this->is_supported($child))
 		{
-			if (isset($config[$key]))
-			{
-				$param = '_'.$key;
-
-				$this->{$param} = $config[$key];
-			}
+			$this->_adapter = $this->_backup_driver;
 		}
 
-		if (isset($config['backup']))
-		{
-			if (in_array('cache_'.$config['backup'], $this->valid_drivers))
-			{
-				$this->_backup_driver = $config['backup'];
-			}
-		}
+		return $obj;
 	}
 
 	// ------------------------------------------------------------------------
@@ -186,26 +202,6 @@ class CI_Cache extends CI_Driver_Library {
 		}
 
 		return $support[$driver];
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * __get()
-	 *
-	 * @param 	child
-	 * @return 	object
-	 */
-	public function __get($child)
-	{
-		$obj = parent::__get($child);
-
-		if ( ! $this->is_supported($child))
-		{
-			$this->_adapter = $this->_backup_driver;
-		}
-
-		return $obj;
 	}
 
 }

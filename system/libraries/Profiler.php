@@ -98,6 +98,35 @@ class CI_Profiler {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Run the Profiler
+	 *
+	 * @return    string
+	 */
+	public function run()
+	{
+		$output = "<div id='codeigniter_profiler' style='clear:both;background-color:#fff;padding:10px;'>";
+		$fields_displayed = 0;
+
+		foreach ($this->_available_sections as $section) {
+			if ($this->_compile_{$section} !== FALSE) {
+				$func = "_compile_{$section}";
+				$output .= $this->{$func}();
+				$fields_displayed++;
+			}
+		}
+
+		if ($fields_displayed == 0) {
+			$output .= '<p style="border:1px solid #5a0099;padding:10px;margin:20px 0;background-color:#eee">' . $this->CI->lang->line('profiler_no_profiles') . '</p>';
+		}
+
+		$output .= '</div>';
+
+		return $output;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Auto Profiler
 	 *
 	 * This function cycles through the entire array of mark points and
@@ -145,6 +174,7 @@ class CI_Profiler {
 
 		return $output;
 	}
+
 
 	// --------------------------------------------------------------------
 
@@ -238,7 +268,6 @@ class CI_Profiler {
 
 		return $output;
 	}
-
 
 	// --------------------------------------------------------------------
 
@@ -516,38 +545,6 @@ class CI_Profiler {
 
 		$output .= '</table>';
 		$output .= "</fieldset>";
-		return $output;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Run the Profiler
-	 *
-	 * @return	string
-	 */
-	public function run()
-	{
-		$output = "<div id='codeigniter_profiler' style='clear:both;background-color:#fff;padding:10px;'>";
-		$fields_displayed = 0;
-
-		foreach ($this->_available_sections as $section)
-		{
-			if ($this->_compile_{$section} !== FALSE)
-			{
-				$func = "_compile_{$section}";
-				$output .= $this->{$func}();
-				$fields_displayed++;
-			}
-		}
-
-		if ($fields_displayed == 0)
-		{
-			$output .= '<p style="border:1px solid #5a0099;padding:10px;margin:20px 0;background-color:#eee">'.$this->CI->lang->line('profiler_no_profiles').'</p>';
-		}
-
-		$output .= '</div>';
-
 		return $output;
 	}
 }

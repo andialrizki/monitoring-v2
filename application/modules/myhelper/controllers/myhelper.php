@@ -25,20 +25,6 @@ class Myhelper extends MX_Controller {
     return( $param );
   }
 
-  public function decrypt_text($value)
-  {
-    $key = 'DmgOu7610sgU4Yqm17u59JLgu13UE4ta';
-    $param = Keepme::decrypt( $value, $key, 256 );
-    return( $param );
-  }
-
-  public function get_data_table($tabel_name, $field, $option = 'where 1', $option2 = 0) 
-  {
-    $result = $this->myhelper_model->get_data_table($tabel_name, $field, $option, $option2);
-
-    return $result;
-  }
-
   public function get_data($tabel_name)
   {
     return $this->myhelper_model->get_data($tabel_name);    
@@ -126,6 +112,13 @@ class Myhelper extends MX_Controller {
       echo $return;
   }
 
+    public function decrypt_text($value)
+    {
+        $key = 'DmgOu7610sgU4Yqm17u59JLgu13UE4ta';
+        $param = Keepme::decrypt($value, $key, 256);
+        return ($param);
+    }
+
   public function cekusername()
   {
       $username = $this->input->post('username', TRUE);
@@ -145,6 +138,13 @@ class Myhelper extends MX_Controller {
       }else{
           echo ($username_ex === true) ? 'nok':'ok';
       }
+  }
+
+    public function get_data_table($tabel_name, $field, $option = 'where 1', $option2 = 0)
+    {
+        $result = $this->myhelper_model->get_data_table($tabel_name, $field, $option, $option2);
+
+        return $result;
   }
 
   public function ceklimit()

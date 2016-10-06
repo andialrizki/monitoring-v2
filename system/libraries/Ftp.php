@@ -119,6 +119,22 @@ class CI_FTP {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Display error message
+	 *
+	 * @access	private
+	 * @param    string
+	 * @return	bool
+	 */
+	function _error($line)
+	{
+		$CI =& get_instance();
+		$CI->lang->load('ftp');
+		show_error($CI->lang->line($line));
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * FTP Login
 	 *
 	 * @access	private
@@ -132,173 +148,23 @@ class CI_FTP {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Validates the connection ID
-	 *
-	 * @access	private
-	 * @return	bool
-	 */
-	function _is_conn()
-	{
-		if ( ! is_resource($this->conn_id))
-		{
-			if ($this->debug == TRUE)
-			{
-				$this->_error('ftp_no_connection');
-			}
-			return FALSE;
-		}
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-
-	/**
-	 * Change directory
-	 *
-	 * The second parameter lets us momentarily turn off debugging so that
-	 * this function can be used to test for the existence of a folder
-	 * without throwing an error.  There's no FTP equivalent to is_dir()
-	 * so we do it by trying to change to a particular directory.
-	 * Internally, this parameter is only used by the "mirror" function below.
-	 *
-	 * @access	public
-	 * @param	string
-	 * @param	bool
-	 * @return	bool
-	 */
-	function changedir($path = '', $supress_debug = FALSE)
-	{
-		if ($path == '' OR ! $this->_is_conn())
-		{
-			return FALSE;
-		}
-
-		$result = @ftp_chdir($this->conn_id, $path);
-
-		if ($result === FALSE)
-		{
-			if ($this->debug == TRUE AND $supress_debug == FALSE)
-			{
-				$this->_error('ftp_unable_to_changedir');
-			}
-			return FALSE;
-		}
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Create a directory
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	bool
-	 */
-	function mkdir($path = '', $permissions = NULL)
-	{
-		if ($path == '' OR ! $this->_is_conn())
-		{
-			return FALSE;
-		}
-
-		$result = @ftp_mkdir($this->conn_id, $path);
-
-		if ($result === FALSE)
-		{
-			if ($this->debug == TRUE)
-			{
-				$this->_error('ftp_unable_to_makdir');
-			}
-			return FALSE;
-		}
-
-		// Set file permissions if needed
-		if ( ! is_null($permissions))
-		{
-			$this->chmod($path, (int)$permissions);
-		}
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Upload a file to the server
-	 *
-	 * @access	public
-	 * @param	string
-	 * @param	string
-	 * @param	string
-	 * @return	bool
-	 */
-	function upload($locpath, $rempath, $mode = 'auto', $permissions = NULL)
-	{
-		if ( ! $this->_is_conn())
-		{
-			return FALSE;
-		}
-
-		if ( ! file_exists($locpath))
-		{
-			$this->_error('ftp_no_source_file');
-			return FALSE;
-		}
-
-		// Set the mode if not specified
-		if ($mode == 'auto')
-		{
-			// Get the file extension so we can set the upload type
-			$ext = $this->_getext($locpath);
-			$mode = $this->_settype($ext);
-		}
-
-		$mode = ($mode == 'ascii') ? FTP_ASCII : FTP_BINARY;
-
-		$result = @ftp_put($this->conn_id, $rempath, $locpath, $mode);
-
-		if ($result === FALSE)
-		{
-			if ($this->debug == TRUE)
-			{
-				$this->_error('ftp_unable_to_upload');
-			}
-			return FALSE;
-		}
-
-		// Set file permissions if needed
-		if ( ! is_null($permissions))
-		{
-			$this->chmod($rempath, (int)$permissions);
-		}
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Download a file from a remote server to the local server
 	 *
 	 * @access	public
 	 * @param	string
-	 * @param	string
-	 * @param	string
+	 * @param    string
+	 * @param    string
 	 * @return	bool
 	 */
 	function download($rempath, $locpath, $mode = 'auto')
 	{
-		if ( ! $this->_is_conn())
+		if (!$this->_is_conn())
 		{
 			return FALSE;
 		}
 
 		// Set the mode if not specified
-		if ($mode == 'auto')
-		{
+		if ($mode == 'auto') {
 			// Get the file extension so we can set the upload type
 			$ext = $this->_getext($rempath);
 			$mode = $this->_settype($ext);
@@ -318,6 +184,93 @@ class CI_FTP {
 		}
 
 		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Validates the connection ID
+	 *
+	 * @access    private
+	 * @return	bool
+	 */
+	function _is_conn()
+	{
+		if (!is_resource($this->conn_id))
+		{
+			if ($this->debug == TRUE)
+			{
+				$this->_error('ftp_no_connection');
+			}
+			return FALSE;
+		}
+		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Extract the file extension
+	 *
+	 * @access    private
+	 * @param	string
+	 * @return    string
+	 */
+	function _getext($filename)
+	{
+		if (FALSE === strpos($filename, '.'))
+		{
+			return 'txt';
+		}
+
+		$x = explode('.', $filename);
+		return end($x);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the upload type
+	 *
+	 * @access    private
+	 * @param    string
+	 * @return    string
+	 */
+	function _settype($ext)
+	{
+		$text_types = array(
+			'txt',
+			'text',
+			'php',
+			'phps',
+			'php4',
+			'js',
+			'css',
+			'htm',
+			'html',
+			'phtml',
+			'shtml',
+			'log',
+			'xml'
+		);
+
+
+		return (in_array($ext, $text_types)) ? 'ascii' : 'binary';
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Move a file
+	 *
+	 * @access	public
+	 * @param	string
+	 * @param	string
+	 * @return	bool
+	 */
+	function move($old_file, $new_file)
+	{
+		return $this->rename($old_file, $new_file, TRUE);
 	}
 
 	// --------------------------------------------------------------------
@@ -352,21 +305,6 @@ class CI_FTP {
 		}
 
 		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Move a file
-	 *
-	 * @access	public
-	 * @param	string
-	 * @param	string
-	 * @return	bool
-	 */
-	function move($old_file, $new_file)
-	{
-		return $this->rename($old_file, $new_file, TRUE);
 	}
 
 	// --------------------------------------------------------------------
@@ -451,47 +389,6 @@ class CI_FTP {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set file permissions
-	 *
-	 * @access	public
-	 * @param	string	the file path
-	 * @param	string	the permissions
-	 * @return	bool
-	 */
-	function chmod($path, $perm)
-	{
-		if ( ! $this->_is_conn())
-		{
-			return FALSE;
-		}
-
-		// Permissions can only be set when running PHP 5
-		if ( ! function_exists('ftp_chmod'))
-		{
-			if ($this->debug == TRUE)
-			{
-				$this->_error('ftp_unable_to_chmod');
-			}
-			return FALSE;
-		}
-
-		$result = @ftp_chmod($this->conn_id, $perm, $path);
-
-		if ($result === FALSE)
-		{
-			if ($this->debug == TRUE)
-			{
-				$this->_error('ftp_unable_to_chmod');
-			}
-			return FALSE;
-		}
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * FTP List files in the specified directory
 	 *
 	 * @access	public
@@ -507,7 +404,7 @@ class CI_FTP {
 		return ftp_nlist($this->conn_id, $path);
 	}
 
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 
 	/**
 	 * Read a directory and recreate it remotely
@@ -563,57 +460,158 @@ class CI_FTP {
 		return FALSE;
 	}
 
-
-	// --------------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
-	 * Extract the file extension
+	 * Change directory
 	 *
-	 * @access	private
-	 * @param	string
-	 * @return	string
+	 * The second parameter lets us momentarily turn off debugging so that
+	 * this function can be used to test for the existence of a folder
+	 * without throwing an error.  There's no FTP equivalent to is_dir()
+	 * so we do it by trying to change to a particular directory.
+	 * Internally, this parameter is only used by the "mirror" function below.
+	 *
+	 * @access    public
+	 * @param    string
+	 * @param    bool
+	 * @return    bool
 	 */
-	function _getext($filename)
+	function changedir($path = '', $supress_debug = FALSE)
 	{
-		if (FALSE === strpos($filename, '.'))
-		{
-			return 'txt';
+		if ($path == '' OR !$this->_is_conn()) {
+			return FALSE;
 		}
 
-		$x = explode('.', $filename);
-		return end($x);
+		$result = @ftp_chdir($this->conn_id, $path);
+
+		if ($result === FALSE) {
+			if ($this->debug == TRUE AND $supress_debug == FALSE) {
+				$this->_error('ftp_unable_to_changedir');
+			}
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set the upload type
+	 * Create a directory
 	 *
-	 * @access	private
+	 * @access    public
 	 * @param	string
-	 * @return	string
+	 * @return    bool
 	 */
-	function _settype($ext)
+	function mkdir($path = '', $permissions = NULL)
 	{
-		$text_types = array(
-							'txt',
-							'text',
-							'php',
-							'phps',
-							'php4',
-							'js',
-							'css',
-							'htm',
-							'html',
-							'phtml',
-							'shtml',
-							'log',
-							'xml'
-							);
+		if ($path == '' OR !$this->_is_conn())
+		{
+			return FALSE;
+		}
+
+		$result = @ftp_mkdir($this->conn_id, $path);
+
+		if ($result === FALSE) {
+			if ($this->debug == TRUE) {
+				$this->_error('ftp_unable_to_makdir');
+			}
+			return FALSE;
+		}
+
+		// Set file permissions if needed
+		if (!is_null($permissions)) {
+			$this->chmod($path, (int)$permissions);
+		}
+
+		return TRUE;
+	}
 
 
-		return (in_array($ext, $text_types)) ? 'ascii' : 'binary';
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set file permissions
+	 *
+	 * @access    public
+	 * @param    string    the file path
+	 * @param    string    the permissions
+	 * @return    bool
+	 */
+	function chmod($path, $perm)
+	{
+		if (!$this->_is_conn()) {
+			return FALSE;
+		}
+
+		// Permissions can only be set when running PHP 5
+		if (!function_exists('ftp_chmod')) {
+			if ($this->debug == TRUE) {
+				$this->_error('ftp_unable_to_chmod');
+			}
+			return FALSE;
+		}
+
+		$result = @ftp_chmod($this->conn_id, $perm, $path);
+
+		if ($result === FALSE) {
+			if ($this->debug == TRUE) {
+				$this->_error('ftp_unable_to_chmod');
+			}
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Upload a file to the server
+	 *
+	 * @access	public
+	 * @param    string
+	 * @param    string
+	 * @param    string
+	 * @return	bool
+	 */
+	function upload($locpath, $rempath, $mode = 'auto', $permissions = NULL)
+	{
+		if ( ! $this->_is_conn())
+		{
+			return FALSE;
+		}
+
+		if (!file_exists($locpath)) {
+			$this->_error('ftp_no_source_file');
+			return FALSE;
+		}
+
+		// Set the mode if not specified
+		if ($mode == 'auto') {
+			// Get the file extension so we can set the upload type
+			$ext = $this->_getext($locpath);
+			$mode = $this->_settype($ext);
+		}
+
+		$mode = ($mode == 'ascii') ? FTP_ASCII : FTP_BINARY;
+
+		$result = @ftp_put($this->conn_id, $rempath, $locpath, $mode);
+
+		if ($result === FALSE) {
+			if ($this->debug == TRUE) {
+				$this->_error('ftp_unable_to_upload');
+			}
+			return FALSE;
+		}
+
+		// Set file permissions if needed
+		if (!is_null($permissions)) {
+			$this->chmod($rempath, (int)$permissions);
+		}
+
+		return TRUE;
 	}
 
 	// ------------------------------------------------------------------------
@@ -621,35 +619,18 @@ class CI_FTP {
 	/**
 	 * Close the connection
 	 *
-	 * @access	public
-	 * @param	string	path to source
-	 * @param	string	path to destination
+	 * @access    public
+	 * @param    string    path to source
+	 * @param    string    path to destination
 	 * @return	bool
 	 */
 	function close()
 	{
-		if ( ! $this->_is_conn())
-		{
+		if (!$this->_is_conn()) {
 			return FALSE;
 		}
 
 		@ftp_close($this->conn_id);
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * Display error message
-	 *
-	 * @access	private
-	 * @param	string
-	 * @return	bool
-	 */
-	function _error($line)
-	{
-		$CI =& get_instance();
-		$CI->lang->load('ftp');
-		show_error($CI->lang->line($line));
 	}
 
 

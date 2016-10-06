@@ -61,97 +61,6 @@ class CI_Form_validation {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set Rules
-	 *
-	 * This function takes an array of field names and validation
-	 * rules as input, validates the info, and stores it
-	 *
-	 * @access	public
-	 * @param	mixed
-	 * @param	string
-	 * @return	void
-	 */
-	public function set_rules($field, $label = '', $rules = '')
-	{
-		// No reason to set rules if we have no POST data
-		if (count($_POST) == 0)
-		{
-			return $this;
-		}
-
-		// If an array was passed via the first parameter instead of indidual string
-		// values we cycle through it and recursively call this function.
-		if (is_array($field))
-		{
-			foreach ($field as $row)
-			{
-				// Houston, we have a problem...
-				if ( ! isset($row['field']) OR ! isset($row['rules']))
-				{
-					continue;
-				}
-
-				// If the field label wasn't passed we use the field name
-				$label = ( ! isset($row['label'])) ? $row['field'] : $row['label'];
-
-				// Here we go!
-				$this->set_rules($row['field'], $label, $row['rules']);
-			}
-			return $this;
-		}
-
-		// No fields? Nothing to do...
-		if ( ! is_string($field) OR  ! is_string($rules) OR $field == '')
-		{
-			return $this;
-		}
-
-		// If the field label wasn't passed we use the field name
-		$label = ($label == '') ? $field : $label;
-
-		// Is the field name an array?  We test for the existence of a bracket "[" in
-		// the field name to determine this.  If it is an array, we break it apart
-		// into its components so that we can fetch the corresponding POST data later
-		if (strpos($field, '[') !== FALSE AND preg_match_all('/\[(.*?)\]/', $field, $matches))
-		{
-			// Note: Due to a bug in current() that affects some versions
-			// of PHP we can not pass function call directly into it
-			$x = explode('[', $field);
-			$indexes[] = current($x);
-
-			for ($i = 0; $i < count($matches['0']); $i++)
-			{
-				if ($matches['1'][$i] != '')
-				{
-					$indexes[] = $matches['1'][$i];
-				}
-			}
-
-			$is_array = TRUE;
-		}
-		else
-		{
-			$indexes	= array();
-			$is_array	= FALSE;
-		}
-
-		// Build our master array
-		$this->_field_data[$field] = array(
-			'field'				=> $field,
-			'label'				=> $label,
-			'rules'				=> $rules,
-			'is_array'			=> $is_array,
-			'keys'				=> $indexes,
-			'postdata'			=> NULL,
-			'error'				=> ''
-		);
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Set Error Message
 	 *
 	 * Lets users set their own error messages on the fly.  Note:  The key
@@ -365,6 +274,87 @@ class CI_Form_validation {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set Rules
+	 *
+	 * This function takes an array of field names and validation
+	 * rules as input, validates the info, and stores it
+	 *
+	 * @access    public
+	 * @param    mixed
+	 * @param    string
+	 * @return    void
+	 */
+	public function set_rules($field, $label = '', $rules = '')
+	{
+		// No reason to set rules if we have no POST data
+		if (count($_POST) == 0) {
+			return $this;
+		}
+
+		// If an array was passed via the first parameter instead of indidual string
+		// values we cycle through it and recursively call this function.
+		if (is_array($field)) {
+			foreach ($field as $row) {
+				// Houston, we have a problem...
+				if (!isset($row['field']) OR !isset($row['rules'])) {
+					continue;
+				}
+
+				// If the field label wasn't passed we use the field name
+				$label = (!isset($row['label'])) ? $row['field'] : $row['label'];
+
+				// Here we go!
+				$this->set_rules($row['field'], $label, $row['rules']);
+			}
+			return $this;
+		}
+
+		// No fields? Nothing to do...
+		if (!is_string($field) OR !is_string($rules) OR $field == '') {
+			return $this;
+		}
+
+		// If the field label wasn't passed we use the field name
+		$label = ($label == '') ? $field : $label;
+
+		// Is the field name an array?  We test for the existence of a bracket "[" in
+		// the field name to determine this.  If it is an array, we break it apart
+		// into its components so that we can fetch the corresponding POST data later
+		if (strpos($field, '[') !== FALSE AND preg_match_all('/\[(.*?)\]/', $field, $matches)) {
+			// Note: Due to a bug in current() that affects some versions
+			// of PHP we can not pass function call directly into it
+			$x = explode('[', $field);
+			$indexes[] = current($x);
+
+			for ($i = 0; $i < count($matches['0']); $i++) {
+				if ($matches['1'][$i] != '') {
+					$indexes[] = $matches['1'][$i];
+				}
+			}
+
+			$is_array = TRUE;
+		} else {
+			$indexes = array();
+			$is_array = FALSE;
+		}
+
+		// Build our master array
+		$this->_field_data[$field] = array(
+			'field' => $field,
+			'label' => $label,
+			'rules' => $rules,
+			'is_array' => $is_array,
+			'keys' => $indexes,
+			'postdata' => NULL,
+			'error' => ''
+		);
+
+		return $this;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Traverse a multidimensional $_POST array index until the data is found
 	 *
 	 * @access	private
@@ -395,64 +385,6 @@ class CI_Form_validation {
 		}
 
 		return $array;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Re-populate the _POST array with our finalized and processed data
-	 *
-	 * @access	private
-	 * @return	null
-	 */
-	protected function _reset_post_array()
-	{
-		foreach ($this->_field_data as $field => $row)
-		{
-			if ( ! is_null($row['postdata']))
-			{
-				if ($row['is_array'] == FALSE)
-				{
-					if (isset($_POST[$row['field']]))
-					{
-						$_POST[$row['field']] = $this->prep_for_form($row['postdata']);
-					}
-				}
-				else
-				{
-					// start with a reference
-					$post_ref =& $_POST;
-
-					// before we assign values, make a reference to the right POST key
-					if (count($row['keys']) == 1)
-					{
-						$post_ref =& $post_ref[current($row['keys'])];
-					}
-					else
-					{
-						foreach ($row['keys'] as $val)
-						{
-							$post_ref =& $post_ref[$val];
-						}
-					}
-
-					if (is_array($row['postdata']))
-					{
-						$array = array();
-						foreach ($row['postdata'] as $k => $v)
-						{
-							$array[$k] = $this->prep_for_form($v);
-						}
-
-						$post_ref = $array;
-					}
-					else
-					{
-						$post_ref = $this->prep_for_form($row['postdata']);
-					}
-				}
-			}
-		}
 	}
 
 	// --------------------------------------------------------------------
@@ -716,6 +648,79 @@ class CI_Form_validation {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Re-populate the _POST array with our finalized and processed data
+	 *
+	 * @access    private
+	 * @return    null
+	 */
+	protected function _reset_post_array()
+	{
+		foreach ($this->_field_data as $field => $row) {
+			if (!is_null($row['postdata'])) {
+				if ($row['is_array'] == FALSE) {
+					if (isset($_POST[$row['field']])) {
+						$_POST[$row['field']] = $this->prep_for_form($row['postdata']);
+					}
+				} else {
+					// start with a reference
+					$post_ref =& $_POST;
+
+					// before we assign values, make a reference to the right POST key
+					if (count($row['keys']) == 1) {
+						$post_ref =& $post_ref[current($row['keys'])];
+					} else {
+						foreach ($row['keys'] as $val) {
+							$post_ref =& $post_ref[$val];
+						}
+					}
+
+					if (is_array($row['postdata'])) {
+						$array = array();
+						foreach ($row['postdata'] as $k => $v) {
+							$array[$k] = $this->prep_for_form($v);
+						}
+
+						$post_ref = $array;
+					} else {
+						$post_ref = $this->prep_for_form($row['postdata']);
+					}
+				}
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep data for form
+	 *
+	 * This function allows HTML to be safely shown in a form.
+	 * Special characters are converted.
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    string
+	 */
+	public function prep_for_form($data = '')
+	{
+		if (is_array($data)) {
+			foreach ($data as $key => $val) {
+				$data[$key] = $this->prep_for_form($val);
+			}
+
+			return $data;
+		}
+
+		if ($this->_safe_form_data == FALSE OR $data === '') {
+			return $data;
+		}
+
+		return str_replace(array("'", '"', '<', '>'), array("&#39;", "&quot;", '&lt;', '&gt;'), stripslashes($data));
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Get the value from a form
 	 *
 	 * Permits you to repopulate a form field with the value it was submitted
@@ -937,7 +942,7 @@ class CI_Form_validation {
 
 		return ($str !== $field) ? FALSE : TRUE;
 	}
-	
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -1034,20 +1039,6 @@ class CI_Form_validation {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Valid Email
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	bool
-	 */
-	public function valid_email($str)
-	{
-		return ( ! preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $str)) ? FALSE : TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Valid Emails
 	 *
 	 * @access	public
@@ -1070,6 +1061,20 @@ class CI_Form_validation {
 		}
 
 		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Valid Email
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    bool
+	 */
+	public function valid_email($str)
+	{
+		return (!preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $str)) ? FALSE : TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -1275,38 +1280,6 @@ class CI_Form_validation {
 	public function valid_base64($str)
 	{
 		return (bool) ! preg_match('/[^a-zA-Z0-9\/\+=]/', $str);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Prep data for form
-	 *
-	 * This function allows HTML to be safely shown in a form.
-	 * Special characters are converted.
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	string
-	 */
-	public function prep_for_form($data = '')
-	{
-		if (is_array($data))
-		{
-			foreach ($data as $key => $val)
-			{
-				$data[$key] = $this->prep_for_form($val);
-			}
-
-			return $data;
-		}
-
-		if ($this->_safe_form_data == FALSE OR $data === '')
-		{
-			return $data;
-		}
-
-		return str_replace(array("'", '"', '<', '>'), array("&#39;", "&quot;", '&lt;', '&gt;'), stripslashes($data));
 	}
 
 	// --------------------------------------------------------------------

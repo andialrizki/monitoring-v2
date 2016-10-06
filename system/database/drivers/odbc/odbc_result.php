@@ -40,19 +40,6 @@ class CI_DB_odbc_result extends CI_DB_result {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Number of fields in the result set
-	 *
-	 * @access	public
-	 * @return	integer
-	 */
-	function num_fields()
-	{
-		return @odbc_num_fields($this->result_id);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Fetch Field Names
 	 *
 	 * Generates an array of column names
@@ -69,6 +56,19 @@ class CI_DB_odbc_result extends CI_DB_result {
 		}
 
 		return $field_names;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Number of fields in the result set
+	 *
+	 * @access    public
+	 * @return    integer
+	 */
+	function num_fields()
+	{
+		return @odbc_num_fields($this->result_id);
 	}
 
 	// --------------------------------------------------------------------
@@ -157,6 +157,29 @@ class CI_DB_odbc_result extends CI_DB_result {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Result - array
+	 *
+	 * subsititutes the odbc_fetch_array function when
+	 * not available (odbc_fetch_array requires unixODBC)
+	 *
+	 * @access    private
+	 * @return    array
+	 */
+	function _odbc_fetch_array(& $odbc_result)
+	{
+		$rs = array();
+		$rs_assoc = FALSE;
+		if (odbc_fetch_into($odbc_result, $rs)) {
+			$rs_assoc = array();
+			foreach ($rs as $k => $v) {
+				$field_name = odbc_field_name($odbc_result, $k + 1);
+				$rs_assoc[$field_name] = $v;
+			}
+		}
+		return $rs_assoc;
+	}
+
+	/**
 	 * Result - object
 	 *
 	 * Returns the result set as an object
@@ -175,7 +198,6 @@ class CI_DB_odbc_result extends CI_DB_result {
 			return $this->_odbc_fetch_object($this->result_id);
 		}
 	}
-
 
 	/**
 	 * Result - object
@@ -196,29 +218,6 @@ class CI_DB_odbc_result extends CI_DB_result {
 			}
 		}
 		return $rs_obj;
-	}
-
-
-	/**
-	 * Result - array
-	 *
-	 * subsititutes the odbc_fetch_array function when
-	 * not available (odbc_fetch_array requires unixODBC)
-	 *
-	 * @access	private
-	 * @return	array
-	 */
-	function _odbc_fetch_array(& $odbc_result) {
-		$rs = array();
-		$rs_assoc = FALSE;
-		if (odbc_fetch_into($odbc_result, $rs)) {
-			$rs_assoc=array();
-			foreach ($rs as $k=>$v) {
-				$field_name= odbc_field_name($odbc_result, $k+1);
-				$rs_assoc[$field_name] = $v;
-			}
-		}
-		return $rs_assoc;
 	}
 
 }

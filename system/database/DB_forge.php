@@ -88,90 +88,6 @@ class CI_DB_forge {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Add Key
-	 *
-	 * @access	public
-	 * @param	string	key
-	 * @param	string	type
-	 * @return	void
-	 */
-	function add_key($key = '', $primary = FALSE)
-	{
-		if (is_array($key))
-		{
-			foreach ($key as $one)
-			{
-				$this->add_key($one, $primary);
-			}
-
-			return;
-		}
-
-		if ($key == '')
-		{
-			show_error('Key information is required for that operation.');
-		}
-
-		if ($primary === TRUE)
-		{
-			$this->primary_keys[] = $key;
-		}
-		else
-		{
-			$this->keys[] = $key;
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Add Field
-	 *
-	 * @access	public
-	 * @param	string	collation
-	 * @return	void
-	 */
-	function add_field($field = '')
-	{
-		if ($field == '')
-		{
-			show_error('Field information is required.');
-		}
-
-		if (is_string($field))
-		{
-			if ($field == 'id')
-			{
-				$this->add_field(array(
-										'id' => array(
-													'type' => 'INT',
-													'constraint' => 9,
-													'auto_increment' => TRUE
-													)
-								));
-				$this->add_key('id', TRUE);
-			}
-			else
-			{
-				if (strpos($field, ' ') === FALSE)
-				{
-					show_error('Field information is required for that operation.');
-				}
-
-				$this->fields[] = $field;
-			}
-		}
-
-		if (is_array($field))
-		{
-			$this->fields = array_merge($this->fields, $field);
-		}
-
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Create Table
 	 *
 	 * @access	public
@@ -194,6 +110,23 @@ class CI_DB_forge {
 
 		$this->_reset();
 		return $this->db->query($sql);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Reset
+	 *
+	 * Resets table creation vars
+	 *
+	 * @access    private
+	 * @return    void
+	 */
+	function _reset()
+	{
+		$this->fields = array();
+		$this->keys = array();
+		$this->primary_keys = array();
 	}
 
 	// --------------------------------------------------------------------
@@ -285,6 +218,77 @@ class CI_DB_forge {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Add Field
+	 *
+	 * @access    public
+	 * @param    string    collation
+	 * @return    void
+	 */
+	function add_field($field = '')
+	{
+		if ($field == '') {
+			show_error('Field information is required.');
+		}
+
+		if (is_string($field)) {
+			if ($field == 'id') {
+				$this->add_field(array(
+					'id' => array(
+						'type' => 'INT',
+						'constraint' => 9,
+						'auto_increment' => TRUE
+					)
+				));
+				$this->add_key('id', TRUE);
+			} else {
+				if (strpos($field, ' ') === FALSE) {
+					show_error('Field information is required for that operation.');
+				}
+
+				$this->fields[] = $field;
+			}
+		}
+
+		if (is_array($field)) {
+			$this->fields = array_merge($this->fields, $field);
+		}
+
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add Key
+	 *
+	 * @access    public
+	 * @param    string    key
+	 * @param    string    type
+	 * @return    void
+	 */
+	function add_key($key = '', $primary = FALSE)
+	{
+		if (is_array($key)) {
+			foreach ($key as $one) {
+				$this->add_key($one, $primary);
+			}
+
+			return;
+		}
+
+		if ($key == '') {
+			show_error('Key information is required for that operation.');
+		}
+
+		if ($primary === TRUE) {
+			$this->primary_keys[] = $key;
+		} else {
+			$this->keys[] = $key;
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Column Drop
 	 *
 	 * @access	public
@@ -357,23 +361,6 @@ class CI_DB_forge {
 		}
 
 		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Reset
-	 *
-	 * Resets table creation vars
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	function _reset()
-	{
-		$this->fields		= array();
-		$this->keys			= array();
-		$this->primary_keys	= array();
 	}
 
 }

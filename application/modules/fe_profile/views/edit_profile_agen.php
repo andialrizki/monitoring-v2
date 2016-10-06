@@ -66,6 +66,13 @@ $type_admin = $this->session->userdata(APP_PREFIX . 'type_admin');
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="control-label col-sm-3">No Handphone</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" name="phone" required=""
+                                   value="<?php echo isset($data['phone']) ? $data['phone'] : ''; ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label col-sm-3">Latitude</label>
                         <div class="col-sm-7">
                             <input type="text" class="form-control" name="latitude" required=""

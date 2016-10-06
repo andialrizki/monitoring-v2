@@ -178,129 +178,6 @@ class CI_User_agent {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set the Browser
-	 *
-	 * @access	private
-	 * @return	bool
-	 */
-	private function _set_browser()
-	{
-		if (is_array($this->browsers) AND count($this->browsers) > 0)
-		{
-			foreach ($this->browsers as $key => $val)
-			{
-				if (preg_match("|".preg_quote($key).".*?([0-9\.]+)|i", $this->agent, $match))
-				{
-					$this->is_browser = TRUE;
-					$this->version = $match[1];
-					$this->browser = $val;
-					$this->_set_mobile();
-					return TRUE;
-				}
-			}
-		}
-		return FALSE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set the Robot
-	 *
-	 * @access	private
-	 * @return	bool
-	 */
-	private function _set_robot()
-	{
-		if (is_array($this->robots) AND count($this->robots) > 0)
-		{
-			foreach ($this->robots as $key => $val)
-			{
-				if (preg_match("|".preg_quote($key)."|i", $this->agent))
-				{
-					$this->is_robot = TRUE;
-					$this->robot = $val;
-					return TRUE;
-				}
-			}
-		}
-		return FALSE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set the Mobile Device
-	 *
-	 * @access	private
-	 * @return	bool
-	 */
-	private function _set_mobile()
-	{
-		if (is_array($this->mobiles) AND count($this->mobiles) > 0)
-		{
-			foreach ($this->mobiles as $key => $val)
-			{
-				if (FALSE !== (strpos(strtolower($this->agent), $key)))
-				{
-					$this->is_mobile = TRUE;
-					$this->mobile = $val;
-					return TRUE;
-				}
-			}
-		}
-		return FALSE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set the accepted languages
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	private function _set_languages()
-	{
-		if ((count($this->languages) == 0) AND isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) AND $_SERVER['HTTP_ACCEPT_LANGUAGE'] != '')
-		{
-			$languages = preg_replace('/(;q=[0-9\.]+)/i', '', strtolower(trim($_SERVER['HTTP_ACCEPT_LANGUAGE'])));
-
-			$this->languages = explode(',', $languages);
-		}
-
-		if (count($this->languages) == 0)
-		{
-			$this->languages = array('Undefined');
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set the accepted character sets
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	private function _set_charsets()
-	{
-		if ((count($this->charsets) == 0) AND isset($_SERVER['HTTP_ACCEPT_CHARSET']) AND $_SERVER['HTTP_ACCEPT_CHARSET'] != '')
-		{
-			$charsets = preg_replace('/(;q=.+)/i', '', strtolower(trim($_SERVER['HTTP_ACCEPT_CHARSET'])));
-
-			$this->charsets = explode(',', $charsets);
-		}
-
-		if (count($this->charsets) == 0)
-		{
-			$this->charsets = array('Undefined');
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Is Browser
 	 *
 	 * @access	public
@@ -454,6 +331,7 @@ class CI_User_agent {
 	{
 		return $this->robot;
 	}
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -483,6 +361,19 @@ class CI_User_agent {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Test for a particular language
+	 *
+	 * @access    public
+	 * @return    bool
+	 */
+	public function accept_lang($lang = 'en')
+	{
+		return (in_array(strtolower($lang), $this->languages(), TRUE));
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Get the accepted languages
 	 *
 	 * @access	public
@@ -496,6 +387,39 @@ class CI_User_agent {
 		}
 
 		return $this->languages;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the accepted languages
+	 *
+	 * @access    private
+	 * @return    void
+	 */
+	private function _set_languages()
+	{
+		if ((count($this->languages) == 0) AND isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) AND $_SERVER['HTTP_ACCEPT_LANGUAGE'] != '') {
+			$languages = preg_replace('/(;q=[0-9\.]+)/i', '', strtolower(trim($_SERVER['HTTP_ACCEPT_LANGUAGE'])));
+
+			$this->languages = explode(',', $languages);
+		}
+
+		if (count($this->languages) == 0) {
+			$this->languages = array('Undefined');
+		}
+	}
+	// --------------------------------------------------------------------
+
+	/**
+	 * Test for a particular character set
+	 *
+	 * @access    public
+	 * @return    bool
+	 */
+	public function accept_charset($charset = 'utf-8')
+	{
+		return (in_array(strtolower($charset), $this->charsets(), TRUE));
 	}
 
 	// --------------------------------------------------------------------
@@ -519,27 +443,90 @@ class CI_User_agent {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Test for a particular language
+	 * Set the accepted character sets
 	 *
-	 * @access	public
-	 * @return	bool
+	 * @access    private
+	 * @return    void
 	 */
-	public function accept_lang($lang = 'en')
+	private function _set_charsets()
 	{
-		return (in_array(strtolower($lang), $this->languages(), TRUE));
+		if ((count($this->charsets) == 0) AND isset($_SERVER['HTTP_ACCEPT_CHARSET']) AND $_SERVER['HTTP_ACCEPT_CHARSET'] != '') {
+			$charsets = preg_replace('/(;q=.+)/i', '', strtolower(trim($_SERVER['HTTP_ACCEPT_CHARSET'])));
+
+			$this->charsets = explode(',', $charsets);
+		}
+
+		if (count($this->charsets) == 0) {
+			$this->charsets = array('Undefined');
+		}
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Test for a particular character set
+	 * Set the Browser
 	 *
-	 * @access	public
+	 * @access    private
 	 * @return	bool
 	 */
-	public function accept_charset($charset = 'utf-8')
+	private function _set_browser()
 	{
-		return (in_array(strtolower($charset), $this->charsets(), TRUE));
+		if (is_array($this->browsers) AND count($this->browsers) > 0) {
+			foreach ($this->browsers as $key => $val) {
+				if (preg_match("|" . preg_quote($key) . ".*?([0-9\.]+)|i", $this->agent, $match)) {
+					$this->is_browser = TRUE;
+					$this->version = $match[1];
+					$this->browser = $val;
+					$this->_set_mobile();
+					return TRUE;
+				}
+			}
+		}
+		return FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the Mobile Device
+	 *
+	 * @access    private
+	 * @return	bool
+	 */
+	private function _set_mobile()
+	{
+		if (is_array($this->mobiles) AND count($this->mobiles) > 0) {
+			foreach ($this->mobiles as $key => $val) {
+				if (FALSE !== (strpos(strtolower($this->agent), $key))) {
+					$this->is_mobile = TRUE;
+					$this->mobile = $val;
+					return TRUE;
+				}
+			}
+		}
+		return FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the Robot
+	 *
+	 * @access    private
+	 * @return    bool
+	 */
+	private function _set_robot()
+	{
+		if (is_array($this->robots) AND count($this->robots) > 0) {
+			foreach ($this->robots as $key => $val) {
+				if (preg_match("|" . preg_quote($key) . "|i", $this->agent)) {
+					$this->is_robot = TRUE;
+					$this->robot = $val;
+					return TRUE;
+				}
+			}
+		}
+		return FALSE;
 	}
 
 }

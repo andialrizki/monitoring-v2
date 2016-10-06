@@ -131,6 +131,32 @@ class CI_Security {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set Cross Site Request Forgery Protection Cookie
+	 *
+	 * @return    string
+	 */
+	protected function _csrf_set_hash()
+	{
+		if ($this->_csrf_hash == '') {
+			// If the cookie exists we will use it's value.
+			// We don't necessarily want to regenerate it with
+			// each page load since a page could contain embedded
+			// sub-pages causing this feature to fail
+			if (isset($_COOKIE[$this->_csrf_cookie_name]) &&
+				preg_match('#^[0-9a-f]{32}$#iS', $_COOKIE[$this->_csrf_cookie_name]) === 1
+			) {
+				return $this->_csrf_hash = $_COOKIE[$this->_csrf_cookie_name];
+			}
+
+			return $this->_csrf_hash = md5(uniqid(rand(), TRUE));
+		}
+
+		return $this->_csrf_hash;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Verify Cross Site Request Forgery Protection
 	 *
 	 * @return	object
@@ -469,6 +495,51 @@ class CI_Security {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Validate URL entities
+	 *
+	 * Called by xss_clean()
+	 *
+	 * @param    string
+	 * @return    string
+	 */
+	protected function _validate_entities($str)
+	{
+		/*
+		 * Protect GET variables in URLs
+		 */
+
+		// 901119URL5918AMP18930PROTECT8198
+
+		$str = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-]+)|i', $this->xss_hash() . "\\1=\\2", $str);
+
+		/*
+		 * Validate standard character entities
+		 *
+		 * Add a semicolon if missing.  We do this to enable
+		 * the conversion of entities to ASCII later.
+		 *
+		 */
+		$str = preg_replace('#(&\#?[0-9a-z]{2,})([\x00-\x20])*;?#i', "\\1;\\2", $str);
+
+		/*
+		 * Validate UTF16 two byte encoding (x00)
+		 *
+		 * Just as above, adds a semicolon if missing.
+		 *
+		 */
+		$str = preg_replace('#(&\#x?)([0-9A-F]+);?#i', "\\1\\2;", $str);
+
+		/*
+		 * Un-Protect GET variables in URLs
+		 */
+		$str = str_replace($this->xss_hash(), '&', $str);
+
+		return $str;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Random Hash for protecting URLs
 	 *
 	 * @return	string
@@ -484,33 +555,85 @@ class CI_Security {
 		return $this->_xss_hash;
 	}
 
-	// --------------------------------------------------------------------
+	// ----------------------------------------------------------------
 
 	/**
-	 * HTML Entities Decode
+	 * Do Never Allowed
 	 *
-	 * This function is a replacement for html_entity_decode()
+	 * A utility function for xss_clean()
 	 *
-	 * The reason we are not using html_entity_decode() by itself is because
-	 * while it is not technically correct to leave out the semicolon
-	 * at the end of an entity most browsers will still interpret the entity
-	 * correctly.  html_entity_decode() does not convert entities without
-	 * semicolons, so we are left with our own little solution here. Bummer.
-	 *
-	 * @param	string
-	 * @param	string
-	 * @return	string
+	 * @param    string
+	 * @return    string
 	 */
-	public function entity_decode($str, $charset='UTF-8')
+	protected function _do_never_allowed($str)
 	{
-		if (stristr($str, '&') === FALSE)
-		{
-			return $str;
+		$str = str_replace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
+
+		foreach ($this->_never_allowed_regex as $regex) {
+			$str = preg_replace('#' . $regex . '#is', '[removed]', $str);
 		}
 
-		$str = html_entity_decode($str, ENT_COMPAT, $charset);
-		$str = preg_replace('~&#x(0*[0-9a-f]{2,5})~ei', 'chr(hexdec("\\1"))', $str);
-		return preg_replace('~&#([0-9]{2,4})~e', 'chr(\\1)', $str);
+		return $str;
+	}
+
+	// --------------------------------------------------------------------
+
+	/*
+	 * Remove Evil HTML Attributes (like evenhandlers and style)
+	 *
+	 * It removes the evil attribute and either:
+	 * 	- Everything up until a space
+	 *		For example, everything between the pipes:
+	 *		<a |style=document.write('hello');alert('world');| class=link>
+	 * 	- Everything inside the quotes
+	 *		For example, everything between the pipes:
+	 *		<a |style="document.write('hello'); alert('world');"| class="link">
+	 *
+	 * @param string $str The string to check
+	 * @param boolean $is_image TRUE if this is an image
+	 * @return string The string with the evil attributes removed
+	 */
+
+	protected function _remove_evil_attributes($str, $is_image)
+	{
+		// All javascript event handlers (e.g. onload, onclick, onmouseover), style, and xmlns
+		$evil_attributes = array('on\w*', 'style', 'xmlns', 'formaction');
+
+		if ($is_image === TRUE)
+		{
+			/*
+			 * Adobe Photoshop puts XML metadata into JFIF images, 
+			 * including namespacing, so we have to allow this for images.
+			 */
+			unset($evil_attributes[array_search('xmlns', $evil_attributes)]);
+		}
+
+		do {
+			$count = 0;
+			$attribs = array();
+
+			// find occurrences of illegal attribute strings with quotes (042 and 047 are octal quotes)
+			preg_match_all('/(' . implode('|', $evil_attributes) . ')\s*=\s*(\042|\047)([^\\2]*?)(\\2)/is', $str, $matches, PREG_SET_ORDER);
+
+			foreach ($matches as $attr) {
+				$attribs[] = preg_quote($attr[0], '/');
+			}
+
+			// find occurrences of illegal attribute strings without quotes
+			preg_match_all('/(' . implode('|', $evil_attributes) . ')\s*=\s*([^\s>]*)/is', $str, $matches, PREG_SET_ORDER);
+
+			foreach ($matches as $attr) {
+				$attribs[] = preg_quote($attr[0], '/');
+			}
+
+			// replace illegal attribute strings that are inside an html tag
+			if (count($attribs) > 0) {
+				$str = preg_replace('/(<?)(\/?[^><]+?)([^A-Za-z<>\-])(.*?)(' . implode('|', $attribs) . ')(.*?)([\s><]?)([><]*)/i', '$1$2 $4$6$7$8', $str, -1, $count);
+			}
+
+		} while ($count);
+
+		return $str;
 	}
 
 	// --------------------------------------------------------------------
@@ -568,7 +691,7 @@ class CI_Security {
 		return stripslashes(str_replace($bad, '', $str));
 	}
 
-	// ----------------------------------------------------------------
+	// --------------------------------------------------------------------
 
 	/**
 	 * Compact Exploded Words
@@ -582,68 +705,6 @@ class CI_Security {
 	protected function _compact_exploded_words($matches)
 	{
 		return preg_replace('/\s+/s', '', $matches[1]).$matches[2];
-	}
-
-	// --------------------------------------------------------------------
-
-	/*
-	 * Remove Evil HTML Attributes (like evenhandlers and style)
-	 *
-	 * It removes the evil attribute and either:
-	 * 	- Everything up until a space
-	 *		For example, everything between the pipes:
-	 *		<a |style=document.write('hello');alert('world');| class=link>
-	 * 	- Everything inside the quotes
-	 *		For example, everything between the pipes:
-	 *		<a |style="document.write('hello'); alert('world');"| class="link">
-	 *
-	 * @param string $str The string to check
-	 * @param boolean $is_image TRUE if this is an image
-	 * @return string The string with the evil attributes removed
-	 */
-	protected function _remove_evil_attributes($str, $is_image)
-	{
-		// All javascript event handlers (e.g. onload, onclick, onmouseover), style, and xmlns
-		$evil_attributes = array('on\w*', 'style', 'xmlns', 'formaction');
-
-		if ($is_image === TRUE)
-		{
-			/*
-			 * Adobe Photoshop puts XML metadata into JFIF images, 
-			 * including namespacing, so we have to allow this for images.
-			 */
-			unset($evil_attributes[array_search('xmlns', $evil_attributes)]);
-		}
-
-		do {
-			$count = 0;
-			$attribs = array();
-
-			// find occurrences of illegal attribute strings with quotes (042 and 047 are octal quotes)
-			preg_match_all('/('.implode('|', $evil_attributes).')\s*=\s*(\042|\047)([^\\2]*?)(\\2)/is', $str, $matches, PREG_SET_ORDER);
-
-			foreach ($matches as $attr)
-			{
-				$attribs[] = preg_quote($attr[0], '/');
-			}
-
-			// find occurrences of illegal attribute strings without quotes
-			preg_match_all('/('.implode('|', $evil_attributes).')\s*=\s*([^\s>]*)/is', $str, $matches, PREG_SET_ORDER);
-
-			foreach ($matches as $attr)
-			{
-				$attribs[] = preg_quote($attr[0], '/');
-			}
-
-			// replace illegal attribute strings that are inside an html tag
-			if (count($attribs) > 0)
-			{
-				$str = preg_replace('/(<?)(\/?[^><]+?)([^A-Za-z<>\-])(.*?)('.implode('|', $attribs).')(.*?)([\s><]?)([><]*)/i', '$1$2 $4$6$7$8', $str, -1, $count);
-			}
-
-		} while ($count);
-
-		return $str;
 	}
 
 	// --------------------------------------------------------------------
@@ -697,6 +758,29 @@ class CI_Security {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Filter Attributes
+	 *
+	 * Filters tag attributes for consistency and safety
+	 *
+	 * @param    string
+	 * @return    string
+	 */
+	protected function _filter_attributes($str)
+	{
+		$out = '';
+
+		if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#is', $str, $matches)) {
+			foreach ($matches[0] as $match) {
+				$out .= preg_replace("#/\*.*?\*/#s", '', $match);
+			}
+		}
+
+		return $out;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * JS Image Removal
 	 *
 	 * Callback function for xss_clean() to sanitize image tags
@@ -735,32 +819,7 @@ class CI_Security {
 		return str_replace(array('>', '<', '\\'), array('&gt;', '&lt;', '\\\\'), $match[0]);
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Filter Attributes
-	 *
-	 * Filters tag attributes for consistency and safety
-	 *
-	 * @param	string
-	 * @return	string
-	 */
-	protected function _filter_attributes($str)
-	{
-		$out = '';
-
-		if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#is', $str, $matches))
-		{
-			foreach ($matches[0] as $match)
-			{
-				$out .= preg_replace("#/\*.*?\*/#s", '', $match);
-			}
-		}
-
-		return $out;
-	}
-
-	// --------------------------------------------------------------------
+	// ----------------------------------------------------------------------
 
 	/**
 	 * HTML Entity Decode Callback
@@ -778,95 +837,30 @@ class CI_Security {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Validate URL entities
+	 * HTML Entities Decode
 	 *
-	 * Called by xss_clean()
+	 * This function is a replacement for html_entity_decode()
 	 *
-	 * @param 	string
-	 * @return 	string
-	 */
-	protected function _validate_entities($str)
-	{
-		/*
-		 * Protect GET variables in URLs
-		 */
-
-		 // 901119URL5918AMP18930PROTECT8198
-
-		$str = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-]+)|i', $this->xss_hash()."\\1=\\2", $str);
-
-		/*
-		 * Validate standard character entities
-		 *
-		 * Add a semicolon if missing.  We do this to enable
-		 * the conversion of entities to ASCII later.
-		 *
-		 */
-		$str = preg_replace('#(&\#?[0-9a-z]{2,})([\x00-\x20])*;?#i', "\\1;\\2", $str);
-
-		/*
-		 * Validate UTF16 two byte encoding (x00)
-		 *
-		 * Just as above, adds a semicolon if missing.
-		 *
-		 */
-		$str = preg_replace('#(&\#x?)([0-9A-F]+);?#i',"\\1\\2;",$str);
-
-		/*
-		 * Un-Protect GET variables in URLs
-		 */
-		$str = str_replace($this->xss_hash(), '&', $str);
-
-		return $str;
-	}
-
-	// ----------------------------------------------------------------------
-
-	/**
-	 * Do Never Allowed
+	 * The reason we are not using html_entity_decode() by itself is because
+	 * while it is not technically correct to leave out the semicolon
+	 * at the end of an entity most browsers will still interpret the entity
+	 * correctly.  html_entity_decode() does not convert entities without
+	 * semicolons, so we are left with our own little solution here. Bummer.
 	 *
-	 * A utility function for xss_clean()
-	 *
-	 * @param 	string
-	 * @return 	string
-	 */
-	protected function _do_never_allowed($str)
-	{
-		$str = str_replace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
-
-		foreach ($this->_never_allowed_regex as $regex)
-		{
-			$str = preg_replace('#'.$regex.'#is', '[removed]', $str);
-		}
-
-		return $str;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set Cross Site Request Forgery Protection Cookie
-	 *
+	 * @param    string
+	 * @param    string
 	 * @return	string
 	 */
-	protected function _csrf_set_hash()
+	public function entity_decode($str, $charset = 'UTF-8')
 	{
-		if ($this->_csrf_hash == '')
+		if (stristr($str, '&') === FALSE)
 		{
-			// If the cookie exists we will use it's value.
-			// We don't necessarily want to regenerate it with
-			// each page load since a page could contain embedded
-			// sub-pages causing this feature to fail
-			if (isset($_COOKIE[$this->_csrf_cookie_name]) &&
-				preg_match('#^[0-9a-f]{32}$#iS', $_COOKIE[$this->_csrf_cookie_name]) === 1)
-			{
-				return $this->_csrf_hash = $_COOKIE[$this->_csrf_cookie_name];
-			}
-
-			return $this->_csrf_hash = md5(uniqid(rand(), TRUE));
+			return $str;
 		}
 
-		return $this->_csrf_hash;
+		$str = html_entity_decode($str, ENT_COMPAT, $charset);
+		$str = preg_replace('~&#x(0*[0-9a-f]{2,5})~ei', 'chr(hexdec("\\1"))', $str);
+		return preg_replace('~&#([0-9]{2,4})~e', 'chr(\\1)', $str);
 	}
 
 }

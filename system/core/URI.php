@@ -167,6 +167,23 @@ class CI_URI {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Parse cli arguments
+	 *
+	 * Take each command line argument and assume it is a URI segment.
+	 *
+	 * @access    private
+	 * @return    string
+	 */
+	private function _parse_cli_args()
+	{
+		$args = array_slice($_SERVER['argv'], 1);
+
+		return $args ? '/' . implode('/', $args) : '';
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Detects the URI
 	 *
 	 * This function will detect the URI automatically and fix the query string
@@ -225,18 +242,37 @@ class CI_URI {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Parse cli arguments
+	 * Remove the suffix from the URL if needed
 	 *
-	 * Take each command line argument and assume it is a URI segment.
+	 * @access    private
+	 * @return    void
+	 */
+	function _remove_url_suffix()
+	{
+		if ($this->config->item('url_suffix') != "") {
+			$this->uri_string = preg_replace("|" . preg_quote($this->config->item('url_suffix')) . "$|", "", $this->uri_string);
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Explode the URI Segments. The individual segments will
+	 * be stored in the $this->segments array.
 	 *
 	 * @access	private
-	 * @return	string
+	 * @return    void
 	 */
-	private function _parse_cli_args()
+	function _explode_segments()
 	{
-		$args = array_slice($_SERVER['argv'], 1);
+		foreach (explode("/", preg_replace("|/*(.+?)/*$|", "\\1", $this->uri_string)) as $val) {
+			// Filter segments for security
+			$val = trim($this->_filter_uri($val));
 
-		return $args ? '/' . implode('/', $args) : '';
+			if ($val != '') {
+				$this->segments[] = $val;
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------
@@ -269,44 +305,6 @@ class CI_URI {
 
 	// --------------------------------------------------------------------
 
-	/**
-	 * Remove the suffix from the URL if needed
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	function _remove_url_suffix()
-	{
-		if  ($this->config->item('url_suffix') != "")
-		{
-			$this->uri_string = preg_replace("|".preg_quote($this->config->item('url_suffix'))."$|", "", $this->uri_string);
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Explode the URI Segments. The individual segments will
-	 * be stored in the $this->segments array.
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	function _explode_segments()
-	{
-		foreach (explode("/", preg_replace("|/*(.+?)/*$|", "\\1", $this->uri_string)) as $val)
-		{
-			// Filter segments for security
-			$val = trim($this->_filter_uri($val));
-
-			if ($val != '')
-			{
-				$this->segments[] = $val;
-			}
-		}
-	}
-
-	// --------------------------------------------------------------------
 	/**
 	 * Re-index Segments
 	 *
@@ -389,21 +387,6 @@ class CI_URI {
 	{
 		return $this->_uri_to_assoc($n, $default, 'segment');
 	}
-	/**
-	 * Identical to above only it uses the re-routed segment array
-	 *
-	 * @access 	public
-	 * @param 	integer	the starting segment number
-	 * @param 	array	an array of default values
-	 * @return 	array
-	 *
-	 */
-	function ruri_to_assoc($n = 3, $default = array())
-	{
-		return $this->_uri_to_assoc($n, $default, 'rsegment');
-	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Generate a key value pair from the URI string or Re-routed URI string
@@ -491,6 +474,22 @@ class CI_URI {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Identical to above only it uses the re-routed segment array
+	 *
+	 * @access    public
+	 * @param    integer    the starting segment number
+	 * @param    array    an array of default values
+	 * @return    array
+	 *
+	 */
+	function ruri_to_assoc($n = 3, $default = array())
+	{
+		return $this->_uri_to_assoc($n, $default, 'rsegment');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Generate a URI string from an associative array
 	 *
 	 *
@@ -528,21 +527,6 @@ class CI_URI {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Fetch a URI Segment and add a trailing slash
-	 *
-	 * @access	public
-	 * @param	integer
-	 * @param	string
-	 * @return	string
-	 */
-	function slash_rsegment($n, $where = 'trailing')
-	{
-		return $this->_slash_segment($n, $where, 'rsegment');
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Fetch a URI Segment and add a trailing slash - helper function
 	 *
 	 * @access	private
@@ -571,6 +555,21 @@ class CI_URI {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Fetch a URI Segment and add a trailing slash
+	 *
+	 * @access	public
+	 * @param    integer
+	 * @param    string
+	 * @return    string
+	 */
+	function slash_rsegment($n, $where = 'trailing')
+	{
+		return $this->_slash_segment($n, $where, 'rsegment');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Segment Array
 	 *
 	 * @access	public
@@ -579,19 +578,6 @@ class CI_URI {
 	function segment_array()
 	{
 		return $this->segments;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Routed Segment Array
-	 *
-	 * @access	public
-	 * @return	array
-	 */
-	function rsegment_array()
-	{
-		return $this->rsegments;
 	}
 
 	// --------------------------------------------------------------------
@@ -633,7 +619,6 @@ class CI_URI {
 		return $this->uri_string;
 	}
 
-
 	// --------------------------------------------------------------------
 
 	/**
@@ -645,6 +630,20 @@ class CI_URI {
 	function ruri_string()
 	{
 		return '/'.implode('/', $this->rsegment_array());
+	}
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Routed Segment Array
+	 *
+	 * @access    public
+	 * @return    array
+	 */
+	function rsegment_array()
+	{
+		return $this->rsegments;
 	}
 
 }

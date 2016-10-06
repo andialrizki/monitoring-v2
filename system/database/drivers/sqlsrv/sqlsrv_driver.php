@@ -48,6 +48,19 @@ class CI_DB_sqlsrv_driver extends CI_DB {
 	var $_random_keyword = ' ASC'; // not currently supported
 
 	/**
+	 * Persistent database connection
+	 *
+	 * @access    private called by the base class
+	 * @return    resource
+	 */
+	function db_pconnect()
+	{
+		$this->db_connect(TRUE);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Non-persistent database connection
 	 *
 	 * @access	private called by the base class
@@ -74,19 +87,6 @@ class CI_DB_sqlsrv_driver extends CI_DB {
 		}
 
 		return sqlsrv_connect($this->hostname, $connection);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Persistent database connection
-	 *
-	 * @access	private called by the base class
-	 * @return	resource
-	 */
-	function db_pconnect()
-	{
-		$this->db_connect(TRUE);
 	}
 
 	// --------------------------------------------------------------------
@@ -121,22 +121,6 @@ class CI_DB_sqlsrv_driver extends CI_DB {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set client character set
-	 *
-	 * @access	public
-	 * @param	string
-	 * @param	string
-	 * @return	resource
-	 */
-	function db_set_charset($charset, $collation)
-	{
-		// @todo - add support if needed
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Execute the query
 	 *
 	 * @access	private called by the base class
@@ -166,6 +150,22 @@ class CI_DB_sqlsrv_driver extends CI_DB {
 	function _prep_query($sql)
 	{
 		return $sql;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set client character set
+	 *
+	 * @access    public
+	 * @param    string
+	 * @param    string
+	 * @return    resource
+	 */
+	function db_set_charset($charset, $collation)
+	{
+		// @todo - add support if needed
+		return TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -383,6 +383,23 @@ class CI_DB_sqlsrv_driver extends CI_DB {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Escape Table Name
+	 *
+	 * This function adds backticks if the table name has a period
+	 * in it. Some DBs will get cranky unless periods are escaped
+	 *
+	 * @access    private
+	 * @param    string    the table name
+	 * @return    string
+	 */
+	function _escape_table($table)
+	{
+		return $table;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Field data query
 	 *
 	 * Generates a platform-specific query so that the column data can be retrieved
@@ -423,24 +440,6 @@ class CI_DB_sqlsrv_driver extends CI_DB {
 		$error = array_shift(sqlsrv_errors());
 		return isset($error['SQLSTATE']) ? $error['SQLSTATE'] : null;
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Escape Table Name
-	 *
-	 * This function adds backticks if the table name has a period
-	 * in it. Some DBs will get cranky unless periods are escaped
-	 *
-	 * @access	private
-	 * @param	string	the table name
-	 * @return	string
-	 */
-	function _escape_table($table)
-	{
-		return $table;
-	}	
-
 
 	/**
 	 * Escape the SQL Identifiers

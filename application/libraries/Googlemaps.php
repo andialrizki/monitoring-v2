@@ -433,6 +433,91 @@ class Googlemaps {
 		array_push($this->markers, $marker_output);
 	
 	}
+
+	function is_lat_long($input)
+	{
+
+		$input = str_replace(", ", ",", trim($input));
+		$input = explode(",", $input);
+		if (count($input) == 2) {
+
+			if (is_numeric($input[0]) && is_numeric($input[1])) { // is a lat long
+				return true;
+			} else { // not a lat long - incorrect values
+				return false;
+			}
+
+		} else { // not a lat long - too many parts
+			return false;
+		}
+
+	}
+
+	function get_lat_long_from_address($address, $attempts = 0)
+	{
+
+		$lat = 0;
+		$lng = 0;
+
+		$error = '';
+
+		if ($this->geocodeCaching) { // if caching of geocode requests is activated
+
+			$CI =& get_instance();
+			$CI->load->database();
+			$CI->db->select("latitude,longitude");
+			$CI->db->from("geocoding");
+			$CI->db->where("address", trim(strtolower($address)));
+			$query = $CI->db->get();
+
+			if ($query->num_rows() > 0) {
+				$row = $query->row();
+				return array($row->latitude, $row->longitude);
+			}
+
+		}
+
+		if ($this->https) {
+			$data_location = 'https://';
+		} else {
+			$data_location = 'http://';
+		}
+		$data_location .= "maps.google.com/maps/api/geocode/json?address=" . urlencode(utf8_encode($address)) . "&sensor=" . $this->sensor;
+		if ($this->region != "" && strlen($this->region) == 2) {
+			$data_location .= "&region=" . $this->region;
+		}
+		$data = file_get_contents($data_location);
+
+		$data = json_decode($data);
+
+		if ($data->status == "OK") {
+			$lat = $data->results[0]->geometry->location->lat;
+			$lng = $data->results[0]->geometry->location->lng;
+
+			if ($this->geocodeCaching) { // if we to need to cache this result
+				if ($address != "" && $lat != 0 && $lng != 0) {
+					$data = array(
+						"address" => trim(strtolower($address)),
+						"latitude" => $lat,
+						"longitude" => $lng
+					);
+					$CI->db->insert("geocoding", $data);
+				}
+			}
+		} else {
+			if ($data->status == "OVER_QUERY_LIMIT") {
+				$error = $data->status;
+				if ($attempts < 2) {
+					sleep(1);
+					++$attempts;
+					list($lat, $lng, $error) = $this->get_lat_long_from_address($address, $attempts);
+				}
+			}
+		}
+
+		return array($lat, $lng, $error);
+
+	}
 	
 	function add_polyline($params = array())
 	{
@@ -2171,91 +2256,6 @@ class Googlemaps {
 		
 		return array('js'=>$this->output_js, 'html'=>$this->output_html, 'markers'=>$this->markersInfo);
 	
-	}
-	
-	function is_lat_long($input)
-	{
-		
-		$input = str_replace(", ", ",", trim($input));
-		$input = explode(",", $input);
-		if (count($input)==2) {
-		
-			if (is_numeric($input[0]) && is_numeric($input[1])) { // is a lat long
-				return true;
-			}else{ // not a lat long - incorrect values
-				return false;
-			}
-		
-		}else{ // not a lat long - too many parts
-			return false;
-		}
-		
-	}
-	
-	function get_lat_long_from_address($address, $attempts = 0)
-	{
-		
-		$lat = 0;
-		$lng = 0;
-		
-		$error = '';
-		
-		if ($this->geocodeCaching) { // if caching of geocode requests is activated
-			
-			$CI =& get_instance();
-			$CI->load->database(); 
-			$CI->db->select("latitude,longitude");
-			$CI->db->from("geocoding");
-			$CI->db->where("address", trim(strtolower($address)));
-			$query = $CI->db->get();
-			
-			if ($query->num_rows()>0) {
-				$row = $query->row();
-				return array($row->latitude, $row->longitude);
-			}
-			
-		}
-		
-		if ($this->https) { $data_location = 'https://'; }else{ $data_location = 'http://'; }
-		$data_location .= "maps.google.com/maps/api/geocode/json?address=".urlencode(utf8_encode($address))."&sensor=".$this->sensor;
-		if ($this->region!="" && strlen($this->region)==2) { $data_location .= "&region=".$this->region; }
-		$data = file_get_contents($data_location);
-		
-		$data = json_decode($data);
-		
-		if ($data->status=="OK") 
-		{
-			$lat = $data->results[0]->geometry->location->lat;
-			$lng = $data->results[0]->geometry->location->lng;
-			
-			if ($this->geocodeCaching) { // if we to need to cache this result
-				if ($address != "" && $lat != 0 && $lng != 0)
-				{
-					$data = array(
-						"address"=>trim(strtolower($address)),
-						"latitude"=>$lat,
-						"longitude"=>$lng
-					);
-					$CI->db->insert("geocoding", $data);
-				}
-			}
-		}
-		else
-		{
-			if ($data->status == "OVER_QUERY_LIMIT") 
-			{
-				$error = $data->status;
-				if ($attempts < 2)
-				{
-					sleep(1);
-					++$attempts;
-					list($lat, $lng, $error) = $this->get_lat_long_from_address($address, $attempts);
-				}
-			}
-		}
-		
-		return array($lat, $lng, $error);
-		
 	}
 	
 }

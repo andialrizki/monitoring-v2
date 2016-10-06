@@ -17,16 +17,23 @@ class Fe_transaksi extends MX_Controller {
 		echo Modules::run('frontend', $content, 'transaksi');
 	}
 
-	public function add_transaksi()
+	public function get_all_transaksi()
+	{
+		$data = $this->model_transaksi->get_all_transaksi();
+		return $data;
+	}
+
+	public function add_transaksi($darimobile = '')
 	{
 		if ($this->session->userdata(APP_PREFIX.'type_admin') != 2) {
 			redirect(site_url('transaksi'));
 		}
+
 		$id_admin = $this->session->userdata(APP_PREFIX.'id_admin');
 		$pelanggan = Modules::run('myhelper/get_data_table', 'tbl_pengecer', 'name, id_pengecer', array('id_pangkalan' => $id_admin));
 		$pelanggan = isset($pelanggan[0]) ? $pelanggan : array('0' => $pelanggan);
 		$harga = Modules::run('myhelper/get_data_table', 'tbl_pangkalan', 'harga_eceran', array('id_pangkalan' => $id_admin));
-		$content = $this->load->view('add_edit_transaksi', array('pelanggan' => $pelanggan, 'harga' => $harga), TRUE);
+		$content = $this->load->view('add_edit_transaksi', array('pelanggan' => $pelanggan, 'harga' => $harga, 'darimobile' => $darimobile), TRUE);
 		echo Modules::run('frontend', $content, 'transaksi');
 	}
 
@@ -65,9 +72,9 @@ class Fe_transaksi extends MX_Controller {
 		echo Modules::run('frontend', $content, 'transaksi');
 	}
 
-	public function get_all_transaksi()
+	public function get_this_data($id)
 	{
-		$data = $this->model_transaksi->get_all_transaksi();
+		$data = $this->model_transaksi->get_this_data($id);
 		return $data;
 	}
 
@@ -86,12 +93,6 @@ class Fe_transaksi extends MX_Controller {
 		$data = $this->model_transaksi->get_transaksi_agen();
 		$content = $this->load->view('index_transaksi_agen', array('data' => $data), TRUE);
 		echo Modules::run('frontend', $content, 'transaksi-agen');
-	}
-
-	public function get_this_data($id)
-	{
-		$data = $this->model_transaksi->get_this_data($id);
-		return $data;
 	}
 
 

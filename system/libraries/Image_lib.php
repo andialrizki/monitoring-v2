@@ -95,29 +95,6 @@ class CI_Image_lib {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Initialize image properties
-	 *
-	 * Resets values in case this class is used in a loop
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function clear()
-	{
-		$props = array('source_folder', 'dest_folder', 'source_image', 'full_src_path', 'full_dst_path', 'new_image', 'image_type', 'size_str', 'quality', 'orig_width', 'orig_height', 'width', 'height', 'rotation_angle', 'x_axis', 'y_axis', 'create_fnc', 'copy_fnc', 'wm_overlay_path', 'wm_use_truetype', 'dynamic_output', 'wm_font_size', 'wm_text', 'wm_vrt_alignment', 'wm_hor_alignment', 'wm_padding', 'wm_hor_offset', 'wm_vrt_offset', 'wm_font_color', 'wm_use_drop_shadow', 'wm_shadow_color', 'wm_shadow_distance', 'wm_opacity');
-
-		foreach ($props as $val)
-		{
-			$this->$val = '';
-		}
-
-		// special consideration for master_dim
-		$this->master_dim = 'auto';
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * initialize image preferences
 	 *
 	 * @access	public
@@ -337,6 +314,170 @@ class CI_Image_lib {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set error message
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    void
+	 */
+	function set_error($msg)
+	{
+		$CI =& get_instance();
+		$CI->lang->load('imglib');
+
+		if (is_array($msg)) {
+			foreach ($msg as $val) {
+
+				$msg = ($CI->lang->line($val) == FALSE) ? $val : $CI->lang->line($val);
+				$this->error_msg[] = $msg;
+				log_message('error', $msg);
+			}
+		} else {
+			$msg = ($CI->lang->line($msg) == FALSE) ? $msg : $CI->lang->line($msg);
+			$this->error_msg[] = $msg;
+			log_message('error', $msg);
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get image properties
+	 *
+	 * A helper function that gets info about the file
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    mixed
+	 */
+	function get_image_properties($path = '', $return = FALSE)
+	{
+		// For now we require GD but we should
+		// find a way to determine this using IM or NetPBM
+
+		if ($path == '')
+			$path = $this->full_src_path;
+
+		if (!file_exists($path)) {
+			$this->set_error('imglib_invalid_path');
+			return FALSE;
+		}
+
+		$vals = @getimagesize($path);
+
+		$types = array(1 => 'gif', 2 => 'jpeg', 3 => 'png');
+
+		$mime = (isset($types[$vals['2']])) ? 'image/' . $types[$vals['2']] : 'image/jpg';
+
+		if ($return == TRUE) {
+			$v['width'] = $vals['0'];
+			$v['height'] = $vals['1'];
+			$v['image_type'] = $vals['2'];
+			$v['size_str'] = $vals['3'];
+			$v['mime_type'] = $mime;
+
+			return $v;
+		}
+
+		$this->orig_width = $vals['0'];
+		$this->orig_height = $vals['1'];
+		$this->image_type = $vals['2'];
+		$this->size_str = $vals['3'];
+		$this->mime_type = $mime;
+
+		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Explode source_image
+	 *
+	 * This is a helper function that extracts the extension
+	 * from the source_image.  This function lets us deal with
+	 * source_images with multiple periods, like:  my.cool.jpg
+	 * It returns an associative array with two elements:
+	 * $array['ext']  = '.jpg';
+	 * $array['name'] = 'my.cool';
+	 *
+	 * @access    public
+	 * @param    array
+	 * @return    array
+	 */
+	function explode_name($source_image)
+	{
+		$ext = strrchr($source_image, '.');
+		$name = ($ext === FALSE) ? $source_image : substr($source_image, 0, -strlen($ext));
+
+		return array('ext' => $ext, 'name' => $name);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Re-proportion Image Width/Height
+	 *
+	 * When creating thumbs, the desired width/height
+	 * can end up warping the image due to an incorrect
+	 * ratio between the full-sized image and the thumb.
+	 *
+	 * This function lets us re-proportion the width/height
+	 * if users choose to maintain the aspect ratio when resizing.
+	 *
+	 * @access    public
+	 * @return    void
+	 */
+	function image_reproportion()
+	{
+		if (!is_numeric($this->width) OR !is_numeric($this->height) OR $this->width == 0 OR $this->height == 0)
+			return;
+
+		if (!is_numeric($this->orig_width) OR !is_numeric($this->orig_height) OR $this->orig_width == 0 OR $this->orig_height == 0)
+			return;
+
+		$new_width = ceil($this->orig_width * $this->height / $this->orig_height);
+		$new_height = ceil($this->width * $this->orig_height / $this->orig_width);
+
+		$ratio = (($this->orig_height / $this->orig_width) - ($this->height / $this->width));
+
+		if ($this->master_dim != 'width' AND $this->master_dim != 'height') {
+			$this->master_dim = ($ratio < 0) ? 'width' : 'height';
+		}
+
+		if (($this->width != $new_width) AND ($this->height != $new_height)) {
+			if ($this->master_dim == 'height') {
+				$this->width = $new_width;
+			} else {
+				$this->height = $new_height;
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Initialize image properties
+	 *
+	 * Resets values in case this class is used in a loop
+	 *
+	 * @access    public
+	 * @return    void
+	 */
+	function clear()
+	{
+		$props = array('source_folder', 'dest_folder', 'source_image', 'full_src_path', 'full_dst_path', 'new_image', 'image_type', 'size_str', 'quality', 'orig_width', 'orig_height', 'width', 'height', 'rotation_angle', 'x_axis', 'y_axis', 'create_fnc', 'copy_fnc', 'wm_overlay_path', 'wm_use_truetype', 'dynamic_output', 'wm_font_size', 'wm_text', 'wm_vrt_alignment', 'wm_hor_alignment', 'wm_padding', 'wm_hor_offset', 'wm_vrt_offset', 'wm_font_color', 'wm_use_drop_shadow', 'wm_shadow_color', 'wm_shadow_distance', 'wm_opacity');
+
+		foreach ($props as $val) {
+			$this->$val = '';
+		}
+
+		// special consideration for master_dim
+		$this->master_dim = 'auto';
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Image Resize
 	 *
 	 * This is a wrapper function that chooses the proper
@@ -431,6 +572,266 @@ class CI_Image_lib {
 		{
 			return $this->image_rotate_gd();
 		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Create Mirror Image using GD
+	 *
+	 * This function will flip horizontal or vertical
+	 *
+	 * @access    public
+	 * @return    bool
+	 */
+	function image_mirror_gd()
+	{
+		if (!$src_img = $this->image_create_gd()) {
+			return FALSE;
+		}
+
+		$width = $this->orig_width;
+		$height = $this->orig_height;
+
+		if ($this->rotation_angle == 'hor') {
+			for ($i = 0; $i < $height; $i++) {
+				$left = 0;
+				$right = $width - 1;
+
+				while ($left < $right) {
+					$cl = imagecolorat($src_img, $left, $i);
+					$cr = imagecolorat($src_img, $right, $i);
+
+					imagesetpixel($src_img, $left, $i, $cr);
+					imagesetpixel($src_img, $right, $i, $cl);
+
+					$left++;
+					$right--;
+				}
+			}
+		} else {
+			for ($i = 0; $i < $width; $i++) {
+				$top = 0;
+				$bot = $height - 1;
+
+				while ($top < $bot) {
+					$ct = imagecolorat($src_img, $i, $top);
+					$cb = imagecolorat($src_img, $i, $bot);
+
+					imagesetpixel($src_img, $i, $top, $cb);
+					imagesetpixel($src_img, $i, $bot, $ct);
+
+					$top++;
+					$bot--;
+				}
+			}
+		}
+
+		//  Show the image
+		if ($this->dynamic_output == TRUE) {
+			$this->image_display_gd($src_img);
+		} else {
+			// Or save it
+			if (!$this->image_save_gd($src_img)) {
+				return FALSE;
+			}
+		}
+
+		//  Kill the file handles
+		imagedestroy($src_img);
+
+		// Set the file to 777
+		@chmod($this->full_dst_path, FILE_WRITE_MODE);
+
+		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Create Image - GD
+	 *
+	 * This simply creates an image resource handle
+	 * based on the type of image being processed
+	 *
+	 * @access    public
+	 * @param    string
+	 * @return    resource
+	 */
+	function image_create_gd($path = '', $image_type = '')
+	{
+		if ($path == '')
+			$path = $this->full_src_path;
+
+		if ($image_type == '')
+			$image_type = $this->image_type;
+
+
+		switch ($image_type) {
+			case     1 :
+				if (!function_exists('imagecreatefromgif')) {
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
+					return FALSE;
+				}
+
+				return imagecreatefromgif($path);
+				break;
+			case 2 :
+				if (!function_exists('imagecreatefromjpeg')) {
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
+					return FALSE;
+				}
+
+				return imagecreatefromjpeg($path);
+				break;
+			case 3 :
+				if (!function_exists('imagecreatefrompng')) {
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
+					return FALSE;
+				}
+
+				return imagecreatefrompng($path);
+				break;
+
+		}
+
+		$this->set_error(array('imglib_unsupported_imagecreate'));
+		return FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Dynamically outputs an image
+	 *
+	 * @access    public
+	 * @param    resource
+	 * @return    void
+	 */
+	function image_display_gd($resource)
+	{
+		header("Content-Disposition: filename={$this->source_image};");
+		header("Content-Type: {$this->mime_type}");
+		header('Content-Transfer-Encoding: binary');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
+
+		switch ($this->image_type) {
+			case 1        :
+				imagegif($resource);
+				break;
+			case 2        :
+				imagejpeg($resource, '', $this->quality);
+				break;
+			case 3        :
+				imagepng($resource);
+				break;
+			default        :
+				echo 'Unable to display the image';
+				break;
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Write image file to disk - GD
+	 *
+	 * Takes an image resource as input and writes the file
+	 * to the specified destination
+	 *
+	 * @access    public
+	 * @param    resource
+	 * @return    bool
+	 */
+	function image_save_gd($resource)
+	{
+		switch ($this->image_type) {
+			case 1 :
+				if (!function_exists('imagegif')) {
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
+					return FALSE;
+				}
+
+				if (!@imagegif($resource, $this->full_dst_path)) {
+					$this->set_error('imglib_save_failed');
+					return FALSE;
+				}
+				break;
+			case 2    :
+				if (!function_exists('imagejpeg')) {
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
+					return FALSE;
+				}
+
+				if (!@imagejpeg($resource, $this->full_dst_path, $this->quality)) {
+					$this->set_error('imglib_save_failed');
+					return FALSE;
+				}
+				break;
+			case 3    :
+				if (!function_exists('imagepng')) {
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
+					return FALSE;
+				}
+
+				if (!@imagepng($resource, $this->full_dst_path)) {
+					$this->set_error('imglib_save_failed');
+					return FALSE;
+				}
+				break;
+			default        :
+				$this->set_error(array('imglib_unsupported_imagecreate'));
+				return FALSE;
+				break;
+		}
+
+		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Image Rotate Using GD
+	 *
+	 * @access    public
+	 * @return    bool
+	 */
+	function image_rotate_gd()
+	{
+		//  Create the image handle
+		if (!($src_img = $this->image_create_gd())) {
+			return FALSE;
+		}
+
+		// Set the background color
+		// This won't work with transparent PNG files so we are
+		// going to have to figure out how to determine the color
+		// of the alpha channel in a future release.
+
+		$white = imagecolorallocate($src_img, 255, 255, 255);
+
+		//  Rotate it!
+		$dst_img = imagerotate($src_img, $this->rotation_angle, $white);
+
+		//  Save the Image
+		if ($this->dynamic_output == TRUE) {
+			$this->image_display_gd($dst_img);
+		} else {
+			// Or save it
+			if (!$this->image_save_gd($dst_img)) {
+				return FALSE;
+			}
+		}
+
+		//  Kill the file handles
+		imagedestroy($dst_img);
+		imagedestroy($src_img);
+
+		// Set the file to 777
+
+		@chmod($this->full_dst_path, FILE_WRITE_MODE);
+
+		return TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -543,6 +944,26 @@ class CI_Image_lib {
 		@chmod($this->full_dst_path, FILE_WRITE_MODE);
 
 		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get GD version
+	 *
+	 * @access    public
+	 * @return    mixed
+	 */
+	function gd_version()
+	{
+		if (function_exists('gd_info')) {
+			$gd_version = @gd_info();
+			$gd_version = preg_replace("/\D/", "", $gd_version['GD Version']);
+
+			return $gd_version;
+		}
+
+		return FALSE;
 	}
 
 	// --------------------------------------------------------------------
@@ -696,141 +1117,6 @@ class CI_Image_lib {
 		// we have to rename the temp file.
 		copy ($this->dest_folder.'netpbm.tmp', $this->full_dst_path);
 		unlink ($this->dest_folder.'netpbm.tmp');
-		@chmod($this->full_dst_path, FILE_WRITE_MODE);
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Image Rotate Using GD
-	 *
-	 * @access	public
-	 * @return	bool
-	 */
-	function image_rotate_gd()
-	{
-		//  Create the image handle
-		if ( ! ($src_img = $this->image_create_gd()))
-		{
-			return FALSE;
-		}
-
-		// Set the background color
-		// This won't work with transparent PNG files so we are
-		// going to have to figure out how to determine the color
-		// of the alpha channel in a future release.
-
-		$white	= imagecolorallocate($src_img, 255, 255, 255);
-
-		//  Rotate it!
-		$dst_img = imagerotate($src_img, $this->rotation_angle, $white);
-
-		//  Save the Image
-		if ($this->dynamic_output == TRUE)
-		{
-			$this->image_display_gd($dst_img);
-		}
-		else
-		{
-			// Or save it
-			if ( ! $this->image_save_gd($dst_img))
-			{
-				return FALSE;
-			}
-		}
-
-		//  Kill the file handles
-		imagedestroy($dst_img);
-		imagedestroy($src_img);
-
-		// Set the file to 777
-
-		@chmod($this->full_dst_path, FILE_WRITE_MODE);
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Create Mirror Image using GD
-	 *
-	 * This function will flip horizontal or vertical
-	 *
-	 * @access	public
-	 * @return	bool
-	 */
-	function image_mirror_gd()
-	{
-		if ( ! $src_img = $this->image_create_gd())
-		{
-			return FALSE;
-		}
-
-		$width  = $this->orig_width;
-		$height = $this->orig_height;
-
-		if ($this->rotation_angle == 'hor')
-		{
-			for ($i = 0; $i < $height; $i++)
-			{
-				$left  = 0;
-				$right = $width-1;
-
-				while ($left < $right)
-				{
-					$cl = imagecolorat($src_img, $left, $i);
-					$cr = imagecolorat($src_img, $right, $i);
-
-					imagesetpixel($src_img, $left, $i, $cr);
-					imagesetpixel($src_img, $right, $i, $cl);
-
-					$left++;
-					$right--;
-				}
-			}
-		}
-		else
-		{
-			for ($i = 0; $i < $width; $i++)
-			{
-				$top = 0;
-				$bot = $height-1;
-
-				while ($top < $bot)
-				{
-					$ct = imagecolorat($src_img, $i, $top);
-					$cb = imagecolorat($src_img, $i, $bot);
-
-					imagesetpixel($src_img, $i, $top, $cb);
-					imagesetpixel($src_img, $i, $bot, $ct);
-
-					$top++;
-					$bot--;
-				}
-			}
-		}
-
-		//  Show the image
-		if ($this->dynamic_output == TRUE)
-		{
-			$this->image_display_gd($src_img);
-		}
-		else
-		{
-			// Or save it
-			if ( ! $this->image_save_gd($src_img))
-			{
-				return FALSE;
-			}
-		}
-
-		//  Kill the file handles
-		imagedestroy($src_img);
-
-		// Set the file to 777
 		@chmod($this->full_dst_path, FILE_WRITE_MODE);
 
 		return TRUE;
@@ -1116,253 +1402,6 @@ class CI_Image_lib {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Create Image - GD
-	 *
-	 * This simply creates an image resource handle
-	 * based on the type of image being processed
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	resource
-	 */
-	function image_create_gd($path = '', $image_type = '')
-	{
-		if ($path == '')
-			$path = $this->full_src_path;
-
-		if ($image_type == '')
-			$image_type = $this->image_type;
-
-
-		switch ($image_type)
-		{
-			case	 1 :
-						if ( ! function_exists('imagecreatefromgif'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
-							return FALSE;
-						}
-
-						return imagecreatefromgif($path);
-				break;
-			case 2 :
-						if ( ! function_exists('imagecreatefromjpeg'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
-							return FALSE;
-						}
-
-						return imagecreatefromjpeg($path);
-				break;
-			case 3 :
-						if ( ! function_exists('imagecreatefrompng'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
-							return FALSE;
-						}
-
-						return imagecreatefrompng($path);
-				break;
-
-		}
-
-		$this->set_error(array('imglib_unsupported_imagecreate'));
-		return FALSE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Write image file to disk - GD
-	 *
-	 * Takes an image resource as input and writes the file
-	 * to the specified destination
-	 *
-	 * @access	public
-	 * @param	resource
-	 * @return	bool
-	 */
-	function image_save_gd($resource)
-	{
-		switch ($this->image_type)
-		{
-			case 1 :
-						if ( ! function_exists('imagegif'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
-							return FALSE;
-						}
-
-						if ( ! @imagegif($resource, $this->full_dst_path))
-						{
-							$this->set_error('imglib_save_failed');
-							return FALSE;
-						}
-				break;
-			case 2	:
-						if ( ! function_exists('imagejpeg'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
-							return FALSE;
-						}
-
-						if ( ! @imagejpeg($resource, $this->full_dst_path, $this->quality))
-						{
-							$this->set_error('imglib_save_failed');
-							return FALSE;
-						}
-				break;
-			case 3	:
-						if ( ! function_exists('imagepng'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
-							return FALSE;
-						}
-
-						if ( ! @imagepng($resource, $this->full_dst_path))
-						{
-							$this->set_error('imglib_save_failed');
-							return FALSE;
-						}
-				break;
-			default		:
-							$this->set_error(array('imglib_unsupported_imagecreate'));
-							return FALSE;
-				break;
-		}
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Dynamically outputs an image
-	 *
-	 * @access	public
-	 * @param	resource
-	 * @return	void
-	 */
-	function image_display_gd($resource)
-	{
-		header("Content-Disposition: filename={$this->source_image};");
-		header("Content-Type: {$this->mime_type}");
-		header('Content-Transfer-Encoding: binary');
-		header('Last-Modified: '.gmdate('D, d M Y H:i:s', time()).' GMT');
-
-		switch ($this->image_type)
-		{
-			case 1		:	imagegif($resource);
-				break;
-			case 2		:	imagejpeg($resource, '', $this->quality);
-				break;
-			case 3		:	imagepng($resource);
-				break;
-			default		:	echo 'Unable to display the image';
-				break;
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Re-proportion Image Width/Height
-	 *
-	 * When creating thumbs, the desired width/height
-	 * can end up warping the image due to an incorrect
-	 * ratio between the full-sized image and the thumb.
-	 *
-	 * This function lets us re-proportion the width/height
-	 * if users choose to maintain the aspect ratio when resizing.
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function image_reproportion()
-	{
-		if ( ! is_numeric($this->width) OR ! is_numeric($this->height) OR $this->width == 0 OR $this->height == 0)
-			return;
-
-		if ( ! is_numeric($this->orig_width) OR ! is_numeric($this->orig_height) OR $this->orig_width == 0 OR $this->orig_height == 0)
-			return;
-
-		$new_width	= ceil($this->orig_width*$this->height/$this->orig_height);
-		$new_height	= ceil($this->width*$this->orig_height/$this->orig_width);
-
-		$ratio = (($this->orig_height/$this->orig_width) - ($this->height/$this->width));
-
-		if ($this->master_dim != 'width' AND $this->master_dim != 'height')
-		{
-			$this->master_dim = ($ratio < 0) ? 'width' : 'height';
-		}
-
-		if (($this->width != $new_width) AND ($this->height != $new_height))
-		{
-			if ($this->master_dim == 'height')
-			{
-				$this->width = $new_width;
-			}
-			else
-			{
-				$this->height = $new_height;
-			}
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get image properties
-	 *
-	 * A helper function that gets info about the file
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	mixed
-	 */
-	function get_image_properties($path = '', $return = FALSE)
-	{
-		// For now we require GD but we should
-		// find a way to determine this using IM or NetPBM
-
-		if ($path == '')
-			$path = $this->full_src_path;
-
-		if ( ! file_exists($path))
-		{
-			$this->set_error('imglib_invalid_path');
-			return FALSE;
-		}
-
-		$vals = @getimagesize($path);
-
-		$types = array(1 => 'gif', 2 => 'jpeg', 3 => 'png');
-
-		$mime = (isset($types[$vals['2']])) ? 'image/'.$types[$vals['2']] : 'image/jpg';
-
-		if ($return == TRUE)
-		{
-			$v['width']			= $vals['0'];
-			$v['height']		= $vals['1'];
-			$v['image_type']	= $vals['2'];
-			$v['size_str']		= $vals['3'];
-			$v['mime_type']		= $mime;
-
-			return $v;
-		}
-
-		$this->orig_width	= $vals['0'];
-		$this->orig_height	= $vals['1'];
-		$this->image_type	= $vals['2'];
-		$this->size_str		= $vals['3'];
-		$this->mime_type	= $mime;
-
-		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Size calculator
 	 *
 	 * This function takes a known width x height and
@@ -1415,30 +1454,6 @@ class CI_Image_lib {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Explode source_image
-	 *
-	 * This is a helper function that extracts the extension
-	 * from the source_image.  This function lets us deal with
-	 * source_images with multiple periods, like:  my.cool.jpg
-	 * It returns an associative array with two elements:
-	 * $array['ext']  = '.jpg';
-	 * $array['name'] = 'my.cool';
-	 *
-	 * @access	public
-	 * @param	array
-	 * @return	array
-	 */
-	function explode_name($source_image)
-	{
-		$ext = strrchr($source_image, '.');
-		$name = ($ext === FALSE) ? $source_image : substr($source_image, 0, -strlen($ext));
-
-		return array('ext' => $ext, 'name' => $name);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Is GD Installed?
 	 *
 	 * @access	public
@@ -1455,59 +1470,6 @@ class CI_Image_lib {
 		}
 
 		return TRUE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get GD version
-	 *
-	 * @access	public
-	 * @return	mixed
-	 */
-	function gd_version()
-	{
-		if (function_exists('gd_info'))
-		{
-			$gd_version = @gd_info();
-			$gd_version = preg_replace("/\D/", "", $gd_version['GD Version']);
-
-			return $gd_version;
-		}
-
-		return FALSE;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set error message
-	 *
-	 * @access	public
-	 * @param	string
-	 * @return	void
-	 */
-	function set_error($msg)
-	{
-		$CI =& get_instance();
-		$CI->lang->load('imglib');
-
-		if (is_array($msg))
-		{
-			foreach ($msg as $val)
-			{
-
-				$msg = ($CI->lang->line($val) == FALSE) ? $val : $CI->lang->line($val);
-				$this->error_msg[] = $msg;
-				log_message('error', $msg);
-			}
-		}
-		else
-		{
-			$msg = ($CI->lang->line($msg) == FALSE) ? $msg : $CI->lang->line($msg);
-			$this->error_msg[] = $msg;
-			log_message('error', $msg);
-		}
 	}
 
 	// --------------------------------------------------------------------

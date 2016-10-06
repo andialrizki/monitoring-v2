@@ -32,7 +32,8 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3">ID Pengecer</label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" required="" id="id_pengecer">
+                            <input type="text" class="form-control" required="" id="id_pengecer"
+                                   value="<?php echo @$darimobile ?>">
                         </div>
                     </div>
                     <div class="form-group">
@@ -42,7 +43,8 @@
                                 <option value="">
                                     <?php if (isset($pelanggan) && $pelanggan): ?>
                                     <?php foreach ($pelanggan as $key): ?>
-                                <option value="<?php echo isset($key['id_pengecer']) ? $key['id_pengecer'] : ''; ?>">
+                                <option
+                                    value="<?php echo isset($key['id_pengecer']) ? $key['id_pengecer'] : ''; ?>" <?php echo (isset($darimobile) && $darimobile == $key['id_pengecer']) ? 'selected' : ''; ?>>
                                     <?php echo isset($key['name']) ? $key['name'] : ''; ?>
                                 </option>
                                 <?php endforeach; ?>

@@ -219,15 +219,6 @@ class CI_Xmlrpc {
 	//  Set Debug
 	//-------------------------------------
 
-	function set_debug($flag = TRUE)
-	{
-		$this->debug = ($flag == TRUE) ? TRUE : FALSE;
-	}
-
-	//-------------------------------------
-	//  Values Parsing
-	//-------------------------------------
-
 	function values_parsing($value, $return = FALSE)
 	{
 		if (is_array($value) && array_key_exists(0, $value))
@@ -263,6 +254,15 @@ class CI_Xmlrpc {
 		}
 
 		return $temp;
+	}
+
+	//-------------------------------------
+	//  Values Parsing
+	//-------------------------------------
+
+	function set_debug($flag = TRUE)
+	{
+		$this->debug = ($flag == TRUE) ? TRUE : FALSE;
 	}
 	// END
 
@@ -1291,18 +1291,6 @@ class XML_RPC_Values extends CI_Xmlrpc
 		return 1;
 	}
 
-	function addStruct($vals)
-	{
-		if ($this->mytype != 0)
-		{
-			echo '<strong>XML_RPC_Values</strong>: already initialized as a [' . $this->kindOf() . ']<br />';
-			return 0;
-		}
-		$this->mytype = $this->xmlrpcTypes['struct'];
-		$this->me['struct'] = $vals;
-		return 1;
-	}
-
 	function kindOf()
 	{
 		switch($this->mytype)
@@ -1319,6 +1307,17 @@ class XML_RPC_Values extends CI_Xmlrpc
 			default:
 				return 'undef';
 		}
+	}
+
+	function addStruct($vals)
+	{
+		if ($this->mytype != 0) {
+			echo '<strong>XML_RPC_Values</strong>: already initialized as a [' . $this->kindOf() . ']<br />';
+			return 0;
+		}
+		$this->mytype = $this->xmlrpcTypes['struct'];
+		$this->me['struct'] = $vals;
+		return 1;
 	}
 
 	function serializedata($typ, $val)
@@ -1371,11 +1370,6 @@ class XML_RPC_Values extends CI_Xmlrpc
 		return $rs;
 	}
 
-	function serialize_class()
-	{
-		return $this->serializeval($this);
-	}
-
 	function serializeval($o)
 	{
 		$ar = $o->me;
@@ -1384,6 +1378,11 @@ class XML_RPC_Values extends CI_Xmlrpc
 		list($typ, $val) = each($ar);
 		$rs = "<value>\n".$this->serializedata($typ, $val)."</value>\n";
 		return $rs;
+	}
+
+	function serialize_class()
+	{
+		return $this->serializeval($this);
 	}
 
 	function scalarval()

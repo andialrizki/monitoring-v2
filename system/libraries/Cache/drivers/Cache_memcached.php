@@ -27,15 +27,14 @@
 
 class CI_Cache_memcached extends CI_Driver {
 
-	private $_memcached;	// Holds the memcached object
-
-	protected $_memcache_conf 	= array(
+	protected $_memcache_conf = array(
 					'default' => array(
 						'default_host'		=> '127.0.0.1',
 						'default_port'		=> 11211,
 						'default_weight'	=> 1
 					)
-				);
+	);    // Holds the memcached object
+	private $_memcached;
 
 	// ------------------------------------------------------------------------
 
@@ -143,6 +142,25 @@ class CI_Cache_memcached extends CI_Driver {
 	// ------------------------------------------------------------------------
 
 	/**
+	 * Is supported
+	 *
+	 * Returns FALSE if memcached is not supported on the system.
+	 * If it is, we setup the memcached object & return TRUE
+	 */
+	public function is_supported()
+	{
+		if (!extension_loaded('memcached')) {
+			log_message('error', 'The Memcached Extension must be loaded to use Memcached Cache.');
+			return FALSE;
+		}
+
+		$this->_setup_memcached();
+		return TRUE;
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
 	 * Setup memcached.
 	 */
 	private function _setup_memcached()
@@ -185,27 +203,6 @@ class CI_Cache_memcached extends CI_Driver {
 					$cache_server['hostname'], $cache_server['port'], $cache_server['weight']
 			);
 		}
-	}
-
-	// ------------------------------------------------------------------------
-
-
-	/**
-	 * Is supported
-	 *
-	 * Returns FALSE if memcached is not supported on the system.
-	 * If it is, we setup the memcached object & return TRUE
-	 */
-	public function is_supported()
-	{
-		if ( ! extension_loaded('memcached'))
-		{
-			log_message('error', 'The Memcached Extension must be loaded to use Memcached Cache.');
-			return FALSE;
-		}
-
-		$this->_setup_memcached();
-		return TRUE;
 	}
 
 }

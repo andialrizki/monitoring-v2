@@ -52,19 +52,6 @@ class CI_DB_pdo_result extends CI_DB_result {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Number of fields in the result set
-	 *
-	 * @access	public
-	 * @return	integer
-	 */
-	function num_fields()
-	{
-		return $this->result_id->columnCount();
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Fetch Field Names
 	 *
 	 * Generates an array of column names
@@ -112,6 +99,19 @@ class CI_DB_pdo_result extends CI_DB_result {
 			}
 			return FALSE;
 		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Number of fields in the result set
+	 *
+	 * @access    public
+	 * @return    integer
+	 */
+	function num_fields()
+	{
+		return $this->result_id->columnCount();
 	}
 
 	// --------------------------------------------------------------------

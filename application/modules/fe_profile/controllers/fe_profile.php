@@ -128,7 +128,7 @@ class Fe_profile extends MX_Controller
                 $data['password'] = Modules::run('myhelper/encrypt_text', $pass);
             } else {
                 $view = 'edit_profile_agen';
-                $arrData = array('name', 'username', 'provinsi', 'city', 'address', 'latitude', 'longitude');
+                $arrData = array('name', 'username', 'provinsi', 'city', 'address', 'phone', 'latitude', 'longitude');
                 $data = array();
                 foreach ($arrData as $kk) {
                     $data[$kk] = trim($this->input->post($kk, TRUE));

@@ -17,6 +17,12 @@ class Fe_pangkalan extends MX_Controller {
 		echo Modules::run('frontend', $content, 'pangkalan');
 	}
 
+	public function get_all_pangkalan()
+	{
+		$data = $this->model_pangkalan->get_all_pangkalan();
+		return $data;
+	}
+
 	public function add_pangkalan()
 	{
 		$data_agen = '';
@@ -38,6 +44,12 @@ class Fe_pangkalan extends MX_Controller {
 		$data=array_map('trim',$data);
 		$content = $this->load->view('add_edit_pangkalan', array('data' => $data, 'data_agen' => $data_agen), TRUE);
 		echo Modules::run('frontend', $content, 'pangkalan');
+	}
+
+	public function get_this_data($id)
+	{
+		$data = $this->model_pangkalan->get_this_data($id);
+		return $data;
 	}
 
 	public function detail_pangkalan()
@@ -122,21 +134,9 @@ class Fe_pangkalan extends MX_Controller {
 		echo Modules::run('frontend', $content, 'perubahan-pangkalan');
 	}
 
-	public function get_all_pangkalan()
-	{
-		$data = $this->model_pangkalan->get_all_pangkalan();
-		return $data;
-	}
-
 	public function get_perubahan_pangkalan()
 	{
 		$data = $this->model_pangkalan->get_perubahan_pangkalan();
-		return $data;
-	}
-
-	public function get_this_data($id)
-	{
-		$data = $this->model_pangkalan->get_this_data($id);
 		return $data;
 	}
 
